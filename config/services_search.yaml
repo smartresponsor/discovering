@@ -1,0 +1,11 @@
+services:
+  App\SearchInterface\Adapter\SearchAdapterInterface: '@App\SearchAdapter\SqliteFtsAdapter'
+  App\SearchAdapter\SqliteFtsAdapter: ~
+  App\SearchAdapter\MeiliAdapter:
+    arguments:
+      $base: '%env(SEARCH_URL)%'
+      $key: '%env(default::SEARCH_API_KEY)%'
+  App\SearchAdapter\ElasticAdapter:
+    arguments:
+      $base: '%env(SEARCH_URL)%'
+      $key: '%env(default::SEARCH_API_KEY)%'
