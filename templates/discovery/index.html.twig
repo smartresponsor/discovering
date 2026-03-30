@@ -4,17 +4,31 @@
 
 {% block body %}
 <div class="container py-4">
-    <h1 class="mb-4">Discovery</h1>
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="mb-2">Discovery</h1>
+            <p class="text-muted mb-0">Scout-like application resource discovery across projects, offerings, documents, and categories.</p>
+        </div>
+        <div class="text-end">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ apiExampleUrl }}">Open JSON API</a>
+        </div>
+    </div>
 
     {{ form_start(form) }}
         <div class="row g-3 align-items-end">
-            <div class="col-md-6">
+            <div class="col-lg-4">
                 {{ form_row(form.term) }}
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-3 col-md-4">
                 {{ form_row(form.resourceType) }}
             </div>
-            <div class="col-md-2">
+            <div class="col-lg-2 col-md-4">
+                {{ form_row(form.status) }}
+            </div>
+            <div class="col-lg-2 col-md-4">
+                {{ form_row(form.visibility) }}
+            </div>
+            <div class="col-lg-1 col-md-12">
                 {{ form_row(form.search) }}
             </div>
         </div>
@@ -22,14 +36,29 @@
 
     {% if result is not null %}
         <hr class="my-4">
-        <h2 class="h5">Results ({{ result.total }})</h2>
+        <div class="d-flex justify-content-between align-items-center gap-3">
+            <h2 class="h5 mb-0">Results ({{ result.total }})</h2>
+            <div class="small text-muted">Filters applied through typed discovery query</div>
+        </div>
         <ul class="list-group mt-3">
             {% for hit in result.hits %}
                 <li class="list-group-item">
-                    <strong>{{ hit.title }}</strong>
-                    <div class="small text-muted">{{ hit.resourceType }} / {{ hit.resourceId }}</div>
+                    <div class="d-flex justify-content-between gap-3">
+                        <div>
+                            <strong>{{ hit.title }}</strong>
+                            <div class="small text-muted">{{ hit.resourceType }} / {{ hit.resourceId }}</div>
+                        </div>
+                        <div class="small text-muted">score {{ hit.score }}</div>
+                    </div>
                     {% if hit.snippet %}
                         <div class="mt-2">{{ hit.snippet }}</div>
+                    {% endif %}
+                    {% if hit.metadata.tags is defined %}
+                        <div class="mt-2">
+                            {% for tag in hit.metadata.tags %}
+                                <span class="badge text-bg-light">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
                     {% endif %}
                 </li>
             {% else %}

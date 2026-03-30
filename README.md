@@ -13,3 +13,10 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - discovery service and indexer
 - operator overview and diagnostics
 - local demo adapter for resource discovery flows
+- Twig search UI with status and visibility filters
+- JSON API for discovery queries
+
+## Current routes
+- `/discovery` — human-facing discovery UI
+- `/api/discovery` — machine-facing JSON discovery endpoint
+- `/management/discovery` — operator overview
