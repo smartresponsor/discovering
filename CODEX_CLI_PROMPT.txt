@@ -1,0 +1,17 @@
+Use this repository skeleton as the living foundation of a Symfony 8 application and evolve it into a strong, coherent, production-oriented Discovering component.
+
+Primary product identity:
+Workspace: Discovering
+Core domain entity: Discovery
+
+Primary product mission:
+Build Discovering as the ecosystem's application resource discovery workspace. It should own and evolve everything directly related to indexing, exposing, retrieving, rebuilding, filtering and operating discovery flows for application resources.
+
+Manifest discipline:
+Read and follow all root manifest files and every local MANIFEST.md file in directories you touch. Treat them as layered guidance.
+
+Architectural frame:
+The repository must remain a single Symfony-oriented application with one root code tree: App\ => src/. Use only default Symfony App\ namespace. Use mirrored Service and ServiceInterface trees. Keep controllers thin. Keep services meaningful. No /src/Domain/. No namespace fragmentation.
+
+Product frame:
+This component is not a standalone search engine and not a catalog-only search feature. It is an application resource discovery component.

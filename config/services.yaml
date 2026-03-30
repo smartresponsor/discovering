@@ -1,0 +1,13 @@
+services:
+  App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface: '@App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter'
+  App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface: '@App\Service\Discovery\Indexer\DiscoveryIndexer'
+  App\ServiceInterface\Discovery\DiscoveryServiceInterface: '@App\Service\Discovery\DiscoveryService'
+
+  App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter:
+    arguments:
+      $path: '%env(default::DISCOVERY_SQLITE_PATH)%'
+
+  App\Service\Discovery\Adapter\MeiliDiscoveryAdapter:
+    arguments:
+      $base: '%env(default::DISCOVERY_URL)%'
+      $key: '%env(default::DISCOVERY_API_KEY)%'

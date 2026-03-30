@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Discovering{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1 class="mb-3">Discovering</h1>
+    <p class="text-muted">Application resource discovery workspace</p>
+
+    {{ form_start(form, { method: 'GET' }) }}
+    <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-5">{{ form_row(form.query) }}</div>
+        <div class="col-md-3">{{ form_row(form.resource) }}</div>
+        <div class="col-md-2">{{ form_row(form.limit) }}</div>
+        <div class="col-md-2">{{ form_row(form.offset) }}</div>
+    </div>
+    <button class="btn btn-primary">Discover</button>
+    {{ form_end(form) }}
+
+    <hr class="my-4" />
+
+    <h2 class="h5">Results ({{ result.total }})</h2>
+
+    {% if result.hits is empty %}
+        <div class="alert alert-light border">No discovery hits yet.</div>
+    {% else %}
+        <div class="list-group">
+            {% for hit in result.hits %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-semibold">{{ hit.title }}</div>
+                            <div class="small text-muted">{{ hit.resource }} · {{ hit.reference }}</div>
+                        </div>
+                        <span class="badge text-bg-secondary">{{ hit.status }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

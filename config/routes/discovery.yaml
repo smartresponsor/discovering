@@ -1,0 +1,7 @@
+discovery_controllers:
+  resource: ../../src/Controller/Discovery/
+  type: attribute
+
+management_discovery_controllers:
+  resource: ../../src/Controller/Management/
+  type: attribute
