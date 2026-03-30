@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller\Management;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+
+final class DiscoveryManagementController extends AbstractController
+{
+    public function overview(): Response
+    {
+        return $this->render('management/discovery/overview.html.twig');
+    }
+}

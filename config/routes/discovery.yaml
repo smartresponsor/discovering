@@ -1,0 +1,7 @@
+discovery_index:
+  path: /discovery
+  controller: App\\Controller\\Discovery\\DiscoveryController::index
+
+management_discovery_overview:
+  path: /management/discovery
+  controller: App\\Controller\\Management\\DiscoveryManagementController::overview

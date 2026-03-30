@@ -1,0 +1,15 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  App\\:
+    resource: '../src/'
+
+  App\\Controller\\:
+    resource: '../src/Controller/'
+    tags: ['controller.service_arguments']
+
+  App\\ServiceInterface\\Discovery\\Adapter\\DiscoveryAdapterInterface: '@App\\Service\\Discovery\\Adapter\\SqliteFtsDiscoveryAdapter'
+  App\\ServiceInterface\\Discovery\\Indexer\\DiscoveryIndexerInterface: '@App\\Service\\Discovery\\Indexer\\DiscoveryIndexer'
+  App\\ServiceInterface\\Discovery\\DiscoveryServiceInterface: '@App\\Service\\Discovery\\DiscoveryService'

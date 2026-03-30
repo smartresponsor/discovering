@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Discovery{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <h1 class="mb-4">Discovery</h1>
+
+    {{ form_start(form) }}
+        <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+                {{ form_row(form.term) }}
+            </div>
+            <div class="col-md-4">
+                {{ form_row(form.resourceType) }}
+            </div>
+            <div class="col-md-2">
+                {{ form_row(form.search) }}
+            </div>
+        </div>
+    {{ form_end(form) }}
+
+    {% if result is not null %}
+        <hr class="my-4">
+        <h2 class="h5">Results ({{ result.total }})</h2>
+        <ul class="list-group mt-3">
+            {% for hit in result.hits %}
+                <li class="list-group-item">
+                    <strong>{{ hit.title }}</strong>
+                    <div class="small text-muted">{{ hit.resourceType }} / {{ hit.resourceId }}</div>
+                    {% if hit.snippet %}
+                        <div class="mt-2">{{ hit.snippet }}</div>
+                    {% endif %}
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">No results.</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}
