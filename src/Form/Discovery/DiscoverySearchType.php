@@ -19,6 +19,7 @@ final class DiscoverySearchType extends AbstractType
         $builder
             ->add('term', SearchType::class, [
                 'required' => false,
+                'label' => 'Search term',
             ])
             ->add('resourceType', ChoiceType::class, [
                 'required' => false,
@@ -28,6 +29,23 @@ final class DiscoverySearchType extends AbstractType
                     'Offering' => 'offering',
                     'Document' => 'document',
                     'Category' => 'category',
+                ],
+            ])
+            ->add('status', ChoiceType::class, [
+                'required' => false,
+                'placeholder' => 'Any status',
+                'choices' => [
+                    'Active' => 'active',
+                    'Published' => 'published',
+                    'Draft' => 'draft',
+                ],
+            ])
+            ->add('visibility', ChoiceType::class, [
+                'required' => false,
+                'placeholder' => 'Any visibility',
+                'choices' => [
+                    'Public' => 'public',
+                    'Internal' => 'internal',
                 ],
             ])
             ->add('search', SubmitType::class)

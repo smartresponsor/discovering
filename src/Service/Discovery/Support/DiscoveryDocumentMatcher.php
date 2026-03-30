@@ -18,9 +18,10 @@ final class DiscoveryDocumentMatcher
     {
         $matched = [];
         $normalizedTerm = trim(strtolower((string) $query->term));
+        $filters = $query->toFilterMap();
 
         foreach ($documents as $document) {
-            if (!$this->matchesFilters($document, $query->filters)) {
+            if (!$this->matchesFilters($document, $filters)) {
                 continue;
             }
 
@@ -57,7 +58,7 @@ final class DiscoveryDocumentMatcher
     }
 
     /**
-     * @param array<string, mixed> $filters
+     * @param array<string, string> $filters
      */
     private function matchesFilters(DiscoveryDocument $document, array $filters): bool
     {
@@ -66,7 +67,7 @@ final class DiscoveryDocumentMatcher
                 return false;
             }
 
-            if ((string) $document->filters[$name] !== (string) $expectedValue) {
+            if ((string) $document->filters[$name] !== $expectedValue) {
                 return false;
             }
         }

@@ -33,6 +33,12 @@ final class DiscoveryController extends AbstractController
         return $this->render('discovery/index.html.twig', [
             'form' => $form->createView(),
             'result' => $result,
+            'apiExampleUrl' => $this->generateUrl('api_discovery_index', [
+                'q' => $query->term,
+                'resourceType' => $query->resourceType,
+                'status' => $query->status,
+                'visibility' => $query->visibility,
+            ]),
         ]);
     }
 }

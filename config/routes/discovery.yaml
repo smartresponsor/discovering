@@ -2,6 +2,10 @@ discovery_index:
   path: /discovery
   controller: App\\Controller\\Discovery\\DiscoveryController::index
 
+api_discovery_index:
+  path: /api/discovery
+  controller: App\\Controller\\Discovery\\DiscoveryApiController::index
+
 management_discovery_overview:
   path: /management/discovery
   controller: App\\Controller\\Management\\DiscoveryManagementController::overview
