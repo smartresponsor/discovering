@@ -6,6 +6,7 @@ namespace App\Command\Discovery;
 
 use App\Dto\Discovery\ReindexRequest;
 use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
+use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -17,6 +18,7 @@ final class DiscoveryRebuildCommand extends Command
 {
     public function __construct(
         private readonly DiscoveryIndexerInterface $indexer,
+        private readonly DiscoveryOverviewServiceInterface $overviewService,
     ) {
         parent::__construct();
     }
@@ -28,10 +30,14 @@ final class DiscoveryRebuildCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $request = new ReindexRequest(resourceType: $input->getArgument('resourceType'));
+        $resourceType = $input->getArgument('resourceType');
+        $request = new ReindexRequest(resourceType: is_string($resourceType) ? $resourceType : null);
         $this->indexer->rebuild($request);
 
-        $output->writeln('Discovery rebuild finished.');
+        $overview = $this->overviewService->buildOverview();
+
+        $output->writeln(sprintf('Discovery rebuild finished using backend %s.', $overview->backendName));
+        $output->writeln(sprintf('Total seeded documents available: %d', $overview->totalDocuments));
 
         return Command::SUCCESS;
     }

@@ -13,3 +13,5 @@ services:
   App\\ServiceInterface\\Discovery\\Adapter\\DiscoveryAdapterInterface: '@App\\Service\\Discovery\\Adapter\\SqliteFtsDiscoveryAdapter'
   App\\ServiceInterface\\Discovery\\Indexer\\DiscoveryIndexerInterface: '@App\\Service\\Discovery\\Indexer\\DiscoveryIndexer'
   App\\ServiceInterface\\Discovery\\DiscoveryServiceInterface: '@App\\Service\\Discovery\\DiscoveryService'
+  App\\ServiceInterface\\Discovery\\Document\\DiscoveryDocumentProviderInterface: '@App\\Service\\Discovery\\Document\\StaticDiscoveryDocumentProvider'
+  App\\ServiceInterface\\Discovery\\Overview\\DiscoveryOverviewServiceInterface: '@App\\Service\\Discovery\\Overview\\DiscoveryOverviewService'

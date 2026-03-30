@@ -12,4 +12,6 @@ interface DiscoveryAdapterInterface
     public function discover(DiscoveryQuery $query): DiscoveryResult;
 
     public function rebuild(?string $resourceType = null): void;
+
+    public function getBackendName(): string;
 }
