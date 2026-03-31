@@ -1,13 +1,37 @@
 services:
-  App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface: '@App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter'
-  App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface: '@App\Service\Discovery\Indexer\DiscoveryIndexer'
-  App\ServiceInterface\Discovery\DiscoveryServiceInterface: '@App\Service\Discovery\DiscoveryService'
+  _defaults:
+    autowire: true
+    autoconfigure: true
 
-  App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter:
-    arguments:
-      $path: '%env(default::DISCOVERY_SQLITE_PATH)%'
+  App\\:
+    resource: '../src/'
 
-  App\Service\Discovery\Adapter\MeiliDiscoveryAdapter:
+  App\\Controller\\:
+    resource: '../src/Controller/'
+    tags: ['controller.service_arguments']
+
+  App\\Service\\Discovery\\Source\\ProjectDiscoverySourceProvider:
+    tags: ['app.discovery_source_provider']
+
+  App\\Service\\Discovery\\Source\\OfferingDiscoverySourceProvider:
+    tags: ['app.discovery_source_provider']
+
+  App\\Service\\Discovery\\Source\\DocumentDiscoverySourceProvider:
+    tags: ['app.discovery_source_provider']
+
+  App\\Service\\Discovery\\Source\\CategoryDiscoverySourceProvider:
+    tags: ['app.discovery_source_provider']
+
+  App\\ServiceInterface\\Discovery\\Adapter\\DiscoveryAdapterInterface: '@App\\Service\\Discovery\\Adapter\\SqliteFtsDiscoveryAdapter'
+  App\\ServiceInterface\\Discovery\\Indexer\\DiscoveryIndexerInterface: '@App\\Service\\Discovery\\Indexer\\DiscoveryIndexer'
+  App\\ServiceInterface\\Discovery\\DiscoveryServiceInterface: '@App\\Service\\Discovery\\DiscoveryService'
+  App\\ServiceInterface\\Discovery\\Document\\DiscoveryDocumentProviderInterface: '@App\\Service\\Discovery\\Document\\DiscoveryDocumentProvider'
+  App\\ServiceInterface\\Discovery\\Overview\\DiscoveryOverviewServiceInterface: '@App\\Service\\Discovery\\Overview\\DiscoveryOverviewService'
+
+  App\\Service\\Discovery\\Document\\DiscoveryDocumentProvider:
     arguments:
-      $base: '%env(default::DISCOVERY_URL)%'
-      $key: '%env(default::DISCOVERY_API_KEY)%'
+      $sourceProviders: !tagged_iterator app.discovery_source_provider
+
+  App\\Service\\Discovery\\Overview\\DiscoveryOverviewService:
+    arguments:
+      $sourceProviders: !tagged_iterator app.discovery_source_provider

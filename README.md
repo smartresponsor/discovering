@@ -5,4 +5,18 @@ Discovering is a Symfony-oriented application resource discovery component.
 Workspace name: **Discovering**  
 Core entity name: **Discovery**
 
-The repository skeleton is intentionally built as a bounded product foundation rather than a bare technical demo. Root manifests define the product frame and architectural canon. Local `MANIFEST.md` files define how each area should evolve.
+The repository is intended to evolve as a Laravel-Scout-like discovery layer for Symfony applications. Its mission is not to become a generic search engine, but to help applications expose, index, scope, and retrieve relevant resources through a coherent discovery model.
+
+## Current business seed
+- seeded discovery source providers for demo and development
+- typed query / result model
+- discovery service and indexer
+- operator overview and source diagnostics
+- local demo adapter for resource discovery flows
+- Twig search UI with status and visibility filters
+- JSON API for discovery queries
+
+## Current routes
+- `/discovery` — human-facing discovery UI
+- `/api/discovery` — machine-facing JSON discovery endpoint
+- `/management/discovery` — operator overview
