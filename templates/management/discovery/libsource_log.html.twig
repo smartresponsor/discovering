@@ -82,26 +82,26 @@
                                 </div>
                                 {% if event.context is not empty %}
                                     <div class="mt-2">
-                                       {% for name, value in event.context %}
+                                        {% for name, value in event.context %}
                                             {% if value is iterable and value is not same as(false) and value is not same as(true) and value is not same as(null) and value is not string %}
                                                 <div class="small text-muted mb-1">{{ name }}</div>
                                                 <div class="mb-2">
                                                     {% for item in value %}
                                                         <span class="badge text-bg-light">{{ item }}</span>
-                                                        {% else %}
-                                                          <span class="text-muted small">empty</span>
-                                                        {% endfor %}
+                                                    {% else %}
+                                                        <span class="text-muted small">empty</span>
+                                                    {% endfor %}
                                                 </div>
-                                            %{ else %}
+                                            %} else %}
                                                 <div class="small"><span class="text-muted">{{ name }}:</span> {{ value is same as(true) ? 'true' : (value is same as(false) ? 'false' : value) }}</div>
                                             {% endif %}
                                         {% endfor %}
                                     </div>
-                                %{ endif %}
+                                %} endif %}
                             </div>
                         {% else %}
                             <div class="list-group-item text-muted">No stored action events match the current filters.</div>
-                        %{ endfor %}
+                        {% endfor %}
                     </div>
 
                     {% if surface.totalPages > 1 %}
@@ -140,6 +140,7 @@
                         </nav>
                     {% endif %}
                 </div>
+            </div>
         </div>
     </div>
 {% endblock %}

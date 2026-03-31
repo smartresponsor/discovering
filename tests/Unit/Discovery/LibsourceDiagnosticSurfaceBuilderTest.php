@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\Discovery;
+
+use App\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
+use App\Service\Discovery\Source\CategoryDiscoverySourceProvider;
+use App\Service\Discovery\Source\DocumentDiscoverySourceProvider;
+use App\Service\Discovery\Source\OfferingDiscoverySourceProvider;
+use App\Service\Discovery\Source\ProjectDiscoverySourceProvider;
+use App\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
+use App\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
+use App\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
+use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
+use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use PHPUnit\Framework\TestCase;
+
+final class LibsourceDiagnosticSurfaceBuilderTest extends TestCase
+{
+    public function testItBuildsRepositoryAwareDiagnosticEntries(): void
+    {
+        $providers = [
+            new ProjectDiscoverySourceProvider(new ProjectDiscoverySourceRecordRepository()),
+            new OfferingDiscoverySourceProvider(new OfferingDiscoverySourceRecordRepository()),
+            new DocumentDiscoverySourceProvider(new DocumentDiscoverySourceRecordRepository()),
+            new CategoryDiscoverySourceProvider(new CategoryDiscoverySourceRecordRepository()),
+        ];
+
+        $registry = new DiscoverySourceRepositoryRegistry([
+            new ProjectDiscoverySourceRecordRepository(),
+            new OfferingDiscoverySourceRecordRepository(),
+            new DocumentDiscoverySourceRecordRepository(),
+            new CategoryDiscoverySourceRecordRepository(),
+        ]);
+
+        $surface = (new LibsourceDiagnosticSurfaceBuilder($providers, $registry))->build();
+
+        self::assertCount(4, $surface->entries);
+        self::assertSame('category-source-provider', $surface->entries[0]->sourceName);
+        self::assertSame('category', $surface->entries[0]->resourceType);
+        self::assertSame(CategoryDiscoverySourceProvider::class, $surface->entries[0]->providerClass);
+        self::assertSame(CategoryDiscoverySourceRecordRepository::class, $surface->entries[0]->repositoryClass);
+        self::assertSame(2, $surface->entries[0]->recordCount);
+    }
+}

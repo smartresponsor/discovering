@@ -1,0 +1,88 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\Discovery;
+
+use App\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
+use App\Service\Discovery\Libsource\LibsourceManagementActionService;
+use App\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
+use App\Service\Discovery\Source\CategoryDiscoverySourceProvider;
+use App\Service\Discovery\Source\DocumentDiscoverySourceProvider;
+use App\Service\Discovery\Source\OfferingDiscoverySourceProvider;
+use App\Service\Discovery\Source\ProjectDiscoverySourceProvider;
+use App\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
+use App\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
+use App\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
+use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
+use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use PHPUnit\Framework\TestCase;
+
+final class LibsourceManagementActionServiceTest extends TestCase
+{
+    private function createService(EphemeralLibsourceOperatorEventLogStore $store): LibsourceManagementActionService
+    {
+        $providers = [
+            new ProjectDiscoverySourceProvider(new ProjectDiscoverySourceRecordRepository()),
+            new OfferingDiscoverySourceProvider(new OfferingDiscoverySourceRecordRepository()),
+            new DocumentDiscoverySourceProvider(new DocumentDiscoverySourceRecordRepository()),
+            new CategoryDiscoverySourceProvider(new CategoryDiscoverySourceRecordRepository()),
+        ];
+
+        $registry = new DiscoverySourceRepositoryRegistry([
+            new ProjectDiscoverySourceRecordRepository(),
+            new OfferingDiscoverySourceRecordRepository(),
+            new DocumentDiscoverySourceRecordRepository(),
+            new CategoryDiscoverySourceRecordRepository(),
+        ]);
+
+        return new LibsourceManagementActionService(
+            diagnosticSurfaceBuilder: new LibsourceDiagnosticSurfaceBuilder($providers, $registry),
+            eventLogStore: $store,
+        );
+    }
+
+    public function testAuditAlignmentProducesSummaryAndAppendsEvent(): void
+    {
+        $store = new EphemeralLibsourceOperatorEventLogStore();
+        $service = $this->createService($store);
+
+        $result = $service->auditAlignment();
+
+        self::assertSame('audit-alignment', $result->actionName);
+        self::assertSame('Audited 4 libsource entries covering 8 records.', $result->summary);
+        self::assertSame(1, count($store->all()));
+        self::assertSame('action:audit-alignment', $store->all()[0]->eventName);
+    }
+
+    public function testInspectReturnsPayloadForKnownSourceAndLogsIt(): void
+    {
+        $store = new EphemeralLibsourceOperatorEventLogStore();
+        $service = $this->createService($store);
+
+        $result = $service->inspect('document-source-provider');
+
+        self::assertSame('inspect', $result->actionName);
+        self::assertSame('document-source-provider', $result->payload['sourceName']);
+        self::assertSame('document', $result->payload['resourceType']);
+        self::assertSame(1, count($store->all()));
+        self::assertSame('action:inspect', $store->all()[0]->eventName);
+    }
+
+    public function testClearEventLogClearsStoredEvents(): void
+    {
+        $store = new EphemeralLibsourceOperatorEventLogStore();
+        $service = $this->createService($store);
+
+        $service->auditAlignment();
+        $service->inspect('project-source-provider');
+
+        self::assertCount(2, $store->all());
+
+        $result = $service->clearEventLog();
+
+        self::assertSame('clear-event-log', $result->actionName);
+        self::assertSame(2, $result->payload['clearedCount']);
+        self::assertSame([], $store->all());
+    }
+}

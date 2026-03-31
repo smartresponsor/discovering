@@ -22,11 +22,24 @@ services:
   App\\Service\\Discovery\\Source\\CategoryDiscoverySourceProvider:
     tags: ['app.discovery_source_provider']
 
+  App\\Service\\Discovery\\Source\\Repository\\ProjectDiscoverySourceRecordRepository:
+    tags: ['app.discovery_source_repository']
+
+  App\\Service\\Discovery\\Source\\Repository\\OfferingDiscoverySourceRecordRepository:
+    tags: ['app.discovery_source_repository']
+
+  App\\Service\\Discovery\\Source\\Repository\\DocumentDiscoverySourceRecordRepository:
+    tags: ['app.discovery_source_repository']
+
+  App\\Service\\Discovery\\Source\\Repository\\CategoryDiscoverySourceRecordRepository:
+    tags: ['app.discovery_source_repository']
+
   App\\ServiceInterface\\Discovery\\Adapter\\DiscoveryAdapterInterface: '@App\\Service\\Discovery\\Adapter\\SqliteFtsDiscoveryAdapter'
   App\\ServiceInterface\\Discovery\\Indexer\\DiscoveryIndexerInterface: '@App\\Service\\Discovery\\Indexer\\DiscoveryIndexer'
   App\\ServiceInterface\\Discovery\\DiscoveryServiceInterface: '@App\\Service\\Discovery\\DiscoveryService'
   App\\ServiceInterface\\Discovery\\Document\\DiscoveryDocumentProviderInterface: '@App\\Service\\Discovery\\Document\\DiscoveryDocumentProvider'
   App\\ServiceInterface\\Discovery\\Overview\\DiscoveryOverviewServiceInterface: '@App\\Service\\Discovery\\Overview\\DiscoveryOverviewService'
+  App\\Service\\Discovery\\Libsource\\Log\\LibsourceOperatorEventLogStoreInterface: '@App\\Service\\Discovery\\Libsource\\Log\\FileLibsourceOperatorEventLogStore'
 
   App\\Service\\Discovery\\Document\\DiscoveryDocumentProvider:
     arguments:
@@ -35,3 +48,11 @@ services:
   App\\Service\\Discovery\\Overview\\DiscoveryOverviewService:
     arguments:
       $sourceProviders: !tagged_iterator app.discovery_source_provider
+
+  App\\Service\\Discovery\\Source\\Repository\\DiscoverySourceRepositoryRegistry:
+    arguments:
+      $repositories: !tagged_iterator app.discovery_source_repository
+
+  App\\Service\\Discovery\\Libsource\\Log\\FileLibsourceOperatorEventLogStore:
+    arguments:
+      $path: '%kernel.project_dir%/var/discovery/libsource_operator_event_log.json'

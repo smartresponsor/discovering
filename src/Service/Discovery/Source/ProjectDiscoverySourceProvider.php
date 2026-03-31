@@ -4,40 +4,28 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\Source;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
+use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
 final class ProjectDiscoverySourceProvider implements DiscoverySourceProviderInterface
 {
+    public function __construct(
+        private readonly ProjectDiscoverySourceRecordRepository $repository,
+    ) {
+    }
+
     public function getSourceName(): string
     {
-        return 'project-source-provider';
+        return $this->repository->getSourceName();
     }
 
     public function getResourceType(): string
     {
-        return 'project';
+        return $this->repository->getResourceType();
     }
 
     public function provide(): array
     {
-        return [
-            new DiscoverySourceRecord(
-                resourceType: 'project',
-                resourceId: 'project-smartresponsor-platform',
-                title: 'Smart Responsor platform project',
-                body: 'Platform-level project coordinating Symfony components, governance, operation, integration, and business capability growth across the ecosystem.',
-                filters: ['status' => 'active', 'visibility' => 'internal'],
-                metadata: ['tags' => ['platform', 'symfony', 'ecosystem']],
-            ),
-            new DiscoverySourceRecord(
-                resourceType: 'project',
-                resourceId: 'project-discovery-workspace',
-                title: 'Discovering workspace rollout',
-                body: 'Workspace-level initiative for building Scout-like application resource discovery with indexing, retrieval, filtering, diagnostics, and management screens.',
-                filters: ['status' => 'active', 'visibility' => 'internal'],
-                metadata: ['tags' => ['discovery', 'indexing', 'retrieval']],
-            ),
-        ];
+        return $this->repository->all();
     }
 }
