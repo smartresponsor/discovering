@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Libsource Event Log{% endblock %}
+
+{{ block body }}
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+            <div class="flex-grow-1">
+                <h1 class="mb-2">Libsource Event Log</h1>
+                <p class="text-muted mb-0">Operator-facing view of stored libsource action events. You can filter by level, search across summaries and context, and page through the stored event history.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource') }}">Back to Libsource</a>
+                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_management_discovery_libsource_log_export', {
+                    search: surface.activeSearch,
+                    level: surface.activeLevel,
+                    page: surface.page,
+                    perPage: surface.perPage,
+                }) }}">Export JSON</a>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h2 class="h5">Log backend</h2>
+                <p class="mb-0 text-muted">{{ surface.backendClass }}</p>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h2 class="h5">Filter events</h2>
+                <form method="get" class="row g-3 align-items-end mt-1">
+                    <div class="col-lg-4">
+                        <label for="search" class="form-label">Search</label>
+                        <input id="search" type="text" name="search" class="form-control" value="{{ surface.activeSearch }}" placeholder="search event, summary, context">
+                    </div>
+                    <div class="col-lg-3">
+                        <label for="level" class="form-label">Level</label>
+                        <select id="level" name="level" class="form-select">
+                            <option value="">All levels</option>
+                            {% for level in surface.availableLevels %}
+                                <option value="{{ level }}" {% if surface.activeLevel == level %}selected{% endif %}>{{ level }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-2">
+                        <label for="perPage" class="form-label">Per page</label>
+                        <select id="perPage" name="perPage" class="form-select">
+                            {% for option in [5, 10, 20, 50] %}
+                                <option value="{{ option }}" {% if surface.perPage == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                        <a class="btn btn-outline-secondary" href="{{ path('app_management_discovery_libsource_log') }}">Reset</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center gap-3">
+                    <h2 class="h5 mb-0">Stored action events</h2>
+                    <div class="small text-muted">
+                        Showing {{ surface.events|length }} of {{ surface.filteredTotalEvents }} filtered events ({{ surface.totalEvents }} total in store)
+                    </div>
+                </div>
+
+                {% if surface.events is not empty %}
+                    <div class="list-group mt-3">
+                        {% for event in surface.events %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                    <div>
+                                        <div class="fw-semibold">{{ event.summary }}</div>
+                                        <div class="small text-muted">{{ event.eventName }}</div>
+                                    </div>
+                                    <span class="badge text-bg-{{ event.level == 'info' ? 'primary' : (event.level == 'warning' ? 'warning' : 'danger') }}">{{ event.level }}</span>
+                                </div>
+                                {% if event.context is not empty %}
+                                    <div class="mt-2">
+                                       {% for name, value in event.context %}
+                                            {% if value is iterable and value is not same as(false) and value is not same as(true) and value is not same as(null) and value is not string %}
+                                                <div class="small text-muted mb-1">{{ name }}</div>
+                                                <div class="mb-2">
+                                                    {% for item in value %}
+                                                        <span class="badge text-bg-light">{{ item }}</span>
+                                                        {% else %}
+                                                          <span class="text-muted small">empty</span>
+                                                        {% endfor %}
+                                                </div>
+                                            %{ else %}
+                                                <div class="small"><span class="text-muted">{{ name }}:</span> {{ value is same as(true) ? 'true' : (value is same as(false) ? 'false' : value) }}</div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                %{ endif %}
+                            </div>
+                        {% else %}
+                            <div class="list-group-item text-muted">No stored action events match the current filters.</div>
+                        %{ endfor %}
+                    </div>
+
+                    {% if surface.totalPages > 1 %}
+                        <nav class="mt-3" aria-label="Libsource event log pagination">
+                            <ul class="pagination mb-0">
+                                {% set previousPage = surface.page > 1 ? surface.page - 1 : 1 %}
+                                <li class="page-item {% if surface.page <= 1 %}disabled{% endif %}">
+                                    <a class="page-link" href="{{ path('app_management_discovery_libsource_log', {
+                                        search: surface.activeSearch,
+                                        level: surface.activeLevel,
+                                        page: previousPage,
+                                        perPage: surface.perPage,
+                                    }) }}">Previous</a>
+                                </li>
+                                {% for page in 1..surface.totalPages %}
+                                    <li class="page-item {% if page == surface.page %}active{% endif %}">
+                                        <a class="page-link" href="{{ path('app_management_discovery_libsource_log', {
+                                            search: surface.activeSearch,
+                                            level: surface.activeLevel,
+                                            page: page,
+                                            perPage: surface.perPage,
+                                        }) }}">{{ page }}</a>
+                                    </li>
+                                {% endfor %}
+
+                                {% set nextPage = surface.page < surface.totalPages ? surface.page + 1 : surface.totalPages %}
+                                <li class="page-item {% if surface.page >= surface.totalPages %}disabled{% endif %}">
+                                    <a class="page-link" href="{{ path('app_management_discovery_libsource_log', {
+                                        search: surface.activeSearch,
+                                        level: surface.activeLevel,
+                                        page: nextPage,
+                                        perPage: surface.perPage,
+                                    }) }}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    {% endif %}
+                </div>
+        </div>
+    </div>
+{% endblock %}
