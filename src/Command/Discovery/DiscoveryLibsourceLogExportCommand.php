@@ -24,6 +24,7 @@ final class DiscoveryLibsourceLogExportCommand extends Command
 
     protected function configure(): void
     {
+        $this->addOption('preset', null, InputOption::VALUE_REQUIRED);
         $this->addOption('search', null, InputOption::VALUE_REQUIRED);
         $this->addOption('level', null, InputOption::VALUE_REQUIRED);
         $this->addOption('page', null, InputOption::VALUE_REQUIRED, default: '1');
@@ -33,6 +34,7 @@ final class DiscoveryLibsourceLogExportCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $surface = $this->surfaceBuilder->build(new LibsourceEventLogQuery(
+            preset: (($input->getOption('preset') ?: null)),
             search: (($input->getOption('search') ?: null)),
             level: (($input->getOption('level') ?: null)),
             page: max(1, (int) $input->getOption('page')),
@@ -43,6 +45,8 @@ final class DiscoveryLibsourceLogExportCommand extends Command
             'backendClass' => $surface->backendClass,
             'totalEvents' => $surface->totalEvents,
             'filteredTotalEvents' => $surface->filteredTotalEvents,
+            'availablePresets' => $surface->availablePresets,
+            'activePreset' => $surface->activePreset,
             'activeLevel' => $surface->activeLevel,
             'activeSearch' => $surface->activeSearch,
             'page' => $surface->page,

@@ -71,4 +71,33 @@ final class LibsourceEventLogSurfaceBuilderTest extends TestCase
         self::assertSame('Event 07', $surface->events[0]->summary);
         self::assertSame('Event 03', $surface->events[4]->summary);
     }
+
+    public function testItAppliesQuickPresetScopes(): void
+    {
+        $store = new EphemeralLibsourceOperatorEventLogStore();
+        $store->append(new LibsourceOperatorEvent('action:inspect', 'info', 'Inspect project provider'));
+        $store->append(new LibsourceOperatorEvent('action:audit-alignment', 'info', 'Audit alignment'));
+        $store->append(new LibsourceOperatorEvent('action:clear-event-log', 'warning', 'Clear event log'));
+        $store->append(new LibsourceOperatorEvent('action:rebuild-coverage', 'info', 'Rebuild coverage snapshot'));
+
+        $warningSurface = (new LibsourceEventLogSurfaceBuilder($store))->build(new LibsourceEventLogQuery(
+            preset: 'warnings',
+            page: 1,
+            perPage: 10,
+        ));
+
+        self::assertSame(1, $warningSurface->filteredTotalEvents);
+        self::assertSame('Clear event log', $warningSurface->events[0]->summary);
+        self::assertSame('warnings', $warningSurface->activePreset);
+
+        $inspectionSurface = (new LibsourceEventLogSurfaceBuilder($store))->build(new LibsourceEventLogQuery(
+            preset: 'inspections',
+            page: 1,
+            perPage: 10,
+        ));
+
+        self::assertSame(1, $inspectionSurface->filteredTotalEvents);
+        self::assertSame('Inspect project provider', $inspectionSurface->events[0]->summary);
+        self::assertArrayHasKey('maintenance', $inspectionSurface->availablePresets);
+    }
 }

@@ -11,6 +11,16 @@ use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
 final class LibsourceEventLogSurfaceBuilder
 {
+    /**
+     * @var array<string, string>
+     */
+    private const PRESETS = [
+        'warnings' => 'Warnings only',
+        'inspections' => 'Inspect actions',
+        'maintenance' => 'Maintenance actions',
+        'audits' => 'Audit actions',
+    ];
+
     public function __construct(
         private readonly LibsourceOperatorEventLogStoreInterface $eventLogStore,
     ) {
@@ -40,6 +50,8 @@ final class LibsourceEventLogSurfaceBuilder
             filteredTotalEvents: $filteredTotalEvents,
             events: $pagedEvents,
             availableLevels: $availableLevels,
+            availablePresets: self::PRESETS,
+            activePreset: $query->preset,
             activeLevel: $query->level,
             activeSearch: $query->search,
             page: $page,
@@ -68,6 +80,10 @@ final class LibsourceEventLogSurfaceBuilder
 
     private function matches(LibsourceOperatorEvent $event, LibsourceEventLogQuery $query): bool
     {
+        if (!$this->matchesPreset($event, $query->preset)) {
+            return false;
+        }
+
         if ($query->level !== null && $query->level !== '' && $event->level !== $query->level) {
             return false;
         }
@@ -84,5 +100,20 @@ final class LibsourceEventLogSurfaceBuilder
         ]));
 
         return str_contains($haystack, $needle);
+    }
+
+    private function matchesPreset(LibsourceOperatorEvent $event, ?string $preset): bool
+    {
+        if ($preset === null || $preset === '') {
+            return true;
+        }
+
+        return match ($preset) {
+            'warnings' => $event->level === 'warning',
+            'inspections' => $event->eventName === 'action:inspect',
+            'maintenance' => in_array($event->eventName, ['action:rebuild-coverage', 'action:clear-event-log'], true),
+            'audits' => $event->eventName === 'action:audit-alignment',
+            default => true,
+        };
     }
 }

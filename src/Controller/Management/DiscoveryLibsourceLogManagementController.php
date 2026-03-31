@@ -40,6 +40,8 @@ final class DiscoveryLibsourceLogManagementController extends AbstractController
             'backendClass' => $surface->backendClass,
             'totalEvents' => $surface->totalEvents,
             'filteredTotalEvents' => $surface->filteredTotalEvents,
+            'availablePresets' => $surface->availablePresets,
+            'activePreset' => $surface->activePreset,
             'activeLevel' => $surface->activeLevel,
             'activeSearch' => $surface->activeSearch,
             'page' => $surface->page,
@@ -59,12 +61,14 @@ final class DiscoveryLibsourceLogManagementController extends AbstractController
 
     private function createQuery(Request $request): LibsourceEventLogQuery
     {
+        $preset = $request->query->get('preset');
         $search = $request->query->get('search');
         $level = $request->query->get('level');
         $page = (int) ($request->query->get('page', 1));
         $perPage = (int) ($request->query->get('perPage', 10));
 
         return new LibsourceEventLogQuery(
+            preset: is_string($preset) && $preset !== '' ? $preset : null,
             search: is_string($search) && $search !== '' ? $search : null,
             level: is_string($level) && $level !== '' ? $level : null,
             page: $page > 0 ? $page : 1,

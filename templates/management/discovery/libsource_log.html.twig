@@ -2,7 +2,7 @@
 
 {% block title %}Libsource Event Log{% endblock %}
 
-{{ block body }}
+{% block body %}
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
             <div class="flex-grow-1">
@@ -12,6 +12,7 @@
             <div class="d-flex gap-2">
                 <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource') }}">Back to Libsource</a>
                 <a class="btn btn-outline-primary btn-sm" href="{{ path('app_management_discovery_libsource_log_export', {
+                    preset: surface.activePreset,
                     search: surface.activeSearch,
                     level: surface.activeLevel,
                     page: surface.page,
@@ -29,8 +30,36 @@
 
         <div class="card mt-4">
             <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                    <h2 class="h5 mb-0">Quick scopes</h2>
+                    {% if surface.activePreset is not null %}
+                        <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource_log', {
+                            search: surface.activeSearch,
+                            level: surface.activeLevel,
+                            perPage: surface.perPage,
+                        }) }}">Clear preset</a>
+                    {% endif %}
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    {% for preset, label in surface.availablePresets %}
+                        <a class="btn btn-sm {% if surface.activePreset == preset %}btn-primary{% else %}btn-outline-primary{% endif %}" href="{{ path('app_management_discovery_libsource_log', {
+                            preset: preset,
+                            search: surface.activeSearch,
+                            level: surface.activeLevel,
+                            perPage: surface.perPage,
+                        }) }}">{{ label }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
                 <h2 class="h5">Filter events</h2>
                 <form method="get" class="row g-3 align-items-end mt-1">
+                    {% if surface.activePreset is not null %}
+                        <input type="hidden" name="preset" value="{{ surface.activePreset }}">
+                    {% endif %}
                     <div class="col-lg-4">
                         <label for="search" class="form-label">Search</label>
                         <input id="search" type="text" name="search" class="form-control" value="{{ surface.activeSearch }}" placeholder="search event, summary, context">
@@ -92,15 +121,13 @@
                                                         <span class="text-muted small">empty</span>
                                                     {% endfor %}
                                                 </div>
-                                            %} else %}
+                                            {% else %}
                                                 <div class="small"><span class="text-muted">{{ name }}:</span> {{ value is same as(true) ? 'true' : (value is same as(false) ? 'false' : value) }}</div>
                                             {% endif %}
                                         {% endfor %}
                                     </div>
-                                %} endif %}
+                                {% endif %}
                             </div>
-                        {% else %}
-                            <div class="list-group-item text-muted">No stored action events match the current filters.</div>
                         {% endfor %}
                     </div>
 
@@ -110,6 +137,7 @@
                                 {% set previousPage = surface.page > 1 ? surface.page - 1 : 1 %}
                                 <li class="page-item {% if surface.page <= 1 %}disabled{% endif %}">
                                     <a class="page-link" href="{{ path('app_management_discovery_libsource_log', {
+                                        preset: surface.activePreset,
                                         search: surface.activeSearch,
                                         level: surface.activeLevel,
                                         page: previousPage,
@@ -119,6 +147,7 @@
                                 {% for page in 1..surface.totalPages %}
                                     <li class="page-item {% if page == surface.page %}active{% endif %}">
                                         <a class="page-link" href="{{ path('app_management_discovery_libsource_log', {
+                                            preset: surface.activePreset,
                                             search: surface.activeSearch,
                                             level: surface.activeLevel,
                                             page: page,
@@ -130,6 +159,7 @@
                                 {% set nextPage = surface.page < surface.totalPages ? surface.page + 1 : surface.totalPages %}
                                 <li class="page-item {% if surface.page >= surface.totalPages %}disabled{% endif %}">
                                     <a class="page-link" href="{{ path('app_management_discovery_libsource_log', {
+                                        preset: surface.activePreset,
                                         search: surface.activeSearch,
                                         level: surface.activeLevel,
                                         page: nextPage,
@@ -139,7 +169,11 @@
                             </ul>
                         </nav>
                     {% endif %}
-                </div>
+                {% else %}
+                    <div class="list-group mt-3">
+                        <div class="list-group-item text-muted">No stored action events match the current filters.</div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
