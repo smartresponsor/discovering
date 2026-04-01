@@ -29,13 +29,54 @@ final class PlaybookFileDiscoverySourceRecordRepository implements DiscoverySour
 
     public function all(): array
     {
-        return $this->decoder->decodeFile(
-            $this->getStoragePath(),
-            $this->getResourceType(),
-        );
+        $records = [];
+
+        foreach ($this->listStorageFiles() as $path) {
+            $records = [...$records, ...$this->allFromStorageFile($path)];
+        }
+
+        return $records;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function listStorageFiles(): array
+    {
+        $directoryPath = $this->getStorageDirectoryPath();
+
+        if (is_dir($directoryPath)) {
+            $matches = glob($directoryPath . '/*.json');
+            $paths = is_array($matches) ? array_values(array_filter($matches, 'is_string')) : [];
+            sort($paths);
+
+            return $paths;
+        }
+
+        $legacyPath = $this->getLegacyStoragePath();
+
+        return is_file($legacyPath) ? [$legacyPath] : [];
+    }
+
+    /**
+     * @return list<DiscoverySourceRecord>
+     */
+    public function allFromStorageFile(string $path): array
+    {
+        return $this->decoder->decodeFile($path, $this->getResourceType());
+    }
+
+    public function getStorageDirectoryPath(): string
+    {
+        return $this->projectDir . '/resources/discovery/playbooks';
     }
 
     public function getStoragePath(): string
+    {
+        return $this->getStorageDirectoryPath() . '/playbook_source_records.json';
+    }
+
+    public function getLegacyStoragePath(): string
     {
         return $this->projectDir . '/resources/discovery/playbook_source_records.json';
     }
@@ -48,9 +89,9 @@ final class PlaybookFileDiscoverySourceRecordRepository implements DiscoverySour
     /**
      * @param list<DiscoverySourceRecord> $records
      */
-    public function replaceAll(array $records): void
+    public function replaceAll(array $records, ?string $targetPath = null): void
     {
-        $storagePath = $this->getStoragePath();
+        $storagePath = $targetPath ?? $this->getStoragePath();
         $directory = dirname($storagePath);
 
         if (!is_dir($directory)) {
@@ -60,10 +101,10 @@ final class PlaybookFileDiscoverySourceRecordRepository implements DiscoverySour
         file_put_contents($storagePath, $this->encoder->encodeRecords($records));
     }
 
-    public function importFile(string $path): int
+    public function importFile(string $path, ?string $targetPath = null): int
     {
         $records = $this->decoder->decodeFile($path, $this->getResourceType());
-        $this->replaceAll($records);
+        $this->replaceAll($records, $targetPath);
 
         return count($records);
     }

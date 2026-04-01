@@ -19,6 +19,7 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - file-backed live source sample for playbook discovery records
 - playbook source import / export tooling for JSON-backed records
 - playbook management surface for reviewing live file-backed records and export flows
+- multi-file live source registry for playbook records with directory-backed aggregation and legacy fallback
 
 ## Current routes
 - `/discovery` — human-facing discovery UI

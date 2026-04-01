@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Playbook;
 
 use App\Dto\Discovery\PlaybookManagementEntry;
+use App\Dto\Discovery\PlaybookManagementFileEntry;
 use App\Dto\Discovery\PlaybookManagementSurface;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 
@@ -32,11 +33,24 @@ final class PlaybookManagementSurfaceBuilder
 
         usort($entries, static fn (PlaybookManagementEntry $left, PlaybookManagementEntry $right): int => $left->resourceId <=> $right->resourceId);
 
+        $fileEntries = array_map(
+            fn (string $path): PlaybookManagementFileEntry => new PlaybookManagementFileEntry(
+                fileName: basename($path),
+                path: $path,
+                recordCount: count($this->repository->allFromStorageFile($path)),
+            ),
+            $this->repository->listStorageFiles(),
+        );
+
+        usort($fileEntries, static fn (PlaybookManagementFileEntry $left, PlaybookManagementFileEntry $right): int => $left->fileName <=> $right->fileName);
+
         return new PlaybookManagementSurface(
             sourceName: $this->repository->getSourceName(),
-            storagePath: $this->repository->getStoragePath(),
+            storageDirectoryPath: $this->repository->getStorageDirectoryPath(),
             totalRecords: count($entries),
+            totalFiles: count($fileEntries),
             entries: $entries,
+            fileEntries: $fileEntries,
         );
     }
 }

@@ -11,13 +11,13 @@ use PHPUnit\Framework\TestCase;
 
 final class PlaybookFileDiscoverySourceRecordRepositoryTest extends TestCase
 {
-    public function testItLoadsPlaybookRecordsFromJsonFile(): void
+    public function testItAggregatesPlaybookRecordsFromDirectoryFiles(): void
     {
         $projectDir = sys_get_temp_dir() . '/discovering-playbook-' . uniqid('', true);
-        $resourceDirectory = $projectDir . '/resources/discovery';
+        $storageDirectory = $projectDir . '/resources/discovery/playbooks';
 
-        mkdir($resourceDirectory, 0777, true);
-        file_put_contents($resourceDirectory . '/playbook_source_records.json', json_encode([
+        mkdir($storageDirectory, 0777, true);
+        file_put_contents($storageDirectory . '/alpha.json', json_encode([
             [
                 'resourceId' => 'playbook-alpha',
                 'title' => 'Alpha playbook',
@@ -25,6 +25,8 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends TestCase
                 'filters' => ['status' => 'active', 'visibility' => 'internal'],
                 'metadata' => ['tags' => ['alpha']],
             ],
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        file_put_contents($storageDirectory . '/beta.json', json_encode([
             [
                 'resourceId' => 'playbook-beta',
                 'title' => 'Beta playbook',
@@ -42,16 +44,49 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends TestCase
         );
 
         $records = $repository->all();
+        $paths = $repository->listStorageFiles();
 
         self::assertSame('playbook-file-source-provider', $repository->getSourceName());
         self::assertSame('playbook', $repository->getResourceType());
         self::assertCount(2, $records);
+        self::assertCount(2, $paths);
+        self::assertStringEndsWith('/resources/discovery/playbooks', $repository->getStorageDirectoryPath());
         self::assertSame('playbook-alpha', $records[0]->resourceId);
-        self::assertSame('playbook', $records[0]->resourceType);
         self::assertSame('special-playbook', $records[1]->resourceType);
 
-        @unlink($resourceDirectory . '/playbook_source_records.json');
-        @rmdir($resourceDirectory);
+        @unlink($storageDirectory . '/alpha.json');
+        @unlink($storageDirectory . '/beta.json');
+        @rmdir($storageDirectory);
+        @rmdir($projectDir . '/resources/discovery');
+        @rmdir($projectDir . '/resources');
+        @rmdir($projectDir);
+    }
+
+    public function testItUsesLegacyFallbackWhenDirectoryDoesNotExist(): void
+    {
+        $projectDir = sys_get_temp_dir() . '/discovering-playbook-legacy-' . uniqid('', true);
+        $legacyDirectory = $projectDir . '/resources/discovery';
+
+        mkdir($legacyDirectory, 0777, true);
+        file_put_contents($legacyDirectory . '/playbook_source_records.json', json_encode([
+            [
+                'resourceId' => 'legacy-playbook',
+                'title' => 'Legacy playbook',
+                'body' => 'Legacy body',
+            ],
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+            $projectDir,
+            new DiscoverySourceRecordJsonFileDecoder(),
+            new DiscoverySourceRecordJsonFileEncoder(),
+        );
+
+        self::assertCount(1, $repository->all());
+        self::assertSame([$repository->getLegacyStoragePath()], $repository->listStorageFiles());
+
+        @unlink($legacyDirectory . '/playbook_source_records.json');
+        @rmdir($legacyDirectory);
         @rmdir($projectDir . '/resources');
         @rmdir($projectDir);
     }
@@ -90,11 +125,12 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends TestCase
         @unlink($importPath);
         @unlink($repository->getStoragePath());
         @rmdir(dirname($repository->getStoragePath()));
+        @rmdir($projectDir . '/resources/discovery');
         @rmdir($projectDir . '/resources');
         @rmdir($projectDir);
     }
 
-    public function testItReturnsEmptyListWhenJsonFileDoesNotExist(): void
+    public function testItReturnsEmptyListWhenNoStorageExists(): void
     {
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             sys_get_temp_dir() . '/discovering-playbook-missing-' . uniqid('', true),

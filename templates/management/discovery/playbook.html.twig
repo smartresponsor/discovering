@@ -16,7 +16,7 @@
     </div>
 
     <div class="row g-4">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card h-100">
                 <div class="card-body">
                     <h2 class="h6 text-muted">Source</h2>
@@ -24,7 +24,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card h-100">
                 <div class="card-body">
                     <h2 class="h6 text-muted">Total records</h2>
@@ -32,13 +32,49 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card h-100">
                 <div class="card-body">
-                    <h2 class="h6 text-muted">Storage path</h2>
-                    <div class="small"><code>{{ surface.storagePath }}</code></div>
+                    <h2 class="h6 text-muted">Total files</h2>
+                    <div class="fs-5">{{ surface.totalFiles }}</div>
                 </div>
             </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Storage directory</h2>
+                    <div class="small"><code>{{ surface.storageDirectoryPath }}</code></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="h5">Source files</h2>
+            <table class="table mt-3 mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Path</th>
+                        <th class="text-end">Records</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fileEntry in surface.fileEntries %}
+                        <tr>
+                            <td><code>{{ fileEntry.fileName }}</code></td>
+                            <td><code>{{ fileEntry.path }}</code></td>
+                            <td class="text-end">{{ fileEntry.recordCount }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-muted">No playbook source files are currently present.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -85,7 +121,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <h2 class="h5">Operational note</h2>
-            <p class="mb-0 text-muted">Use <code>app:discovery:playbook:import</code> to replace the stored records from an input JSON file, or <code>app:discovery:playbook:export</code> to export the current live source state.</p>
+            <p class="mb-0 text-muted">Use <code>app:discovery:playbook:import</code> to write records into the directory-backed live source registry, or <code>app:discovery:playbook:export</code> to export the aggregated current live source state.</p>
         </div>
     </div>
 </div>
