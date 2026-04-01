@@ -22,6 +22,7 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - multi-file live source registry for playbook records with directory-backed aggregation and legacy fallback
 - inline playbook management actions for registry audit, sample seeding, and legacy migration
 - playbook operator event trail and CLI history output for management observability
+- second live source family for briefing discovery records with its own directory-backed registry and management surface
 
 ## Current routes
 - `/discovery` — human-facing discovery UI

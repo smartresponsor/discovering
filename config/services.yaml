@@ -25,6 +25,9 @@ services:
   App\\Service\\Discovery\\Source\\PlaybookDiscoverySourceProvider:
     tags: ['app.discovery_source_provider']
 
+  App\\Service\\Discovery\\Source\\BriefingDiscoverySourceProvider:
+    tags: ['app.discovery_source_provider']
+
   App\\Service\\Discovery\\Source\\Repository\\ProjectDiscoverySourceRecordRepository:
     tags: ['app.discovery_source_repository']
 
@@ -38,6 +41,11 @@ services:
     tags: ['app.discovery_source_repository']
 
   App\\Service\\Discovery\\Source\\Repository\\PlaybookFileDiscoverySourceRecordRepository:
+    tags: ['app.discovery_source_repository']
+    arguments:
+      $projectDir: '%kernel.project_dir%'
+
+  App\\Service\\Discovery\\Source\\Repository\\BriefingFileDiscoverySourceRecordRepository:
     tags: ['app.discovery_source_repository']
     arguments:
       $projectDir: '%kernel.project_dir%'
