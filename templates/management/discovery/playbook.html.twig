@@ -38,6 +38,32 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Operator event trail</h2>
+            <div class="list-group mt-3">
+                {% for event in operatorEventTrail %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between gap-3">
+                            <div>
+                                <div class="fw-semibold">{{ event.summary }}</div>
+                                <div class="small text-muted">{{ event.eventName }}</div>
+                            </div>
+                            <span class="badge text-bg-light">{{ event.level }}</span>
+                        </div>
+                        {% if event.context is not empty %}
+                            <div class="mt-2 small">
+                                <pre class="mb-0">{{ event.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="list-group-item text-muted">No events.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-md-3">
             <div class="card h-100">
@@ -144,7 +170,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <h2 class="h5">Operational note</h2>
-            <p class="mb-0 text-muted">Use <code>app:discovery:playbook:import</code> to write records into the directory-backed live source registry, or <code>app:discovery:playbook:export</code> to export the aggregated current live source state.</p>
+            <p class="mb-0 text-muted">Use <code>app:discovery:playbook:import</code> to write records into the directory-backed live source registry, <code>app:discovery:playbook:export</code> to export the aggregated current live source state, or <code>app:discovery:playbook:history</code> to review the current operator event trail from CLI.</p>
         </div>
     </div>
 </div>

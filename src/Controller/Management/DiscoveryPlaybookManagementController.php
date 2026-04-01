@@ -6,6 +6,7 @@ namespace App\Controller\Management;
 
 use App\Service\Discovery\Playbook\PlaybookManagementSurfaceActionResolver;
 use App\Service\Discovery\Playbook\PlaybookManagementSurfaceBuilder;
+use App\Service\Discovery\Playbook\PlaybookOperatorEventTrailBuilder;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,6 +19,7 @@ final class DiscoveryPlaybookManagementController extends AbstractController
     public function __construct(
         private readonly PlaybookManagementSurfaceBuilder $surfaceBuilder,
         private readonly PlaybookManagementSurfaceActionResolver $actionResolver,
+        private readonly PlaybookOperatorEventTrailBuilder $eventTrailBuilder,
         private readonly PlaybookFileDiscoverySourceRecordRepository $repository,
     ) {
     }
@@ -30,6 +32,7 @@ final class DiscoveryPlaybookManagementController extends AbstractController
         return $this->render('management/discovery/playbook.html.twig', [
             'surface' => $this->surfaceBuilder->build(),
             'lastActionResult' => $lastActionResult,
+            'operatorEventTrail' => $this->eventTrailBuilder->build($lastActionResult),
         ]);
     }
 
