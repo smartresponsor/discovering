@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Playbook Management{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="mb-2">Playbook Management</h1>
+            <p class="text-muted mb-0">Operator-facing surface for the file-backed playbook discovery source.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource') }}">Libsource</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_playbook_export') }}">Export JSON</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Source</h2>
+                    <div class="fs-6">{{ surface.sourceName }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Total records</h2>
+                    <div class="fs-5">{{ surface.totalRecords }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Storage path</h2>
+                    <div class="small"><code>{{ surface.storagePath }}</code></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="h5">Live playbook records</h2>
+            <table class="table mt-3 mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Resource ID</th>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Visibility</th>
+                        <th>Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in surface.entries %}
+                        <tr>
+                            <td><code>{{ entry.resourceId }}</code></td>
+                            <td>{{ entry.resourceType }}</td>
+                            <td>{{ entry.title }}</td>
+                            <td>{{ entry.status }}</td>
+                            <td>{{ entry.visibility }}</td>
+                            <td>
+                                {% for tag in entry.tags %}
+                                    <span class="badge text-bg-light">{{ tag }}</span>
+                                {% else %}
+                                    <span class="text-muted small">none</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-muted">No playbook records are currently stored.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="h5">Operational note</h2>
+            <p class="mb-0 text-muted">Use <code>app:discovery:playbook:import</code> to replace the stored records from an input JSON file, or <code>app:discovery:playbook:export</code> to export the current live source state.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

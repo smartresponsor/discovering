@@ -18,6 +18,7 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - libsource event log viewer with search, level filters, quick presets, and pagination
 - file-backed live source sample for playbook discovery records
 - playbook source import / export tooling for JSON-backed records
+- playbook management surface for reviewing live file-backed records and export flows
 
 ## Current routes
 - `/discovery` — human-facing discovery UI
