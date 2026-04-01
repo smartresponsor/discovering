@@ -15,6 +15,29 @@
         </div>
     </div>
 
+    {% if lastActionResult is not null %}
+        <div class="alert alert-info">
+            <div class="fw-semibold">Last action: {{ lastActionResult.actionName }}</div>
+            <div>{{ lastActionResult.summary }}</div>
+            {% if lastActionResult.payload is not empty %}
+                <div class="mt-2 small">
+                    <pre class="mb-0">{{ lastActionResult.payload|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Operator actions</h2>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a class="btn btn-primary btn-sm" href="{{ path('app_management_discovery_playbook', { action: 'audit-registry' }) }}">Audit registry</a>
+                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_management_discovery_playbook', { action: 'ensure-sample-registry' }) }}">Ensure sample registry</a>
+                <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_playbook', { action: 'migrate-legacy-storage' }) }}">Migrate legacy storage</a>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-md-3">
             <div class="card h-100">
