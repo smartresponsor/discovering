@@ -22,6 +22,9 @@ services:
   App\\Service\\Discovery\\Source\\CategoryDiscoverySourceProvider:
     tags: ['app.discovery_source_provider']
 
+  App\\Service\\Discovery\\Source\\PlaybookDiscoverySourceProvider:
+    tags: ['app.discovery_source_provider']
+
   App\\Service\\Discovery\\Source\\Repository\\ProjectDiscoverySourceRecordRepository:
     tags: ['app.discovery_source_repository']
 
@@ -33,6 +36,11 @@ services:
 
   App\\Service\\Discovery\\Source\\Repository\\CategoryDiscoverySourceRecordRepository:
     tags: ['app.discovery_source_repository']
+
+  App\\Service\\Discovery\\Source\\Repository\\PlaybookFileDiscoverySourceRecordRepository:
+    tags: ['app.discovery_source_repository']
+    arguments:
+      $projectDir: '%kernel.project_dir%'
 
   App\\ServiceInterface\\Discovery\\Adapter\\DiscoveryAdapterInterface: '@App\\Service\\Discovery\\Adapter\\SqliteFtsDiscoveryAdapter'
   App\\ServiceInterface\\Discovery\\Indexer\\DiscoveryIndexerInterface: '@App\\Service\\Discovery\\Indexer\\DiscoveryIndexer'

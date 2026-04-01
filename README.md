@@ -16,6 +16,7 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - Twig search UI with status and visibility filters
 - JSON API for discovery queries
 - libsource event log viewer with search, level filters, quick presets, and pagination
+- file-backed live source sample for playbook discovery records
 
 ## Current routes
 - `/discovery` — human-facing discovery UI
