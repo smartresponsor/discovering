@@ -6,17 +6,21 @@ namespace App\Controller\Discovery;
 use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
 use App\Form\Discovery\DiscoverySearchType;
+use App\Service\Discovery\DiscoveryLearningService;
 use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class DiscoveryController extends AbstractController
 {
-    public function __construct(private readonly DiscoveryServiceInterface $discoveryService)
-    {
+    public function __construct(
+        private readonly DiscoveryServiceInterface $discoveryService,
+        private readonly DiscoveryLearningService $learningService,
+    ) {
     }
 
     #[Route('/discovery', name: 'app_discovery_index', methods: ['GET', 'POST'])]
@@ -35,12 +39,54 @@ final class DiscoveryController extends AbstractController
         ]);
     }
 
+    #[Route('/discovery/feedback', name: 'app_discovery_feedback', methods: ['POST'])]
+    public function feedback(Request $request): RedirectResponse
+    {
+        $count = $this->learningService->recordUsefulClick(
+            resource: (string) $request->request->get('resource', 'global'),
+            hitId: (string) $request->request->get('id', ''),
+            title: (string) $request->request->get('title', ''),
+            reference: (string) $request->request->get('reference', ''),
+        );
+
+        $this->addFlash('success', sprintf('Recorded useful click (%d total).', $count));
+
+        $returnTo = (string) $request->request->get('return_to', $this->generateUrl('app_discovery_index'));
+
+        return $this->redirect($returnTo);
+    }
+
     #[Route('/api/discovery', name: 'app_discovery_api', methods: ['GET'])]
     public function api(Request $request): JsonResponse
     {
         $query = $this->buildDiscoveryQuery($request, false);
 
         return $this->json(['ok' => true, 'data' => $this->discoveryService->discover($query)->toArray()]);
+    }
+
+    #[Route('/api/discovery/click', name: 'app_discovery_api_click', methods: ['POST'])]
+    public function click(Request $request): JsonResponse
+    {
+        $payload = json_decode($request->getContent(), true);
+        if (!is_array($payload)) {
+            $payload = $request->request->all();
+        }
+
+        $count = $this->learningService->recordUsefulClick(
+            resource: (string) ($payload['resource'] ?? 'global'),
+            hitId: (string) ($payload['id'] ?? ''),
+            title: (string) ($payload['title'] ?? ''),
+            reference: (string) ($payload['reference'] ?? ''),
+        );
+
+        return $this->json([
+            'ok' => true,
+            'data' => [
+                'resource' => (string) ($payload['resource'] ?? 'global'),
+                'id' => (string) ($payload['id'] ?? ''),
+                'feedbackCount' => $count,
+            ],
+        ]);
     }
 
     private function buildDiscoveryQuery(Request $request, bool $allowFormFallback): DiscoveryQuery

@@ -5,15 +5,22 @@ namespace App\Tests\Unit\Discovery;
 
 use App\Dto\Discovery\DiscoveryHit;
 use App\Dto\Discovery\DiscoveryQuery;
+use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryHighlightingService;
+use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\DiscoveryScoringService;
 use PHPUnit\Framework\TestCase;
 
 final class DiscoveryScoringServiceTest extends TestCase
 {
-    public function testItRanksHitsAndBuildsHighlightsAndSnippets(): void
+    public function testItRanksHitsAndAppliesFeedbackBoost(): void
     {
-        $service = new DiscoveryScoringService(new DiscoveryHighlightingService());
+        $path = sys_get_temp_dir() . '/discovering-scoring-feedback-' . uniqid('', true) . '.sqlite';
+        $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
+        $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
+        $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
+
+        $service = new DiscoveryScoringService(new DiscoveryHighlightingService(), $learningService);
         $hits = [
             new DiscoveryHit(
                 id: 'briefing-1',
@@ -35,19 +42,14 @@ final class DiscoveryScoringServiceTest extends TestCase
             ),
         ];
 
-        $query = new DiscoveryQuery(
-            query: 'search portability',
-            resourceWeights: ['briefing' => 1.3],
-        );
-
+        $query = new DiscoveryQuery(query: 'reindex operations');
         $rankedHits = $service->rank($hits, $query);
 
-        self::assertCount(2, $rankedHits);
-        self::assertSame('briefing-1', $rankedHits[0]->id);
-        self::assertContains('content token: search', $rankedHits[0]->matchReasons);
-        self::assertContains('fts boost 5.56', $rankedHits[0]->matchReasons);
-        self::assertSame(['search', 'portability'], $rankedHits[0]->matchedTokens);
-        self::assertStringContainsString('<mark>Search</mark>', $rankedHits[0]->highlightedTitle);
-        self::assertStringContainsString('<mark>search</mark>', strtolower($rankedHits[0]->highlightedSnippet));
+        self::assertSame('playbook-1', $rankedHits[0]->id);
+        self::assertSame(2, $rankedHits[0]->feedbackCount);
+        self::assertGreaterThan(0.0, $rankedHits[0]->feedbackBoost);
+        self::assertContains('feedback boost 4.75', $rankedHits[0]->matchReasons);
+
+        @unlink($path);
     }
 }

@@ -32,8 +32,11 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - hybrid ranking that combines SQLite FTS bm25 relevance with explainable custom scoring
 - query modes and preset weighting strategies for relevance, governance, operations, and exploration discovery intents
 - content snippets with safe token highlighting for titles, references, and contextual excerpts in UI and API
+- feedback-aware learning with persisted useful-click signals, ranking boost, and HTML/API feedback endpoints
 
 ## Current routes
 - `/discovery` — human-facing discovery UI
+- `/discovery/feedback` — human-facing feedback capture endpoint
 - `/api/discovery` — machine-facing JSON discovery endpoint
+- `/api/discovery/click` — machine-facing feedback capture endpoint
 - `/management/discovery` — operator overview

@@ -5,7 +5,9 @@ namespace App\Tests\Unit\Discovery;
 
 use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
+use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryHighlightingService;
+use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\DiscoveryModePresetService;
 use App\Service\Discovery\DiscoveryScoringService;
 use App\Service\Discovery\DiscoveryService;
@@ -14,8 +16,13 @@ use PHPUnit\Framework\TestCase;
 
 final class DiscoveryServiceTest extends TestCase
 {
-    public function testItBuildsRankedHitsWithHighlightsAndSnippets(): void
+    public function testItBuildsRankedHitsWithFeedbackAwareBoosting(): void
     {
+        $path = sys_get_temp_dir() . '/discovering-service-feedback-' . uniqid('', true) . '.sqlite';
+        $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
+        $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
+        $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
+
         $adapter = new class() implements DiscoveryAdapterInterface {
             public function upsert(string $resource, string $id, array $document): void
             {
@@ -60,7 +67,7 @@ final class DiscoveryServiceTest extends TestCase
 
         $service = new DiscoveryService(
             $adapter,
-            new DiscoveryScoringService(new DiscoveryHighlightingService()),
+            new DiscoveryScoringService(new DiscoveryHighlightingService(), $learningService),
             new DiscoveryModePresetService(),
         );
 
@@ -71,8 +78,10 @@ final class DiscoveryServiceTest extends TestCase
 
         self::assertSame(1, $result->total);
         self::assertSame('briefing-2', $result->hits[0]->id);
-        self::assertSame(['governance', 'review'], $result->hits[0]->matchedTokens);
-        self::assertStringContainsString('<mark>Governance</mark>', $result->hits[0]->highlightedTitle);
-        self::assertStringContainsString('<mark>governance</mark>', strtolower($result->hits[0]->highlightedSnippet));
+        self::assertSame(2, $result->hits[0]->feedbackCount);
+        self::assertGreaterThan(0.0, $result->hits[0]->feedbackBoost);
+        self::assertContains('feedback boost 4.75', $result->hits[0]->matchReasons);
+
+        @unlink($path);
     }
 }

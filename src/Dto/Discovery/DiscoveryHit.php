@@ -23,6 +23,8 @@ final class DiscoveryHit
         public string $highlightedReference = '',
         public string $highlightedSnippet = '',
         public array $matchedTokens = [],
+        public int $feedbackCount = 0,
+        public float $feedbackBoost = 0.0,
     ) {
     }
 
@@ -47,6 +49,8 @@ final class DiscoveryHit
             highlightedReference: (string) ($payload['highlightedReference'] ?? $reference),
             highlightedSnippet: (string) ($payload['highlightedSnippet'] ?? ''),
             matchedTokens: self::normalizeStrings($payload['matchedTokens'] ?? []),
+            feedbackCount: max(0, (int) ($payload['feedbackCount'] ?? 0)),
+            feedbackBoost: is_numeric($payload['feedbackBoost'] ?? null) ? (float) $payload['feedbackBoost'] : 0.0,
         );
     }
 
@@ -80,6 +84,8 @@ final class DiscoveryHit
             'highlightedReference' => $this->highlightedReference,
             'highlightedSnippet' => $this->highlightedSnippet,
             'matchedTokens' => $this->matchedTokens,
+            'feedbackCount' => $this->feedbackCount,
+            'feedbackBoost' => $this->feedbackBoost,
         ];
     }
 }

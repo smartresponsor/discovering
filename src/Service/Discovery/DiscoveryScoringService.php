@@ -10,6 +10,7 @@ final class DiscoveryScoringService
 {
     public function __construct(
         private readonly DiscoveryHighlightingService $highlightingService,
+        private readonly DiscoveryLearningService $learningService,
     ) {
     }
 
@@ -138,9 +139,15 @@ final class DiscoveryScoringService
             $reasons[] = sprintf('fts boost %.2f', $ftsBoost);
         }
 
+        $feedbackCount = $this->learningService->getFeedbackCount($hit);
+        $feedbackBoost = $this->learningService->calculateFeedbackBoost($feedbackCount);
+        if ($feedbackBoost > 0.0) {
+            $reasons[] = sprintf('feedback boost %.2f', $feedbackBoost);
+        }
+
         $matchedTokens = array_values(array_unique($matchedTokens));
         $snippet = $this->highlightingService->buildSnippet($hit->content, $matchedTokens);
-        $finalScore = round($customScore + $ftsBoost, 2);
+        $finalScore = round($customScore + $ftsBoost + $feedbackBoost, 2);
 
         return new DiscoveryHit(
             id: $hit->id,
@@ -156,6 +163,8 @@ final class DiscoveryScoringService
             highlightedReference: $this->highlightingService->highlight($hit->reference, $matchedTokens),
             highlightedSnippet: $this->highlightingService->highlight($snippet, $matchedTokens),
             matchedTokens: $matchedTokens,
+            feedbackCount: $feedbackCount,
+            feedbackBoost: $feedbackBoost,
         );
     }
 
