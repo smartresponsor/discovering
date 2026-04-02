@@ -4,8 +4,17 @@
 
 {% block body %}
 <div class="container py-4">
-    <h1 class="mb-3">Discovery Management</h1>
-    <p class="text-muted">Operator-facing overview for discovery backends, rebuild flows, diagnostics, and source coverage.</p>
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+        <div>
+            <h1 class="mb-2">Discovery Management</h1>
+            <p class="text-muted mb-0">Operator-facing overview for discovery backends, rebuild flows, diagnostics, and source coverage.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource') }}">Libsource</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_playbook') }}">Playbook</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_briefing') }}">Briefing</a>
+        </div>
+    </div>
 
     <div class="row g-4 mt-1">
         <div class="col-md-4">

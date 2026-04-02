@@ -1,0 +1,14 @@
+[
+  {
+    "resourceId": "briefing-live-source-governance",
+    "title": "Live source governance briefing",
+    "body": "Short governance briefing outlining how live source families should evolve, how directory-backed registries differ from seeded repositories, and what operators should review before merging registry changes.",
+    "filters": {
+      "status": "active",
+      "visibility": "internal"
+    },
+    "metadata": {
+      "tags": ["briefing", "governance", "live-source"]
+    }
+  }
+]

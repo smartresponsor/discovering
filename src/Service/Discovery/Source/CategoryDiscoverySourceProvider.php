@@ -4,40 +4,28 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\Source;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
+use App\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
 final class CategoryDiscoverySourceProvider implements DiscoverySourceProviderInterface
 {
+    public function __construct(
+        private readonly CategoryDiscoverySourceRecordRepository $repository,
+    ) {
+    }
+
     public function getSourceName(): string
     {
-        return 'category-source-provider';
+        return $this->repository->getSourceName();
     }
 
     public function getResourceType(): string
     {
-        return 'category';
+        return $this->repository->getResourceType();
     }
 
     public function provide(): array
     {
-        return [
-            new DiscoverySourceRecord(
-                resourceType: 'category',
-                resourceId: 'category-automation',
-                title: 'Automation category',
-                body: 'Category grouping automation-oriented resources, delivery offerings, diagnostic guides, and operational templates.',
-                filters: ['status' => 'active', 'visibility' => 'public'],
-                metadata: ['tags' => ['automation', 'category']],
-            ),
-            new DiscoverySourceRecord(
-                resourceType: 'category',
-                resourceId: 'category-governance',
-                title: 'Governance category',
-                body: 'Category for governance-related resources such as canon rules, architecture manifests, diagnostics, and policy-oriented guidance.',
-                filters: ['status' => 'active', 'visibility' => 'internal'],
-                metadata: ['tags' => ['governance', 'policy', 'canon']],
-            ),
-        ];
+        return $this->repository->all();
     }
 }

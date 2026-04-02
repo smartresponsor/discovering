@@ -1,0 +1,14 @@
+[
+  {
+    "resourceId": "briefing-discovery-backends",
+    "title": "Discovery backend briefing",
+    "body": "Concise briefing comparing the local SQLite-backed demo adapter, portability expectations for external backends, and operational implications for future search-layer evolution.",
+    "filters": {
+      "status": "active",
+      "visibility": "internal"
+    },
+    "metadata": {
+      "tags": ["briefing", "backend", "technology"]
+    }
+  }
+]

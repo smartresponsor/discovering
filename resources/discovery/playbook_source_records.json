@@ -1,0 +1,26 @@
+[
+  {
+    "resourceId": "playbook-discovery-reindex",
+    "title": "Discovery reindex playbook",
+    "body": "Operational playbook for rebuilding discovery indexes, verifying backend availability, and validating sample retrieval results after reindex.",
+    "filters": {
+      "status": "active",
+      "visibility": "internal"
+    },
+    "metadata": {
+      "tags": ["playbook", "reindex", "operations"]
+    }
+  },
+  {
+    "resourceId": "playbook-libsource-audit",
+    "title": "Libsource audit playbook",
+    "body": "Step-by-step playbook for auditing libsource coverage, inspecting source repositories, reviewing event logs, and exporting operator evidence for synchronization.",
+    "filters": {
+      "status": "active",
+      "visibility": "internal"
+    },
+    "metadata": {
+      "tags": ["playbook", "libsource", "audit"]
+    }
+  }
+]

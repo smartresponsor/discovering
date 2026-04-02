@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\Source;
 
-use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
-final class ProjectDiscoverySourceProvider implements DiscoverySourceProviderInterface
+final class BriefingDiscoverySourceProvider implements DiscoverySourceProviderInterface
 {
     public function __construct(
-        private readonly ProjectDiscoverySourceRecordRepository $repository,
+        private readonly BriefingFileDiscoverySourceRecordRepository $repository,
     ) {
     }
 

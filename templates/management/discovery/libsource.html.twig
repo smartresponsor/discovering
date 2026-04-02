@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Libsource diagnostics{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="mb-2">Libsource diagnostics</h1>
+            <p class="text-muted mb-0">Operator-facing surface for discovery source providers, repositories, coverage diagnostics, and libsource management actions.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" href="{{ path('management_discovery_overview') }}">Discovery overview</a>
+            <a class="btn btn-outline-primary btn-sm" href="{{ path('app_management_discovery_libsource_log') }}">View event log</a>
+        </div>
+    </div>
+
+    {% if lastActionResult is not null %}
+        <div class="alert alert-info">
+            <div class="fw-semibold">Last action: {{ lastActionResult.actionName }}</div>
+            <div>{{ lastActionResult.summary }}</div>
+            {% if lastActionResult.payload is not empty %}
+                <div class="mt-2 small">
+                    <pre class="mb-0">{{ lastActionResult.payload|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Operator actions</h2>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a class="btn btn-primary btn-sm" href="{{ path('app_management_discovery_libsource', { action: 'audit-alignment' }) }}">Run audit alignment</a>
+                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_management_discovery_libsource', { action: 'rebuild-coverage-snapshot' }) }}">Rebuild coverage snapshot</a>
+                <a class="btn btn-outline-danger btn-sm" href="{{ path('app_management_discovery_libsource', { action: 'clear-event-log' }) }}">Clear event log</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Operator event trail</h2>
+            <div class="list-group mt-3">
+                {% for event in operatorEventTrail %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between gap-3">
+                            <div>
+                                <div class="fw-semibold">{{ event.summary }}</div>
+                                <div class="small text-muted">{{ event.eventName }}</div>
+                            </div>
+                            <span class="badge text-bg-light">{{ event.level }}</span>
+                        </div>
+                        {% if event.context is not empty %}
+                            <div class="mt-2 small">
+                                <pre class="mb-0">{{ event.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="list-group-item text-muted">No events.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h2 class="h5">Source entries</h2>
+            <table class="table mt-3 mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Type</th>
+                        <th>Provider</th>
+                        <th>Repository</th>
+                        <th class="text-end">Records</th>
+                        <th>Samples</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in surface.entries %}
+                        <tr>
+                            <td>{{ entry.sourceName }}</td>
+                            <td>{{ entry.resourceType }}</td>
+                            <td><code>{{ entry.providerClass }}</code></td>
+                            <td><code>{{ entry.repositoryClass }}</code></td>
+                            <td class="text-end">{{ entry.recordCount }}</td>
+                            <td>
+                                {% for resourceId in entry.sampleResourceIds %}
+                                    <span class="badge text-bg-light">{{ resourceId }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource', { action: 'inspect', sourceName: entry.sourceName }) }}">Inspect in surface</a>
+                                    <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource_inspect', { sourceName: entry.sourceName }) }}">JSON inspect</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-muted">No libsource entries.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
