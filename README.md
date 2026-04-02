@@ -28,6 +28,7 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - shared operator-action and operator-event foundation for reusable live-family action, resolver, and trail behavior
 - shared family controller and Twig foundation for reusable live-family management rendering and export helpers
 - discovery engine ranking with resource weights, filter-aware scoring, and match reasons
+- explainable discovery UI with score, ranking reasons, and engine-aware query controls
 
 ## Current routes
 - `/discovery` — human-facing discovery UI
