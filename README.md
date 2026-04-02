@@ -27,8 +27,16 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - shared family management surface foundation for reusable directory-backed live family UI aggregation
 - shared operator-action and operator-event foundation for reusable live-family action, resolver, and trail behavior
 - shared family controller and Twig foundation for reusable live-family management rendering and export helpers
+- discovery engine ranking with resource weights, filter-aware scoring, and match reasons
+- explainable discovery UI with score, ranking reasons, and engine-aware query controls
+- hybrid ranking that combines SQLite FTS bm25 relevance with explainable custom scoring
+- query modes and preset weighting strategies for relevance, governance, operations, and exploration discovery intents
+- content snippets with safe token highlighting for titles, references, and contextual excerpts in UI and API
+- feedback-aware learning with persisted useful-click signals, ranking boost, and HTML/API feedback endpoints
 
 ## Current routes
 - `/discovery` — human-facing discovery UI
+- `/discovery/feedback` — human-facing feedback capture endpoint
 - `/api/discovery` — machine-facing JSON discovery endpoint
+- `/api/discovery/click` — machine-facing feedback capture endpoint
 - `/management/discovery` — operator overview
