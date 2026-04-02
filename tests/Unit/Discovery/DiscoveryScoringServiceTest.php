@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
 
 final class DiscoveryScoringServiceTest extends TestCase
 {
-    public function testItRanksHitsByPhraseTokensAndResourceWeight(): void
+    public function testItRanksHitsByPhraseTokensFtsAndResourceWeight(): void
     {
         $service = new DiscoveryScoringService();
         $hits = [
@@ -20,6 +20,7 @@ final class DiscoveryScoringServiceTest extends TestCase
                 resource: 'briefing',
                 reference: 'briefing-search-portability',
                 status: 'active',
+                ftsScore: -0.8,
             ),
             new DiscoveryHit(
                 id: 'playbook-1',
@@ -27,6 +28,7 @@ final class DiscoveryScoringServiceTest extends TestCase
                 resource: 'playbook',
                 reference: 'playbook-reindex-operations',
                 status: 'active',
+                ftsScore: -0.1,
             ),
             new DiscoveryHit(
                 id: 'playbook-2',
@@ -34,6 +36,7 @@ final class DiscoveryScoringServiceTest extends TestCase
                 resource: 'playbook',
                 reference: 'playbook-governance-audit',
                 status: 'draft',
+                ftsScore: null,
             ),
         ];
 
@@ -49,6 +52,7 @@ final class DiscoveryScoringServiceTest extends TestCase
         self::assertGreaterThan(0.0, $rankedHits[0]->score);
         self::assertContains('title phrase match', $rankedHits[0]->matchReasons);
         self::assertContains('resource weight 1.30', $rankedHits[0]->matchReasons);
+        self::assertContains('fts boost 5.56', $rankedHits[0]->matchReasons);
         self::assertSame('playbook-1', $rankedHits[1]->id);
         self::assertSame(0.0, $rankedHits[2]->score);
     }
@@ -57,9 +61,9 @@ final class DiscoveryScoringServiceTest extends TestCase
     {
         $service = new DiscoveryScoringService();
         $hits = [
-            new DiscoveryHit(id: 'playbook-active', title: 'Governance playbook', resource: 'playbook', status: 'active'),
-            new DiscoveryHit(id: 'playbook-draft', title: 'Governance draft', resource: 'playbook', status: 'draft'),
-            new DiscoveryHit(id: 'briefing-active', title: 'Governance briefing', resource: 'briefing', status: 'active'),
+            new DiscoveryHit(id: 'playbook-active', title: 'Governance playbook', resource: 'playbook', status: 'active', ftsScore: -0.2),
+            new DiscoveryHit(id: 'playbook-draft', title: 'Governance draft', resource: 'playbook', status: 'draft', ftsScore: -0.2),
+            new DiscoveryHit(id: 'briefing-active', title: 'Governance briefing', resource: 'briefing', status: 'active', ftsScore: -0.2),
         ];
 
         $query = new DiscoveryQuery(

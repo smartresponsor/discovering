@@ -16,6 +16,7 @@ final class DiscoveryHit
         public string $status = '',
         public float $score = 0.0,
         public array $matchReasons = [],
+        public ?float $ftsScore = null,
     ) {
     }
 
@@ -30,6 +31,7 @@ final class DiscoveryHit
             status: (string) ($payload['status'] ?? ''),
             score: is_numeric($payload['score'] ?? null) ? (float) $payload['score'] : 0.0,
             matchReasons: self::normalizeMatchReasons($payload['matchReasons'] ?? []),
+            ftsScore: is_numeric($payload['ftsScore'] ?? null) ? (float) $payload['ftsScore'] : null,
         );
     }
 
@@ -57,6 +59,7 @@ final class DiscoveryHit
             'status' => $this->status,
             'score' => $this->score,
             'matchReasons' => $this->matchReasons,
+            'ftsScore' => $this->ftsScore,
         ];
     }
 }

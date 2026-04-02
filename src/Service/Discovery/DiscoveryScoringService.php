@@ -64,51 +64,59 @@ final class DiscoveryScoringService
         $status = $this->normalize($hit->status);
         $combined = trim(implode(' ', [$title, $reference, $resource, $status]));
 
-        $score = 0.0;
+        $customScore = 0.0;
         $reasons = [];
 
         if ($phrase !== '' && str_contains($title, $phrase)) {
-            $score += 20.0;
+            $customScore += 20.0;
             $reasons[] = 'title phrase match';
         }
 
         if ($phrase !== '' && $reference !== '' && str_contains($reference, $phrase)) {
-            $score += 12.0;
+            $customScore += 12.0;
             $reasons[] = 'reference phrase match';
         }
 
         foreach ($tokens as $token) {
             if (str_contains($title, $token)) {
-                $score += 6.0;
+                $customScore += 6.0;
                 $reasons[] = sprintf('title token: %s', $token);
             }
 
             if ($reference !== '' && str_contains($reference, $token)) {
-                $score += 4.0;
+                $customScore += 4.0;
                 $reasons[] = sprintf('reference token: %s', $token);
             }
 
             if ($resource === $token) {
-                $score += 3.0;
+                $customScore += 3.0;
                 $reasons[] = sprintf('resource token: %s', $token);
             }
 
             if ($status !== '' && $status === $token) {
-                $score += 2.0;
+                $customScore += 2.0;
                 $reasons[] = sprintf('status token: %s', $token);
             }
         }
 
         if ($tokens !== [] && $this->allTokensPresent($tokens, $combined)) {
-            $score += 8.0;
+            $customScore += 8.0;
             $reasons[] = 'all query tokens matched';
         }
 
         $resourceWeight = $query->resourceWeights[$hit->resource] ?? 1.0;
-        if ($resourceWeight !== 1.0 && $score > 0.0) {
-            $score *= $resourceWeight;
+        if ($resourceWeight !== 1.0 && $customScore > 0.0) {
+            $customScore *= $resourceWeight;
             $reasons[] = sprintf('resource weight %.2f', $resourceWeight);
         }
+
+        $ftsScore = $hit->ftsScore;
+        $ftsBoost = $this->calculateFtsBoost($ftsScore);
+        if ($ftsBoost > 0.0) {
+            $reasons[] = sprintf('fts boost %.2f', $ftsBoost);
+        }
+
+        $finalScore = round($customScore + $ftsBoost, 2);
 
         return new DiscoveryHit(
             id: $hit->id,
@@ -116,8 +124,9 @@ final class DiscoveryScoringService
             resource: $hit->resource,
             reference: $hit->reference,
             status: $hit->status,
-            score: round($score, 2),
+            score: $finalScore,
             matchReasons: array_values(array_unique($reasons)),
+            ftsScore: $ftsScore,
         );
     }
 
@@ -147,5 +156,16 @@ final class DiscoveryScoringService
         }
 
         return true;
+    }
+
+    private function calculateFtsBoost(?float $ftsScore): float
+    {
+        if ($ftsScore === null) {
+            return 0.0;
+        }
+
+        $normalized = 1 / (1 + abs($ftsScore));
+
+        return round($normalized * 10, 2);
     }
 }

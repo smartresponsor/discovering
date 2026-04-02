@@ -63,14 +63,17 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface
         $this->createIndex($index);
 
         if ($query === '') {
-            $statement = $this->pdo->prepare(sprintf('SELECT id, title, resource, reference, status FROM %s ORDER BY rowid DESC LIMIT :limit OFFSET :offset', $index));
+            $statement = $this->pdo->prepare(sprintf('SELECT id, title, resource, reference, status, NULL AS ftsScore FROM %s ORDER BY rowid DESC LIMIT :limit OFFSET :offset', $index));
             $statement->bindValue('limit', $limit, PDO::PARAM_INT);
             $statement->bindValue('offset', $offset, PDO::PARAM_INT);
             $statement->execute();
             return $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
         }
 
-        $statement = $this->pdo->prepare(sprintf('SELECT id, title, resource, reference, status FROM %s WHERE %s MATCH :query LIMIT :limit OFFSET :offset', $index, $index));
+        $statement = $this->pdo->prepare(sprintf(
+            'SELECT id, title, resource, reference, status, bm25(%1$s, 5.0, 1.0, 1.0, 1.0, 0.5) AS ftsScore FROM %1$s WHERE %1$s MATCH :query ORDER BY ftsScore ASC LIMIT :limit OFFSET :offset',
+            $index,
+        ));
         $statement->bindValue('query', $query);
         $statement->bindValue('limit', $limit, PDO::PARAM_INT);
         $statement->bindValue('offset', $offset, PDO::PARAM_INT);

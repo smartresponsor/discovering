@@ -25,9 +25,9 @@ final class DiscoveryServiceTest extends TestCase
             public function search(string $resource, string $query, int $limit = 20, int $offset = 0): array
             {
                 return [
-                    ['id' => 'playbook-1', 'title' => 'Reindex operations playbook', 'resource' => 'playbook', 'reference' => 'playbook-reindex-operations', 'status' => 'active'],
-                    ['id' => 'briefing-1', 'title' => 'Search portability briefing', 'resource' => 'briefing', 'reference' => 'briefing-search-portability', 'status' => 'active'],
-                    ['id' => 'briefing-2', 'title' => 'Governance review briefing', 'resource' => 'briefing', 'reference' => 'briefing-governance-review', 'status' => 'active'],
+                    ['id' => 'playbook-1', 'title' => 'Reindex operations playbook', 'resource' => 'playbook', 'reference' => 'playbook-reindex-operations', 'status' => 'active', 'ftsScore' => -0.2],
+                    ['id' => 'briefing-1', 'title' => 'Search portability briefing', 'resource' => 'briefing', 'reference' => 'briefing-search-portability', 'status' => 'active', 'ftsScore' => -0.9],
+                    ['id' => 'briefing-2', 'title' => 'Governance review briefing', 'resource' => 'briefing', 'reference' => 'briefing-governance-review', 'status' => 'active', 'ftsScore' => -0.4],
                 ];
             }
 
@@ -53,5 +53,6 @@ final class DiscoveryServiceTest extends TestCase
         self::assertSame('briefing-2', $result->hits[0]->id);
         self::assertGreaterThan(0.0, $result->hits[0]->score);
         self::assertContains('resource weight 1.20', $result->hits[0]->matchReasons);
+        self::assertNotNull($result->hits[0]->ftsScore);
     }
 }

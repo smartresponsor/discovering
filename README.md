@@ -29,6 +29,7 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - shared family controller and Twig foundation for reusable live-family management rendering and export helpers
 - discovery engine ranking with resource weights, filter-aware scoring, and match reasons
 - explainable discovery UI with score, ranking reasons, and engine-aware query controls
+- hybrid ranking that combines SQLite FTS bm25 relevance with explainable custom scoring
 
 ## Current routes
 - `/discovery` — human-facing discovery UI

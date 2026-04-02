@@ -70,6 +70,9 @@
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <div class="fw-semibold">{{ hit.title }}</div>
                                 <span class="badge text-bg-primary">Score {{ hit.score }}</span>
+                                {% if hit.ftsScore is not null %}
+                                    <span class="badge text-bg-info">FTS {{ hit.ftsScore|number_format(4, '.', '') }}</span>
+                                {% endif %}
                                 <span class="badge text-bg-secondary">{{ hit.status }}</span>
                             </div>
                             <div class="small text-muted mt-1">{{ hit.resource }} · {{ hit.reference }}</div>
