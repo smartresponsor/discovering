@@ -1,178 +1,22 @@
-{% extends 'base.html.twig' %}
+{% extends 'management/discovery/directory_backed_family_management.html.twig' %}
 
-{% block title %}Briefing Management{% endblock %}
+{% block family_title %}Briefing Management{% endblock %}
+{% block family_heading %}Briefing Management{% endblock %}
+{% block family_description %}Operator-facing surface for the file-backed briefing discovery source.{% endblock %}
 
-{% block body %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
-        <div>
-            <h1 class="mb-2">Briefing Management</h1>
-            <p class="text-muted mb-0">Operator-facing surface for the file-backed briefing discovery source.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource') }}">Libsource</a>
-            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_playbook') }}">Playbook</a>
-            <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_briefing_export') }}">Export JSON</a>
-        </div>
-    </div>
-
-    {% if lastActionResult is not null %}
-        <div class="alert alert-info">
-            <div class="fw-semibold">Last action: {{ lastActionResult.actionName }}</div>
-            <div>{{ lastActionResult.summary }}</div>
-            {% if lastActionResult.payload is not empty %}
-                <div class="mt-2 small">
-                    <pre class="mb-0">{{ lastActionResult.payload|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
-                </div>
-            {% endif %}
-        </div>
-    {% endif %}
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h5">Operator actions</h2>
-            <div class="d-flex flex-wrap gap-2 mt-3">
-                <a class="btn btn-primary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'audit-registry' }) }}">Audit registry</a>
-                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'ensure-sample-registry' }) }}">Ensure sample registry</a>
-                <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'migrate-legacy-storage' }) }}">Migrate legacy storage</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h5">Operator event trail</h2>
-            <div class="list-group mt-3">
-                {% for event in operatorEventTrail %}
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between gap-3">
-                            <div>
-                                <div class="fw-semibold">{{ event.summary }}</div>
-                                <div class="small text-muted">{{ event.eventName }}</div>
-                            </div>
-                            <span class="badge text-bg-light">{{ event.level }}</span>
-                        </div>
-                        {% if event.context is not empty %}
-                            <div class="mt-2 small">
-                                <pre class="mb-0">{{ event.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
-                            </div>
-                        {% endif %}
-                    </div>
-                {% else %}
-                    <div class="list-group-item text-muted">No events.</div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4">
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h2 class="h6 text-muted">Source</h2>
-                    <div class="fs-6">{{ surface.sourceName }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h2 class="h6 text-muted">Total records</h2>
-                    <div class="fs-5">{{ surface.totalRecords }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h2 class="h6 text-muted">Total files</h2>
-                    <div class="fs-5">{{ surface.totalFiles }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h2 class="h6 text-muted">Storage directory</h2>
-                    <div class="small"><code>{{ surface.storageDirectoryPath }}</code></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <h2 class="h5">Source files</h2>
-            <table class="table mt-3 mb-0 align-middle">
-                <thead>
-                    <tr>
-                        <th>File</th>
-                        <th>Path</th>
-                        <th class="text-end">Records</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for fileEntry in surface.fileEntries %}
-                        <tr>
-                            <td><code>{{ fileEntry.fileName }}</code></td>
-                            <td><code>{{ fileEntry.path }}</code></td>
-                            <td class="text-end">{{ fileEntry.recordCount }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="3" class="text-muted">No briefing source files are currently present.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <h2 class="h5">Live briefing records</h2>
-            <table class="table mt-3 mb-0 align-middle">
-                <thead>
-                    <tr>
-                        <th>Resource ID</th>
-                        <th>Type</th>
-                        <th>Title</th>
-                        <th>Status</th>
-                        <th>Visibility</th>
-                        <th>Tags</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in surface.entries %}
-                        <tr>
-                            <td><code>{{ entry.resourceId }}</code></td>
-                            <td>{{ entry.resourceType }}</td>
-                            <td>{{ entry.title }}</td>
-                            <td>{{ entry.status }}</td>
-                            <td>{{ entry.visibility }}</td>
-                            <td>
-                                {% for tag in entry.tags %}
-                                    <span class="badge text-bg-light">{{ tag }}</span>
-                                {% else %}
-                                    <span class="text-muted small">none</span>
-                                {% endfor %}
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="6" class="text-muted">No briefing records are currently stored.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <h2 class="h5">Operational note</h2>
-            <p class="mb-0 text-muted">Briefings are intended for concise contextual and explanatory live materials, distinct from procedural playbooks. Use <code>app:discovery:briefing:history</code> to review the current operator event trail from CLI, or the export endpoint to inspect the aggregated live source state.</p>
-        </div>
-    </div>
-</div>
+{% block family_navigation %}
+    <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_libsource') }}">Libsource</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_playbook') }}">Playbook</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_briefing_export') }}">Export JSON</a>
 {% endblock %}
+
+{% block family_actions %}
+    <a class="btn btn-primary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'audit-registry' }) }}">Audit registry</a>
+    <a class="btn btn-outline-primary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'ensure-sample-registry' }) }}">Ensure sample registry</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'migrate-legacy-storage' }) }}">Migrate legacy storage</a>
+{% endblock %}
+
+{% block empty_source_files_message %}No briefing source files are currently present.{% endblock %}
+{% block live_records_heading %}Live briefing records{% endblock %}
+{% block empty_records_message %}No briefing records are currently stored.{% endblock %}
+{% block operational_note %}Briefings are intended for concise contextual and explanatory live materials, distinct from procedural playbooks. Use <code>app:discovery:briefing:history</code> to review the current operator event trail from CLI, or the export endpoint to inspect the aggregated live source state.{% endblock %}

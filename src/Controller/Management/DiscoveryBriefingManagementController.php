@@ -8,13 +8,12 @@ use App\Service\Discovery\Briefing\BriefingManagementSurfaceActionResolver;
 use App\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
 use App\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class DiscoveryBriefingManagementController extends AbstractController
+final class DiscoveryBriefingManagementController extends AbstractDirectoryBackedFamilyManagementController
 {
     public function __construct(
         private readonly BriefingManagementSurfaceBuilder $surfaceBuilder,
@@ -29,20 +28,17 @@ final class DiscoveryBriefingManagementController extends AbstractController
     {
         $lastActionResult = $this->actionResolver->resolve($request);
 
-        return $this->render('management/discovery/briefing.html.twig', [
-            'surface' => $this->surfaceBuilder->build(),
-            'lastActionResult' => $lastActionResult,
-            'operatorEventTrail' => $this->eventTrailBuilder->build($lastActionResult),
-        ]);
+        return $this->renderDirectoryBackedFamilyManagement(
+            'management/discovery/briefing.html.twig',
+            $this->surfaceBuilder->build(),
+            $lastActionResult,
+            $this->eventTrailBuilder->build($lastActionResult),
+        );
     }
 
     #[Route('/management/discovery/briefing/export', name: 'app_management_discovery_briefing_export', methods: ['GET'])]
     public function export(): JsonResponse
     {
-        return $this->json([
-            'sourceName' => $this->repository->getSourceName(),
-            'storagePath' => $this->repository->getStoragePath(),
-            'records' => json_decode($this->repository->exportJson(), true),
-        ]);
+        return $this->exportDirectoryBackedFamilySource($this->repository);
     }
 }

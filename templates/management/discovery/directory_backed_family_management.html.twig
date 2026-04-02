@@ -1,0 +1,174 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% block family_title %}Family Management{% endblock %}{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h1 class="mb-2">{% block family_heading %}Family Management{% endblock %}</h1>
+            <p class="text-muted mb-0">{% block family_description %}Operator-facing surface for a directory-backed live discovery family.{% endblock %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% block family_navigation %}{% endblock %}
+        </div>
+    </div>
+
+    {% if lastActionResult is not null %}
+        <div class="alert alert-info">
+            <div class="fw-semibold">Last action: {{ lastActionResult.actionName }}</div>
+            <div>{{ lastActionResult.summary }}</div>
+            {% if lastActionResult.payload is not empty %}
+                <div class="mt-2 small">
+                    <pre class="mb-0">{{ lastActionResult.payload|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">{% block operator_actions_heading %}Operator actions{% endblock %}</h2>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                {% block family_actions %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">{% block operator_event_trail_heading %}Operator event trail{% endblock %}</h2>
+            <div class="list-group mt-3">
+                {% for event in operatorEventTrail %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between gap-3">
+                            <div>
+                                <div class="fw-semibold">{{ event.summary }}</div>
+                                <div class="small text-muted">{{ event.eventName }}</div>
+                            </div>
+                            <span class="badge text-bg-light">{{ event.level }}</span>
+                        </div>
+                        {% if event.context is not empty %}
+                            <div class="mt-2 small">
+                                <pre class="mb-0">{{ event.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="list-group-item text-muted">{% block empty_events_message %}No events.{% endblock %}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Source</h2>
+                    <div class="fs-6">{{ surface.sourceName }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Total records</h2>
+                    <div class="fs-5">{{ surface.totalRecords }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Total files</h2>
+                    <div class="fs-5">{{ surface.totalFiles }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Storage directory</h2>
+                    <div class="small"><code>{{ surface.storageDirectoryPath }}</code></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="h5">{% block source_files_heading %}Source files{% endblock %}</h2>
+            <table class="table mt-3 mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Path</th>
+                        <th class="text-end">Records</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for fileEntry in surface.fileEntries %}
+                        <tr>
+                            <td><code>{{ fileEntry.fileName }}</code></td>
+                            <td><code>{{ fileEntry.path }}</code></td>
+                            <td class="text-end">{{ fileEntry.recordCount }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-muted">{% block empty_source_files_message %}No source files are currently present.{% endblock %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="h5">{% block live_records_heading %}Live records{% endblock %}</h2>
+            <table class="table mt-3 mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Resource ID</th>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Visibility</th>
+                        <th>Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in surface.entries %}
+                        <tr>
+                            <td><code>{{ entry.resourceId }}</code></td>
+                            <td>{{ entry.resourceType }}</td>
+                            <td>{{ entry.title }}</td>
+                            <td>{{ entry.status }}</td>
+                            <td>{{ entry.visibility }}</td>
+                            <td>
+                                {% for tag in entry.tags %}
+                                    <span class="badge text-bg-light">{{ tag }}</span>
+                                {% else %}
+                                    <span class="text-muted small">none</span>
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-muted">{% block empty_records_message %}No records are currently stored.{% endblock %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="h5">Operational note</h2>
+            <p class="mb-0 text-muted">{% block operational_note %}Review the current family state through the UI, export endpoint, and family-specific CLI history command.{% endblock %}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
