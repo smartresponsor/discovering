@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-final class PlaybookOperatorEvent
+final class PlaybookOperatorEvent extends DirectoryBackedFamilyOperatorEvent
 {
-    /**
-     * @param array<string, mixed> $context
-     */
-    public function __construct(
-        public string $eventName,
-        public string $level,
-        public string $summary,
-        public array $context = [],
-    ) {
+    public static function fromGeneric(DirectoryBackedFamilyOperatorEvent $event): self
+    {
+        return new self(
+            eventName: $event->eventName,
+            level: $event->level,
+            summary: $event->summary,
+            context: $event->context,
+        );
     }
 }

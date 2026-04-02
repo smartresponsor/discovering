@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-final class BriefingManagementActionResult
+final class BriefingManagementActionResult extends DirectoryBackedFamilyManagementActionResult
 {
-    /**
-     * @param array<string, mixed> $payload
-     */
-    public function __construct(
-        public string $actionName,
-        public string $summary,
-        public array $payload,
-    ) {
+    public static function fromGeneric(DirectoryBackedFamilyManagementActionResult $result): self
+    {
+        return new self(
+            actionName: $result->actionName,
+            summary: $result->summary,
+            payload: $result->payload,
+        );
     }
 }

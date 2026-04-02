@@ -5,28 +5,23 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Playbook;
 
 use App\Dto\Discovery\PlaybookManagementActionResult;
+use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceActionResolver;
 use Symfony\Component\HttpFoundation\Request;
 
 final class PlaybookManagementSurfaceActionResolver
 {
+    private readonly DirectoryBackedFamilyManagementSurfaceActionResolver $delegate;
+
     public function __construct(
-        private readonly PlaybookManagementActionService $actionService,
+        PlaybookManagementActionService $actionService,
     ) {
+        $this->delegate = new DirectoryBackedFamilyManagementSurfaceActionResolver($actionService);
     }
 
     public function resolve(Request $request): ?PlaybookManagementActionResult
     {
-        $action = $request->query->get('action');
+        $result = $this->delegate->resolve($request);
 
-        if (!is_string($action) || $action === '') {
-            return null;
-        }
-
-        return match ($action) {
-            'audit-registry' => $this->actionService->auditRegistry(),
-            'ensure-sample-registry' => $this->actionService->ensureSampleRegistry(),
-            'migrate-legacy-storage' => $this->actionService->migrateLegacyStorage(),
-            default => null,
-        };
+        return $result !== null ? PlaybookManagementActionResult::fromGeneric($result) : null;
     }
 }
