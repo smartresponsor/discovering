@@ -26,6 +26,7 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - shared file-backed source family foundation for reusable directory/legacy/import/export repository behavior
 - shared family management surface foundation for reusable directory-backed live family UI aggregation
 - shared operator-action and operator-event foundation for reusable live-family action, resolver, and trail behavior
+- shared family controller and Twig foundation for reusable live-family management rendering and export helpers
 
 ## Current routes
 - `/discovery` — human-facing discovery UI
