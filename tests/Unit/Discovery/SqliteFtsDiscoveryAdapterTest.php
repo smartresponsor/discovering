@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 final class SqliteFtsDiscoveryAdapterTest extends TestCase
 {
-    public function testItReturnsFtsScoreForNonEmptyQueries(): void
+    public function testItReturnsFtsScoreAndContentForNonEmptyQueries(): void
     {
         $path = sys_get_temp_dir() . '/discovering-sqlite-' . uniqid('', true) . '.sqlite';
         $adapter = new SqliteFtsDiscoveryAdapter($path);
@@ -21,19 +21,13 @@ final class SqliteFtsDiscoveryAdapterTest extends TestCase
             'content' => 'Search portability governance context',
         ]);
 
-        $adapter->upsert('global', 'playbook-1', [
-            'title' => 'Reindex operations playbook',
-            'resource' => 'playbook',
-            'reference' => 'playbook-reindex-operations',
-            'status' => 'active',
-            'content' => 'Operational reindex validation guide',
-        ]);
-
         $results = $adapter->search('global', 'search portability', 10, 0);
 
         self::assertNotEmpty($results);
         self::assertArrayHasKey('ftsScore', $results[0]);
+        self::assertArrayHasKey('content', $results[0]);
         self::assertIsNumeric($results[0]['ftsScore']);
+        self::assertSame('Search portability governance context', $results[0]['content']);
 
         @unlink($path);
     }

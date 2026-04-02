@@ -30,8 +30,8 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - discovery engine ranking with resource weights, filter-aware scoring, and match reasons
 - explainable discovery UI with score, ranking reasons, and engine-aware query controls
 - hybrid ranking that combines SQLite FTS bm25 relevance with explainable custom scoring
-- token highlighting for titles and references with API-visible matched tokens and safe UI emphasis
 - query modes and preset weighting strategies for relevance, governance, operations, and exploration discovery intents
+- content snippets with safe token highlighting for titles, references, and contextual excerpts in UI and API
 
 ## Current routes
 - `/discovery` — human-facing discovery UI

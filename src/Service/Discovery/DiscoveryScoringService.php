@@ -67,7 +67,8 @@ final class DiscoveryScoringService
         $reference = $this->normalize($hit->reference);
         $resource = $this->normalize($hit->resource);
         $status = $this->normalize($hit->status);
-        $combined = trim(implode(' ', [$title, $reference, $resource, $status]));
+        $content = $this->normalize($hit->content);
+        $combined = trim(implode(' ', [$title, $reference, $resource, $status, $content]));
 
         $customScore = 0.0;
         $reasons = [];
@@ -83,6 +84,11 @@ final class DiscoveryScoringService
             $reasons[] = 'reference phrase match';
         }
 
+        if ($phrase !== '' && $content !== '' && str_contains($content, $phrase)) {
+            $customScore += 10.0;
+            $reasons[] = 'content phrase match';
+        }
+
         foreach ($tokens as $token) {
             if (str_contains($title, $token)) {
                 $customScore += 6.0;
@@ -93,6 +99,12 @@ final class DiscoveryScoringService
             if ($reference !== '' && str_contains($reference, $token)) {
                 $customScore += 4.0;
                 $reasons[] = sprintf('reference token: %s', $token);
+                $matchedTokens[] = $token;
+            }
+
+            if ($content !== '' && str_contains($content, $token)) {
+                $customScore += 3.5;
+                $reasons[] = sprintf('content token: %s', $token);
                 $matchedTokens[] = $token;
             }
 
@@ -127,6 +139,7 @@ final class DiscoveryScoringService
         }
 
         $matchedTokens = array_values(array_unique($matchedTokens));
+        $snippet = $this->highlightingService->buildSnippet($hit->content, $matchedTokens);
         $finalScore = round($customScore + $ftsBoost, 2);
 
         return new DiscoveryHit(
@@ -135,11 +148,13 @@ final class DiscoveryScoringService
             resource: $hit->resource,
             reference: $hit->reference,
             status: $hit->status,
+            content: $hit->content,
             score: $finalScore,
             matchReasons: array_values(array_unique($reasons)),
             ftsScore: $ftsScore,
             highlightedTitle: $this->highlightingService->highlight($hit->title, $matchedTokens),
             highlightedReference: $this->highlightingService->highlight($hit->reference, $matchedTokens),
+            highlightedSnippet: $this->highlightingService->highlight($snippet, $matchedTokens),
             matchedTokens: $matchedTokens,
         );
     }

@@ -15,11 +15,13 @@ final class DiscoveryHit
         public string $resource,
         public string $reference = '',
         public string $status = '',
+        public string $content = '',
         public float $score = 0.0,
         public array $matchReasons = [],
         public ?float $ftsScore = null,
         public string $highlightedTitle = '',
         public string $highlightedReference = '',
+        public string $highlightedSnippet = '',
         public array $matchedTokens = [],
     ) {
     }
@@ -29,6 +31,7 @@ final class DiscoveryHit
     {
         $title = (string) ($payload['title'] ?? $payload['name'] ?? '');
         $reference = (string) ($payload['reference'] ?? $payload['metaCode'] ?? '');
+        $content = (string) ($payload['content'] ?? '');
 
         return new self(
             id: (string) ($payload['id'] ?? ''),
@@ -36,11 +39,13 @@ final class DiscoveryHit
             resource: (string) ($payload['resource'] ?? 'global'),
             reference: $reference,
             status: (string) ($payload['status'] ?? ''),
+            content: $content,
             score: is_numeric($payload['score'] ?? null) ? (float) $payload['score'] : 0.0,
             matchReasons: self::normalizeStrings($payload['matchReasons'] ?? []),
             ftsScore: is_numeric($payload['ftsScore'] ?? null) ? (float) $payload['ftsScore'] : null,
             highlightedTitle: (string) ($payload['highlightedTitle'] ?? $title),
             highlightedReference: (string) ($payload['highlightedReference'] ?? $reference),
+            highlightedSnippet: (string) ($payload['highlightedSnippet'] ?? ''),
             matchedTokens: self::normalizeStrings($payload['matchedTokens'] ?? []),
         );
     }
@@ -67,11 +72,13 @@ final class DiscoveryHit
             'resource' => $this->resource,
             'reference' => $this->reference,
             'status' => $this->status,
+            'content' => $this->content,
             'score' => $this->score,
             'matchReasons' => $this->matchReasons,
             'ftsScore' => $this->ftsScore,
             'highlightedTitle' => $this->highlightedTitle,
             'highlightedReference' => $this->highlightedReference,
+            'highlightedSnippet' => $this->highlightedSnippet,
             'matchedTokens' => $this->matchedTokens,
         ];
     }
