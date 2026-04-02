@@ -16,6 +16,55 @@
         </div>
     </div>
 
+    {% if lastActionResult is not null %}
+        <div class="alert alert-info">
+            <div class="fw-semibold">Last action: {{ lastActionResult.actionName }}</div>
+            <div>{{ lastActionResult.summary }}</div>
+            {% if lastActionResult.payload is not empty %}
+                <div class="mt-2 small">
+                    <pre class="mb-0">{{ lastActionResult.payload|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Operator actions</h2>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a class="btn btn-primary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'audit-registry' }) }}">Audit registry</a>
+                <a class="btn btn-outline-primary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'ensure-sample-registry' }) }}">Ensure sample registry</a>
+                <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_briefing', { action: 'migrate-legacy-storage' }) }}">Migrate legacy storage</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2 class="h5">Operator event trail</h2>
+            <div class="list-group mt-3">
+                {% for event in operatorEventTrail %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between gap-3">
+                            <div>
+                                <div class="fw-semibold">{{ event.summary }}</div>
+                                <div class="small text-muted">{{ event.eventName }}</div>
+                            </div>
+                            <span class="badge text-bg-light">{{ event.level }}</span>
+                        </div>
+                        {% if event.context is not empty %}
+                            <div class="mt-2 small">
+                                <pre class="mb-0">{{ event.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="list-group-item text-muted">No events.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-md-3">
             <div class="card h-100">
@@ -122,7 +171,7 @@
     <div class="card mt-4">
         <div class="card-body">
             <h2 class="h5">Operational note</h2>
-            <p class="mb-0 text-muted">Briefings are intended for concise contextual and explanatory live materials, distinct from procedural playbooks. Use the export endpoint to inspect the aggregated current live source state.</p>
+            <p class="mb-0 text-muted">Briefings are intended for concise contextual and explanatory live materials, distinct from procedural playbooks. Use <code>app:discovery:briefing:history</code> to review the current operator event trail from CLI, or the export endpoint to inspect the aggregated live source state.</p>
         </div>
     </div>
 </div>
