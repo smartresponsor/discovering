@@ -9,16 +9,21 @@
 
     {{ form_start(form, { method: 'GET' }) }}
     <div class="row g-3 align-items-end mb-3">
-        <div class="col-md-4">{{ form_row(form.query) }}</div>
+        <div class="col-md-3">{{ form_row(form.query) }}</div>
+        <div class="col-md-2">{{ form_row(form.mode) }}</div>
         <div class="col-md-2">{{ form_row(form.resource) }}</div>
         <div class="col-md-2">{{ form_row(form.status) }}</div>
-        <div class="col-md-2">{{ form_row(form.limit) }}</div>
+        <div class="col-md-1">{{ form_row(form.limit) }}</div>
         <div class="col-md-2">{{ form_row(form.offset) }}</div>
     </div>
     <div class="row g-3 align-items-end mb-4">
         <div class="col-md-4">{{ form_row(form.project_weight) }}</div>
         <div class="col-md-4">{{ form_row(form.offering_weight) }}</div>
         <div class="col-md-4">{{ form_row(form.document_weight) }}</div>
+    </div>
+    <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-6">{{ form_row(form.playbook_weight) }}</div>
+        <div class="col-md-6">{{ form_row(form.briefing_weight) }}</div>
     </div>
     <button class="btn btn-primary">Discover</button>
     {{ form_end(form) }}
@@ -34,6 +39,10 @@
                     <div>{{ query.query is same as('') ? '—' : query.query }}</div>
                 </div>
                 <div class="col-md-3">
+                    <div class="text-muted">Mode</div>
+                    <div><span class="badge text-bg-dark">{{ query.mode }}</span></div>
+                </div>
+                <div class="col-md-3">
                     <div class="text-muted">Resource scope</div>
                     <div>{{ query.resource }}</div>
                 </div>
@@ -41,8 +50,10 @@
                     <div class="text-muted">Status filter</div>
                     <div>{{ query.filters.status|default('—') }}</div>
                 </div>
-                <div class="col-md-3">
-                    <div class="text-muted">Weights</div>
+            </div>
+            <div class="row g-3 small mt-1">
+                <div class="col-md-12">
+                    <div class="text-muted">Effective weights</div>
                     <div>
                         {% if query.resourceWeights is empty %}
                             —

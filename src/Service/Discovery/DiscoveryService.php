@@ -14,18 +14,20 @@ final class DiscoveryService implements DiscoveryServiceInterface
     public function __construct(
         private readonly DiscoveryAdapterInterface $adapter,
         private readonly DiscoveryScoringService $scoringService,
+        private readonly DiscoveryModePresetService $modePresetService,
     ) {
     }
 
     public function discover(DiscoveryQuery $query): DiscoveryResult
     {
-        $resource = $query->resource === '' ? 'global' : $query->resource;
-        $candidateLimit = max(50, $query->limit + $query->offset + 50);
-        $rows = $this->adapter->search($resource, $query->query, $candidateLimit, 0);
+        $effectiveQuery = $this->modePresetService->apply($query);
+        $resource = $effectiveQuery->resource === '' ? 'global' : $effectiveQuery->resource;
+        $candidateLimit = max(50, $effectiveQuery->limit + $effectiveQuery->offset + 50);
+        $rows = $this->adapter->search($resource, $effectiveQuery->query, $candidateLimit, 0);
         $hits = array_map(static fn (array $row): DiscoveryHit => DiscoveryHit::fromArray($row), $rows);
-        $rankedHits = $this->scoringService->rank($hits, $query);
-        $pagedHits = array_slice($rankedHits, $query->offset, $query->limit);
+        $rankedHits = $this->scoringService->rank($hits, $effectiveQuery);
+        $pagedHits = array_slice($rankedHits, $effectiveQuery->offset, $effectiveQuery->limit);
 
-        return new DiscoveryResult(query: $query, hits: $pagedHits, total: count($rankedHits));
+        return new DiscoveryResult(query: $effectiveQuery, hits: $pagedHits, total: count($rankedHits));
     }
 }

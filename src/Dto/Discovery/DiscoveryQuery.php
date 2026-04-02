@@ -16,6 +16,7 @@ final class DiscoveryQuery
         public int $offset = 0,
         public array $filters = [],
         public array $resourceWeights = [],
+        public string $mode = DiscoveryMode::RELEVANCE,
     ) {
     }
 
@@ -29,6 +30,7 @@ final class DiscoveryQuery
             offset: max(0, (int) ($payload['offset'] ?? 0)),
             filters: is_array($payload['filters'] ?? null) ? $payload['filters'] : [],
             resourceWeights: self::normalizeResourceWeights($payload['resourceWeights'] ?? []),
+            mode: DiscoveryMode::normalize((string) ($payload['mode'] ?? DiscoveryMode::RELEVANCE)),
         );
     }
 

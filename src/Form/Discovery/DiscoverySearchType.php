@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Form\Discovery;
 
+use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -22,6 +23,14 @@ final class DiscoverySearchType extends AbstractType
 
         $builder
             ->add('query', SearchType::class, ['required' => false])
+            ->add('mode', ChoiceType::class, [
+                'choices' => [
+                    'Relevance' => DiscoveryMode::RELEVANCE,
+                    'Governance' => DiscoveryMode::GOVERNANCE,
+                    'Operations' => DiscoveryMode::OPERATIONS,
+                    'Exploration' => DiscoveryMode::EXPLORATION,
+                ],
+            ])
             ->add('resource', ChoiceType::class, ['choices' => ['Global' => 'global', 'Project' => 'project', 'Offering' => 'offering', 'Document' => 'document']])
             ->add('status', ChoiceType::class, [
                 'required' => false,
@@ -53,6 +62,18 @@ final class DiscoverySearchType extends AbstractType
                 'mapped' => false,
                 'empty_data' => '',
                 'label' => 'Document weight',
+            ])
+            ->add('playbook_weight', TextType::class, [
+                'required' => false,
+                'mapped' => false,
+                'empty_data' => '',
+                'label' => 'Playbook weight',
+            ])
+            ->add('briefing_weight', TextType::class, [
+                'required' => false,
+                'mapped' => false,
+                'empty_data' => '',
+                'label' => 'Briefing weight',
             ]);
     }
 

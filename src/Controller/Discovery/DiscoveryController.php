@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Discovery;
 
+use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
 use App\Form\Discovery\DiscoverySearchType;
 use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
@@ -29,7 +30,7 @@ final class DiscoveryController extends AbstractController
 
         return $this->render('discovery/index.html.twig', [
             'form' => $form->createView(),
-            'query' => $query,
+            'query' => $result->query,
             'result' => $result,
         ]);
     }
@@ -60,6 +61,7 @@ final class DiscoveryController extends AbstractController
             'offset' => (int) $source->get('offset', $fallback->getInt('offset', 0)),
             'filters' => $filters,
             'resourceWeights' => $this->extractResourceWeights($request),
+            'mode' => (string) $source->get('mode', $fallback->get('mode', DiscoveryMode::RELEVANCE)),
         ]);
     }
 
@@ -71,6 +73,8 @@ final class DiscoveryController extends AbstractController
             'project' => 'project_weight',
             'offering' => 'offering_weight',
             'document' => 'document_weight',
+            'playbook' => 'playbook_weight',
+            'briefing' => 'briefing_weight',
         ];
 
         $weights = [];
