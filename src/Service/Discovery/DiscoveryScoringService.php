@@ -8,6 +8,11 @@ use App\Dto\Discovery\DiscoveryQuery;
 
 final class DiscoveryScoringService
 {
+    public function __construct(
+        private readonly DiscoveryHighlightingService $highlightingService,
+    ) {
+    }
+
     /**
      * @param list<DiscoveryHit> $hits
      * @return list<DiscoveryHit>
@@ -66,6 +71,7 @@ final class DiscoveryScoringService
 
         $customScore = 0.0;
         $reasons = [];
+        $matchedTokens = [];
 
         if ($phrase !== '' && str_contains($title, $phrase)) {
             $customScore += 20.0;
@@ -81,21 +87,25 @@ final class DiscoveryScoringService
             if (str_contains($title, $token)) {
                 $customScore += 6.0;
                 $reasons[] = sprintf('title token: %s', $token);
+                $matchedTokens[] = $token;
             }
 
             if ($reference !== '' && str_contains($reference, $token)) {
                 $customScore += 4.0;
                 $reasons[] = sprintf('reference token: %s', $token);
+                $matchedTokens[] = $token;
             }
 
             if ($resource === $token) {
                 $customScore += 3.0;
                 $reasons[] = sprintf('resource token: %s', $token);
+                $matchedTokens[] = $token;
             }
 
             if ($status !== '' && $status === $token) {
                 $customScore += 2.0;
                 $reasons[] = sprintf('status token: %s', $token);
+                $matchedTokens[] = $token;
             }
         }
 
@@ -116,6 +126,7 @@ final class DiscoveryScoringService
             $reasons[] = sprintf('fts boost %.2f', $ftsBoost);
         }
 
+        $matchedTokens = array_values(array_unique($matchedTokens));
         $finalScore = round($customScore + $ftsBoost, 2);
 
         return new DiscoveryHit(
@@ -127,6 +138,9 @@ final class DiscoveryScoringService
             score: $finalScore,
             matchReasons: array_values(array_unique($reasons)),
             ftsScore: $ftsScore,
+            highlightedTitle: $this->highlightingService->highlight($hit->title, $matchedTokens),
+            highlightedReference: $this->highlightingService->highlight($hit->reference, $matchedTokens),
+            matchedTokens: $matchedTokens,
         );
     }
 

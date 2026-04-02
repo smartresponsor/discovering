@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Discovery;
 
 use App\Dto\Discovery\DiscoveryQuery;
+use App\Service\Discovery\DiscoveryHighlightingService;
 use App\Service\Discovery\DiscoveryScoringService;
 use App\Service\Discovery\DiscoveryService;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
@@ -40,7 +41,7 @@ final class DiscoveryServiceTest extends TestCase
             }
         };
 
-        $service = new DiscoveryService($adapter, new DiscoveryScoringService());
+        $service = new DiscoveryService($adapter, new DiscoveryScoringService(new DiscoveryHighlightingService()));
         $result = $service->discover(new DiscoveryQuery(
             query: 'briefing governance',
             limit: 1,
@@ -54,5 +55,7 @@ final class DiscoveryServiceTest extends TestCase
         self::assertGreaterThan(0.0, $result->hits[0]->score);
         self::assertContains('resource weight 1.20', $result->hits[0]->matchReasons);
         self::assertNotNull($result->hits[0]->ftsScore);
+        self::assertSame(['briefing', 'governance'], $result->hits[0]->matchedTokens);
+        self::assertStringContainsString('<mark>briefing</mark>', strtolower($result->hits[0]->highlightedTitle));
     }
 }

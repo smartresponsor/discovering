@@ -7,6 +7,7 @@ final class DiscoveryHit
 {
     /**
      * @param list<string> $matchReasons
+     * @param list<string> $matchedTokens
      */
     public function __construct(
         public string $id,
@@ -17,21 +18,30 @@ final class DiscoveryHit
         public float $score = 0.0,
         public array $matchReasons = [],
         public ?float $ftsScore = null,
+        public string $highlightedTitle = '',
+        public string $highlightedReference = '',
+        public array $matchedTokens = [],
     ) {
     }
 
     /** @param array<string, mixed> $payload */
     public static function fromArray(array $payload): self
     {
+        $title = (string) ($payload['title'] ?? $payload['name'] ?? '');
+        $reference = (string) ($payload['reference'] ?? $payload['metaCode'] ?? '');
+
         return new self(
             id: (string) ($payload['id'] ?? ''),
-            title: (string) ($payload['title'] ?? $payload['name'] ?? ''),
+            title: $title,
             resource: (string) ($payload['resource'] ?? 'global'),
-            reference: (string) ($payload['reference'] ?? $payload['metaCode'] ?? ''),
+            reference: $reference,
             status: (string) ($payload['status'] ?? ''),
             score: is_numeric($payload['score'] ?? null) ? (float) $payload['score'] : 0.0,
-            matchReasons: self::normalizeMatchReasons($payload['matchReasons'] ?? []),
+            matchReasons: self::normalizeStrings($payload['matchReasons'] ?? []),
             ftsScore: is_numeric($payload['ftsScore'] ?? null) ? (float) $payload['ftsScore'] : null,
+            highlightedTitle: (string) ($payload['highlightedTitle'] ?? $title),
+            highlightedReference: (string) ($payload['highlightedReference'] ?? $reference),
+            matchedTokens: self::normalizeStrings($payload['matchedTokens'] ?? []),
         );
     }
 
@@ -39,7 +49,7 @@ final class DiscoveryHit
      * @param mixed $payload
      * @return list<string>
      */
-    private static function normalizeMatchReasons(mixed $payload): array
+    private static function normalizeStrings(mixed $payload): array
     {
         if (!is_array($payload)) {
             return [];
@@ -60,6 +70,9 @@ final class DiscoveryHit
             'score' => $this->score,
             'matchReasons' => $this->matchReasons,
             'ftsScore' => $this->ftsScore,
+            'highlightedTitle' => $this->highlightedTitle,
+            'highlightedReference' => $this->highlightedReference,
+            'matchedTokens' => $this->matchedTokens,
         ];
     }
 }
