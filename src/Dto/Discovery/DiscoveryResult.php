@@ -23,6 +23,7 @@ final class DiscoveryResult
                 'limit' => $this->query->limit,
                 'offset' => $this->query->offset,
                 'filters' => $this->query->filters,
+                'resourceWeights' => $this->query->resourceWeights,
             ],
             'hits' => array_map(static fn (DiscoveryHit $hit): array => $hit->toArray(), $this->hits),
             'total' => $this->total,

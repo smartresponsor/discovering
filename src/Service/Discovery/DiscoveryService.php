@@ -11,16 +11,21 @@ use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
 
 final class DiscoveryService implements DiscoveryServiceInterface
 {
-    public function __construct(private readonly DiscoveryAdapterInterface $adapter)
-    {
+    public function __construct(
+        private readonly DiscoveryAdapterInterface $adapter,
+        private readonly DiscoveryScoringService $scoringService,
+    ) {
     }
 
     public function discover(DiscoveryQuery $query): DiscoveryResult
     {
         $resource = $query->resource === '' ? 'global' : $query->resource;
-        $rows = $this->adapter->search($resource, $query->query, $query->limit, $query->offset);
+        $candidateLimit = max(50, $query->limit + $query->offset + 50);
+        $rows = $this->adapter->search($resource, $query->query, $candidateLimit, 0);
         $hits = array_map(static fn (array $row): DiscoveryHit => DiscoveryHit::fromArray($row), $rows);
+        $rankedHits = $this->scoringService->rank($hits, $query);
+        $pagedHits = array_slice($rankedHits, $query->offset, $query->limit);
 
-        return new DiscoveryResult(query: $query, hits: $hits, total: count($hits));
+        return new DiscoveryResult(query: $query, hits: $pagedHits, total: count($rankedHits));
     }
 }

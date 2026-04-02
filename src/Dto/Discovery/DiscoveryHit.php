@@ -5,12 +5,17 @@ namespace App\Dto\Discovery;
 
 final class DiscoveryHit
 {
+    /**
+     * @param list<string> $matchReasons
+     */
     public function __construct(
         public string $id,
         public string $title,
         public string $resource,
         public string $reference = '',
         public string $status = '',
+        public float $score = 0.0,
+        public array $matchReasons = [],
     ) {
     }
 
@@ -23,10 +28,25 @@ final class DiscoveryHit
             resource: (string) ($payload['resource'] ?? 'global'),
             reference: (string) ($payload['reference'] ?? $payload['metaCode'] ?? ''),
             status: (string) ($payload['status'] ?? ''),
+            score: is_numeric($payload['score'] ?? null) ? (float) $payload['score'] : 0.0,
+            matchReasons: self::normalizeMatchReasons($payload['matchReasons'] ?? []),
         );
     }
 
-    /** @return array<string, string> */
+    /**
+     * @param mixed $payload
+     * @return list<string>
+     */
+    private static function normalizeMatchReasons(mixed $payload): array
+    {
+        if (!is_array($payload)) {
+            return [];
+        }
+
+        return array_values(array_filter($payload, 'is_string'));
+    }
+
+    /** @return array<string, mixed> */
     public function toArray(): array
     {
         return [
@@ -35,6 +55,8 @@ final class DiscoveryHit
             'resource' => $this->resource,
             'reference' => $this->reference,
             'status' => $this->status,
+            'score' => $this->score,
+            'matchReasons' => $this->matchReasons,
         ];
     }
 }
