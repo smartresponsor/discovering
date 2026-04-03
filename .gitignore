@@ -3,3 +3,4 @@
 /vendor/
 /var/
 /.phpunit.result.cache
+/config/reference.php

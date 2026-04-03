@@ -93,3 +93,5 @@ Update: rollback execution is now implemented as an alias-promotion primitive an
 
 
 Update: rate limiting, operation history, rebuild evidence, libsource event history, and feedback learning now all support optional stronger coordination backends. Discovery index backend selection now also exists between SQLite FTS and Meilisearch service mode.
+
+Update: `config/reference.php` is treated as generated Symfony app reference output and is now ignored instead of left as recurring untracked noise.
