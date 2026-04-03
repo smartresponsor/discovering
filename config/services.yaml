@@ -72,3 +72,7 @@ services:
   App\\Service\\Discovery\\Libsource\\Log\\FileLibsourceOperatorEventLogStore:
     arguments:
       $path: '%kernel.project_dir%/var/discovery/libsource_operator_event_log.json'
+
+  App\\Service\\Discovery\\Adapter\\SqliteFtsDiscoveryAdapter:
+    arguments:
+      $path: '%kernel.project_dir%/var/discovery/discovering.sqlite'

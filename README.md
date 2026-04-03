@@ -40,3 +40,10 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - `/api/discovery` — machine-facing JSON discovery endpoint
 - `/api/discovery/click` — machine-facing feedback capture endpoint
 - `/management/discovery` — operator overview
+
+## Local bootstrap baseline
+- install dependencies with `composer install`
+- run the operator CLI with `php bin/console`
+- serve HTTP through `public/index.php`
+- use `.env` / `.env.test` for local and test runtime defaults
+- SQLite discovery index defaults to `var/discovery/discovering.sqlite` via DI configuration
