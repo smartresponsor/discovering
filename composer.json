@@ -35,6 +35,22 @@
   },
   "scripts": {
     "test": "phpunit",
-    "lint:php": "find src tests -name '*.php' -print0 | xargs -0 -n1 php -l"
+    "lint:php": "find src tests -name '*.php' -print0 | xargs -0 -n1 php -l",
+    "validate:composer": "composer validate --strict",
+    "test:unit": "phpunit --testsuite Unit",
+    "test:functional": "phpunit --testsuite Functional",
+    "test:contract": "phpunit --testsuite Contract",
+    "test:behavioral": "phpunit --testsuite Behavioral",
+    "test:all": [
+      "@test:unit",
+      "@test:contract",
+      "@test:behavioral",
+      "@test:functional"
+    ],
+    "ci": [
+      "@validate:composer",
+      "@lint:php",
+      "@test:all"
+    ]
   }
 }
