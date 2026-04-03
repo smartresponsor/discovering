@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service\Discovery;
 
 use PDO;
 
-final class DiscoveryFeedbackStore
+final class DiscoveryFeedbackStore implements DiscoveryFeedbackStoreInterface
 {
     private ?PDO $pdo = null;
 
@@ -31,10 +32,14 @@ final class DiscoveryFeedbackStore
     public function getClickCount(string $resource, string $hitId): int
     {
         $statement = $this->pdo()->prepare('SELECT click_count FROM discovery_feedback WHERE resource = :resource AND hit_id = :hit_id');
-        $statement->execute(['resource' => $resource, 'hit_id' => $hitId]);
-        $result = $statement->fetchColumn();
+        $statement->execute([
+            'resource' => $resource,
+            'hit_id' => $hitId,
+        ]);
 
-        return is_numeric($result) ? (int) $result : 0;
+        $count = $statement->fetchColumn();
+
+        return $count === false ? 0 : max(0, (int) $count);
     }
 
     private function pdo(): PDO

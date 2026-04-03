@@ -1,6 +1,11 @@
 parameters:
   app.discovery.default_sqlite_path: '%kernel.project_dir%/var/discovery/discovering.test.sqlite'
   app.discovery.default_feedback_path: '%kernel.project_dir%/var/discovery/discovering-feedback.test.sqlite'
+  app.discovery.default_feedback_backend: 'sqlite_path'
+  app.discovery.default_feedback_pdo_dsn: ''
+  app.discovery.default_feedback_pdo_user: ''
+  app.discovery.default_feedback_pdo_password: ''
+  app.discovery.default_feedback_pdo_table: 'discovery_feedback_test'
   app.discovery.default_operation_log_path: '%kernel.project_dir%/var/discovery/discovery-operation.test.json'
   app.discovery.default_operation_log_backend: 'file'
   app.discovery.default_operation_log_pdo_dsn: ''

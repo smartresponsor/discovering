@@ -13,8 +13,9 @@ The topology export now makes mutable discovery state inspectable instead of imp
 
 ## Stronger coordination seams
 
-The following stores can now be configured as PDO-backed coordination tables instead of JSON files:
+The following stores can now be configured as PDO-backed coordination tables instead of local JSON/SQLite files:
 
+- feedback store
 - operation log
 - rebuild evidence
 - libsource event log
@@ -32,9 +33,8 @@ into:
 
 ## Why distributedReady can still remain false
 
-Even when these stores use shared PDO backends, overall discovery state still includes:
+Even when these stores use shared PDO backends, overall discovery state still includes at least:
 
 - SQLite-backed search index state
-- SQLite-backed feedback state
 
-So the topology can now show **multiple stronger coordination stores** without falsely claiming that the whole component is multi-replica write-ready.
+If feedback learning also remains on the default SQLite path, it stays single-node too. So the topology can now show **multiple stronger coordination stores** without falsely claiming that the whole component is multi-replica write-ready.

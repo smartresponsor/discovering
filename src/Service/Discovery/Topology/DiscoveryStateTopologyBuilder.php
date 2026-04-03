@@ -12,7 +12,10 @@ final class DiscoveryStateTopologyBuilder
     public function __construct(
         private readonly string $projectDir,
         private readonly string $discoverySqlitePath,
-        private readonly string $feedbackSqlitePath,
+        private readonly string $feedbackPath,
+        private readonly string $feedbackBackend,
+        private readonly string $feedbackPdoDsn,
+        private readonly string $feedbackPdoTable,
         private readonly string $operationLogPath,
         private readonly string $operationLogBackend,
         private readonly string $operationLogPdoDsn,
@@ -38,7 +41,7 @@ final class DiscoveryStateTopologyBuilder
 
         $stores = [
             $this->sqliteStore('discoveryIndex', $this->discoverySqlitePath, $localStateRoot),
-            $this->sqliteStore('feedbackStore', $this->feedbackSqlitePath, $localStateRoot),
+            $this->feedbackStore($localStateRoot),
             $this->coordinationStore('operationLog', $this->operationLogPath, $this->operationLogBackend, $this->operationLogPdoDsn, $this->operationLogPdoTable, $localStateRoot, 'shared-event-history'),
             $this->coordinationStore('rebuildEvidence', $this->rebuildEvidencePath, $this->rebuildEvidenceBackend, $this->rebuildEvidencePdoDsn, $this->rebuildEvidencePdoTable, $localStateRoot, 'shared-evidence-history'),
             $this->coordinationStore('libsourceEventLog', $this->libsourceEventLogPath, $this->libsourceEventLogBackend, $this->libsourceEventLogPdoDsn, $this->libsourceEventLogPdoTable, $localStateRoot, 'shared-operator-history'),
@@ -65,7 +68,13 @@ final class DiscoveryStateTopologyBuilder
             $notes[] = 'One or more discovery state stores are configured outside the local var/discovery root or through a shared coordination backend.';
         }
 
-        $notes[] = 'SQLite-backed discovery index and feedback state remain single-node oriented and are not treated as multi-replica write-safe.';
+        $feedbackUsesPdo = strtolower(trim($this->feedbackBackend)) === 'pdo' && trim($this->feedbackPdoDsn) !== '';
+        if ($feedbackUsesPdo) {
+            $notes[] = 'Feedback learning uses a shared PDO coordination backend.';
+            $notes[] = 'SQLite-backed discovery index state still remains single-node oriented and is not treated as multi-replica write-safe.';
+        } else {
+            $notes[] = 'SQLite-backed discovery index and feedback state remain single-node oriented and are not treated as multi-replica write-safe.';
+        }
 
         $strongerStoreNotes = [];
         foreach ([
@@ -85,6 +94,11 @@ final class DiscoveryStateTopologyBuilder
             foreach ($strongerStoreNotes as $note) {
                 $notes[] = $note;
             }
+        }
+
+        if ($feedbackUsesPdo) {
+            $notes[] = 'Overall distributed readiness still remains false until discovery index moves beyond SQLite single-node storage.';
+        } elseif ($strongerStoreNotes !== []) {
             $notes[] = 'Overall distributed readiness still remains false until discovery index and feedback state move beyond SQLite single-node storage.';
         }
 
@@ -116,6 +130,23 @@ final class DiscoveryStateTopologyBuilder
             multiReplicaWriteReady: false,
             concerns: $concerns,
         );
+    }
+
+    private function feedbackStore(string $localStateRoot): DiscoveryStateStoreDescriptor
+    {
+        if (strtolower(trim($this->feedbackBackend)) === 'pdo') {
+            return $this->coordinationStore(
+                name: 'feedbackStore',
+                path: $this->feedbackPath,
+                backend: $this->feedbackBackend,
+                pdoDsn: $this->feedbackPdoDsn,
+                pdoTable: $this->feedbackPdoTable,
+                localStateRoot: $localStateRoot,
+                coordinationConcern: 'shared-feedback-coordination',
+            );
+        }
+
+        return $this->sqliteStore('feedbackStore', $this->feedbackPath, $localStateRoot);
     }
 
     private function jsonStore(string $name, string $path, string $localStateRoot): DiscoveryStateStoreDescriptor

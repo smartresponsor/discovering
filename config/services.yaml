@@ -1,6 +1,11 @@
 parameters:
   app.discovery.default_sqlite_path: '%kernel.project_dir%/var/discovery/discovering.sqlite'
   app.discovery.default_feedback_path: '%kernel.project_dir%/var/discovery/discovering-feedback.sqlite'
+  app.discovery.default_feedback_backend: 'sqlite_path'
+  app.discovery.default_feedback_pdo_dsn: ''
+  app.discovery.default_feedback_pdo_user: ''
+  app.discovery.default_feedback_pdo_password: ''
+  app.discovery.default_feedback_pdo_table: 'discovery_feedback'
   app.discovery.default_operation_log_path: '%kernel.project_dir%/var/discovery/discovery_operation_event_log.json'
   app.discovery.default_operation_log_backend: 'file'
   app.discovery.default_operation_log_pdo_dsn: ''
@@ -113,7 +118,10 @@ services:
     arguments:
       $projectDir: '%kernel.project_dir%'
       $discoverySqlitePath: '%env(default:app.discovery.default_sqlite_path:APP_DISCOVERY_SQLITE_PATH)%'
-      $feedbackSqlitePath: '%env(default:app.discovery.default_feedback_path:APP_DISCOVERY_FEEDBACK_SQLITE_PATH)%'
+      $feedbackPath: '%env(default:app.discovery.default_feedback_path:APP_DISCOVERY_FEEDBACK_SQLITE_PATH)%'
+      $feedbackBackend: '%env(default:app.discovery.default_feedback_backend:APP_DISCOVERY_FEEDBACK_BACKEND)%'
+      $feedbackPdoDsn: '%env(default:app.discovery.default_feedback_pdo_dsn:APP_DISCOVERY_FEEDBACK_PDO_DSN)%'
+      $feedbackPdoTable: '%env(default:app.discovery.default_feedback_pdo_table:APP_DISCOVERY_FEEDBACK_PDO_TABLE)%'
       $operationLogPath: '%env(default:app.discovery.default_operation_log_path:APP_DISCOVERY_OPERATION_LOG_PATH)%'
       $operationLogBackend: '%env(default:app.discovery.default_operation_log_backend:APP_DISCOVERY_OPERATION_LOG_BACKEND)%'
       $operationLogPdoDsn: '%env(default:app.discovery.default_operation_log_pdo_dsn:APP_DISCOVERY_OPERATION_LOG_PDO_DSN)%'
@@ -209,9 +217,23 @@ services:
     arguments:
       $path: '%env(default:app.discovery.default_sqlite_path:APP_DISCOVERY_SQLITE_PATH)%'
 
+  App\Service\Discovery\DiscoveryFeedbackStoreInterface: '@App\Service\Discovery\ConfigurableDiscoveryFeedbackStore'
+
   App\Service\Discovery\DiscoveryFeedbackStore:
     arguments:
       $path: '%env(default:app.discovery.default_feedback_path:APP_DISCOVERY_FEEDBACK_SQLITE_PATH)%'
+
+  App\Service\Discovery\PdoDiscoveryFeedbackStore:
+    arguments:
+      $dsn: '%env(default:app.discovery.default_feedback_pdo_dsn:APP_DISCOVERY_FEEDBACK_PDO_DSN)%'
+      $user: '%env(default:app.discovery.default_feedback_pdo_user:APP_DISCOVERY_FEEDBACK_PDO_USER)%'
+      $password: '%env(default:app.discovery.default_feedback_pdo_password:APP_DISCOVERY_FEEDBACK_PDO_PASSWORD)%'
+      $tableName: '%env(default:app.discovery.default_feedback_pdo_table:APP_DISCOVERY_FEEDBACK_PDO_TABLE)%'
+
+  App\Service\Discovery\ConfigurableDiscoveryFeedbackStore:
+    arguments:
+      $backend: '%env(default:app.discovery.default_feedback_backend:APP_DISCOVERY_FEEDBACK_BACKEND)%'
+      $pdoDsn: '%env(default:app.discovery.default_feedback_pdo_dsn:APP_DISCOVERY_FEEDBACK_PDO_DSN)%'
 
   App\EventSubscriber\DiscoveryEndpointSecuritySubscriber:
     arguments:

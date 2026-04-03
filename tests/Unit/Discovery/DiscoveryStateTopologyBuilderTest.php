@@ -28,7 +28,7 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
     {
         $builder = $this->builder(
             discoverySqlitePath: '/mnt/shared/discovering/discovering.sqlite',
-            feedbackSqlitePath: '/mnt/shared/discovering/discovering-feedback.sqlite',
+            feedbackPath: '/mnt/shared/discovering/discovering-feedback.sqlite',
             operationLogPath: '/mnt/shared/discovering/discovery-operation-log.json',
             rebuildEvidencePath: '/mnt/shared/discovering/discovery-rebuild-evidence.json',
             libsourceEventLogPath: '/mnt/shared/discovering/libsource-operator-event-log.json',
@@ -73,9 +73,29 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
         self::assertContains('Libsource event log uses a shared PDO coordination backend.', $topology->notes);
     }
 
+    public function testBuildRecognizesSharedPdoFeedbackButStillKeepsDistributedReadinessFalseUntilIndexMoves(): void
+    {
+        $builder = $this->builder(
+            feedbackBackend: 'pdo',
+            feedbackPdoDsn: 'pgsql:host=db.internal;dbname=discovering',
+        );
+
+        $topology = $builder->build();
+
+        self::assertTrue($topology->sharedStateConfigured);
+        self::assertFalse($topology->distributedReady);
+        self::assertSame('pdo_table', $topology->stores[1]->backend);
+        self::assertTrue($topology->stores[1]->multiReplicaWriteReady);
+        self::assertContains('Feedback learning uses a shared PDO coordination backend.', $topology->notes);
+        self::assertContains('Overall distributed readiness still remains false until discovery index moves beyond SQLite single-node storage.', $topology->notes);
+    }
+
     private function builder(
         string $discoverySqlitePath = '/workspace/discovering/var/discovery/discovering.sqlite',
-        string $feedbackSqlitePath = '/workspace/discovering/var/discovery/discovering-feedback.sqlite',
+        string $feedbackPath = '/workspace/discovering/var/discovery/discovering-feedback.sqlite',
+        string $feedbackBackend = 'sqlite_path',
+        string $feedbackPdoDsn = '',
+        string $feedbackPdoTable = 'discovery_feedback',
         string $operationLogPath = '/workspace/discovering/var/discovery/discovery-operation-log.json',
         string $operationLogBackend = 'file',
         string $operationLogPdoDsn = '',
@@ -96,7 +116,10 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
         return new DiscoveryStateTopologyBuilder(
             projectDir: '/workspace/discovering',
             discoverySqlitePath: $discoverySqlitePath,
-            feedbackSqlitePath: $feedbackSqlitePath,
+            feedbackPath: $feedbackPath,
+            feedbackBackend: $feedbackBackend,
+            feedbackPdoDsn: $feedbackPdoDsn,
+            feedbackPdoTable: $feedbackPdoTable,
             operationLogPath: $operationLogPath,
             operationLogBackend: $operationLogBackend,
             operationLogPdoDsn: $operationLogPdoDsn,

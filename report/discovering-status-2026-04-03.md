@@ -28,9 +28,10 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 13. `263baac` — document discovery threat model and harden response headers
 14. `1d7f16e` — add discovery state topology and shared-state seam
 15. `dc3330a` — add discovery rate limiting baseline
-16. `e97378b` — add discovery rollback planning baseline
+16. `546782f` — add discovery rollback planning baseline
 17. `6a36629` — prove runtime boot on current slice
-18. `af78e98` — add shared coordination backends for discovery operator stores
+18. `734d5b9` — add shared coordination backends for discovery operator stores
+19. `535590b` — add shared feedback coordination seam
 
 ## Direct unfinished items
 
@@ -42,9 +43,9 @@ The current slice now boots through real Symfony console paths: `bin/console lis
 
 ### 2. Shared-state externalization is now inspectable, but distributed readiness still remains false
 
-The repository can now describe mutable discovery state paths and can externalize them through environment-level path overrides. Rate limiting, operation history, rebuild evidence, and libsource event history can now all move from JSON files to PDO-backed coordination tables. However, the discovery index and feedback state remain SQLite-oriented, so the component is still not treated as multi-replica write-ready.
+The repository can now describe mutable discovery state paths and can externalize them through environment-level path overrides. Rate limiting, feedback learning, operation history, rebuild evidence, and libsource event history can all move to PDO-backed coordination tables. However, the discovery index still remains SQLite-oriented, so the component is not yet treated as multi-replica write-ready.
 
-**Impact:** the platform seam is clearer and stronger than before, but a true distributed posture still requires discovery index and feedback state to move beyond single-node SQLite semantics.
+**Impact:** the platform seam is clearer and stronger than before, but a true distributed posture still requires the discovery index to move beyond single-node SQLite semantics.
 
 ### 3. Rollback execution now exists, but it remains intentionally narrow
 
@@ -70,7 +71,7 @@ The current codebase is now ready for a proving wave centered on installation, r
 
 1. Run PHPUnit suites and fix runtime regressions
 2. Verify Composer-installed tooling (`phpstan`, `php-cs-fixer`) on the active slice
-3. Decide whether shared-state overrides are enough for the target deployment, or whether discovery state and operator history must move to stronger coordination backends
+3. Decide whether the discovery index also needs a stronger multi-replica backend beyond SQLite for the target deployment
 4. If needed later, broaden rollback beyond alias promotion toward richer historical-state recovery semantics
 
 ## Current architectural verdict
