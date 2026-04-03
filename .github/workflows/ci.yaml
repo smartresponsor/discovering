@@ -20,11 +20,20 @@ jobs:
           tools: composer:v2
           extensions: json, pdo, pdo_sqlite
 
+      - name: Environment preflight
+        run: php tools/runtime_preflight.php
+
       - name: Validate composer metadata
         run: composer validate --strict
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Post-install runtime preflight
+        run: php tools/runtime_preflight.php --require-vendor
+
+      - name: Console boot smoke
+        run: php bin/console list --raw
 
       - name: Lint PHP sources
         run: composer lint:php

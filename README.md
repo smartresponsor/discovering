@@ -48,6 +48,13 @@ The repository is intended to evolve as a Laravel-Scout-like discovery layer for
 - use `.env` / `.env.test` for local and test runtime defaults
 - SQLite discovery index defaults to `var/discovery/discovering.sqlite` via DI configuration
 
+## Installability proving baseline
+- `php tools/runtime_preflight.php` — verifies PHP/extensions/Composer/entrypoints before install
+- `php tools/runtime_preflight.php --require-vendor` — verifies the same plus `vendor/autoload.php` after install
+- `php bin/console list --raw` — proves the console entrypoint boots after install
+
+See `docs/discovery/INSTALLABILITY_PROVING_V1.md` for the proving sequence and blocker classes.
+
 ## CI and verification baseline
 - `composer validate:composer` — validates Composer metadata
 - `composer lint:php` — runs PHP syntax lint across `src` and `tests`
