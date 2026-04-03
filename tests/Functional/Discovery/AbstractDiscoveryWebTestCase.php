@@ -25,9 +25,26 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
         self::ensureKernelShutdown();
     }
 
-    protected function createDiscoveryClient(): KernelBrowser
+    /** @param array<string, string> $server */
+    protected function createDiscoveryClient(array $server = []): KernelBrowser
     {
-        return static::createClient();
+        return static::createClient([], $server);
+    }
+
+    /** @return array<string, string> */
+    protected function managementTokenServer(): array
+    {
+        return [
+            'HTTP_X_DISCOVERY_MANAGEMENT_TOKEN' => $this->envValue('APP_DISCOVERY_MANAGEMENT_TOKEN'),
+        ];
+    }
+
+    /** @return array<string, string> */
+    protected function apiWriteTokenServer(): array
+    {
+        return [
+            'HTTP_X_DISCOVERY_API_WRITE_TOKEN' => $this->envValue('APP_DISCOVERY_API_WRITE_TOKEN'),
+        ];
     }
 
     private function resetDiscoveryStorage(): void
@@ -43,5 +60,12 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
                 unlink($path);
             }
         }
+    }
+
+    private function envValue(string $key): string
+    {
+        $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+
+        return is_string($value) ? $value : '';
     }
 }

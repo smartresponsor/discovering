@@ -76,3 +76,8 @@ services:
   App\\Service\\Discovery\\Adapter\\SqliteFtsDiscoveryAdapter:
     arguments:
       $path: '%kernel.project_dir%/var/discovery/discovering.sqlite'
+
+  App\\EventSubscriber\\DiscoveryEndpointSecuritySubscriber:
+    arguments:
+      $managementToken: '%env(APP_DISCOVERY_MANAGEMENT_TOKEN)%'
+      $apiWriteToken: '%env(APP_DISCOVERY_API_WRITE_TOKEN)%'

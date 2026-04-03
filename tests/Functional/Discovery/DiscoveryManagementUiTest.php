@@ -24,10 +24,19 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringContainsString('Mark useful', $content);
     }
 
-    public function testManagementOverviewExportReturnsCoverageSummary(): void
+    public function testManagementOverviewRequiresManagementToken(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/management/discovery/export');
+        $client->request('GET', '/management/discovery');
+
+        self::assertResponseStatusCodeSame(403);
+        self::assertStringContainsString('Forbidden discovery management request.', (string) $client->getResponse()->getContent());
+    }
+
+    public function testManagementOverviewExportReturnsCoverageSummary(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('GET', '/management/discovery/export', [], [], $this->managementTokenServer());
 
         self::assertResponseIsSuccessful();
 
@@ -42,8 +51,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementOverviewPageRenders(): void
     {
-        $client = $this->createDiscoveryClient();
-        $client->request('GET', '/management/discovery');
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('GET', '/management/discovery', [], [], $this->managementTokenServer());
 
         self::assertResponseIsSuccessful();
 
