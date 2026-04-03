@@ -23,4 +23,4 @@ This surface summarizes the active discovery adapter, mutable-state topology pos
 
 ## Intent
 
-This surface does not claim that every backend is reachable at runtime. It reports the repository's currently selected discovery platform posture and the structural blockers that still matter for multi-replica operation.
+This surface does not claim that every backend is reachable at runtime. It reports the repository's currently selected discovery platform posture and the structural blockers that still matter for multi-replica operation. Reachability is now handled by the dedicated platform probe surfaces described in `PLATFORM_PROBES_V1.md`.

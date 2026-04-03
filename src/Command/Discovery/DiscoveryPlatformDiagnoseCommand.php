@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command\Discovery;
 
+use App\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
 use App\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -15,6 +16,7 @@ final class DiscoveryPlatformDiagnoseCommand extends Command
 {
     public function __construct(
         private readonly DiscoveryPlatformDiagnosticsBuilder $diagnosticsBuilder,
+        private readonly DiscoveryBackendReachabilityBuilder $probeBuilder,
     ) {
         parent::__construct();
     }
@@ -51,6 +53,13 @@ final class DiscoveryPlatformDiagnoseCommand extends Command
             $output->writeln(sprintf('- %s', $note));
         }
 
-        return Command::SUCCESS;
+        $probeReport = $this->probeBuilder->build();
+        $output->writeln('Backend probes:');
+        $output->writeln(sprintf('- performed: %d', $probeReport->performedProbeCount));
+        $output->writeln(sprintf('- reachable: %d', $probeReport->reachableProbeCount));
+        $output->writeln(sprintf('- failing: %d', $probeReport->failingProbeCount));
+        $output->writeln(sprintf('- skipped: %d', $probeReport->skippedProbeCount));
+
+        return $probeReport->failingProbeCount === 0 ? Command::SUCCESS : Command::FAILURE;
     }
 }

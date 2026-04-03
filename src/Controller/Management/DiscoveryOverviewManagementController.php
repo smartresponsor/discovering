@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Management;
 
+use App\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
 use App\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
@@ -26,6 +27,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
         private readonly DiscoveryOperationLogger $operationLogger,
         private readonly DiscoveryStateTopologyBuilder $stateTopologyBuilder,
         private readonly DiscoveryPlatformDiagnosticsBuilder $platformDiagnosticsBuilder,
+        private readonly DiscoveryBackendReachabilityBuilder $backendReachabilityBuilder,
         private readonly DiscoveryRollbackPlanBuilder $rollbackPlanBuilder,
         private readonly DiscoveryRollbackExecutor $rollbackExecutor,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
@@ -137,6 +139,18 @@ final class DiscoveryOverviewManagementController extends AbstractController
 
         return $this->jsonResponseFactory->success($this->platformDiagnosticsBuilder->build()->toArray(), [
             'schemaFamily' => 'discovery.platform.diagnostics',
+            'schemaVersion' => 1,
+        ]);
+    }
+
+
+    #[Route('/management/discovery/platform/probes/export', name: 'app_management_discovery_platform_probes_export', methods: ['GET'])]
+    public function exportPlatformProbes(): JsonResponse
+    {
+        $this->operationLogger->recordHttp('discovery.management.platform.probes.export');
+
+        return $this->jsonResponseFactory->success($this->backendReachabilityBuilder->build()->toArray(), [
+            'schemaFamily' => 'discovery.platform.probes',
             'schemaVersion' => 1,
         ]);
     }

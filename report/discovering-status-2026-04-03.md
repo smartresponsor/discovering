@@ -33,7 +33,9 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 18. `734d5b9` — add shared coordination backends for discovery operator stores
 19. `c4f4249` — add shared feedback coordination seam
 20. `e335ae8` — add shared discovery index backend seam
-21. `b6e9f5a` — add discovery platform diagnostics surface
+21. `26b1b5d` — add discovery platform diagnostics surface
+
+22. `d88d4f6` — add discovery backend reachability probes
 
 ## Direct unfinished items
 
@@ -43,9 +45,9 @@ The current slice now boots through real Symfony console paths: `bin/console lis
 
 **Impact:** runtime credibility is materially stronger than before, but full test execution still remains the next proving step.
 
-### 2. Shared-state externalization is now inspectable, and discovery index backend selection now exists
+### 2. Shared-state externalization is now inspectable, and backend reachability probes now exist
 
-The repository can now describe mutable discovery state paths and can externalize them through environment-level path overrides. Rate limiting, feedback learning, operation history, rebuild evidence, and libsource event history can all move to PDO-backed coordination tables. The discovery index now also supports backend selection between local SQLite FTS and shared Meilisearch service mode. Distributed readiness still depends on the chosen combination of index and coordination backends rather than being assumed automatically.
+The repository can now describe mutable discovery state paths and can externalize them through environment-level path overrides. Rate limiting, feedback learning, operation history, rebuild evidence, and libsource event history can all move to PDO-backed coordination tables. The discovery index also supports backend selection between local SQLite FTS and shared Meilisearch service mode. In addition, dedicated CLI and management probe surfaces now exist for active Meilisearch and PDO-backed coordination targets, so reachability can be checked on demand instead of being inferred only from configuration. Distributed readiness still depends on the chosen combination of index and coordination backends rather than being assumed automatically.
 
 **Impact:** the platform seam is materially stronger than before, and distributed readiness can now be expressed honestly instead of remaining permanently false.
 
@@ -70,13 +72,13 @@ The current codebase is now ready for a proving wave centered on installation, r
 - rollback posture, guarded execution, CLI commands, and operator runbooks now exist instead of rollback clarity remaining only implicit
 - discovery index backend selection now exists between local SQLite FTS and shared Meilisearch service mode
 - platform diagnostics now exists as a CLI, management export, and overview surface for adapter capability, topology posture, and rollback readiness
+- explicit backend reachability probes now exist as a dedicated CLI and management export for Meilisearch and PDO-backed coordination targets
 
 ## Recommended next execution order
 
 1. Run PHPUnit suites and fix runtime regressions
-2. Add backend reachability probes for the active discovery platform mode (especially Meilisearch and PDO-backed coordination stores)
-3. In a deployment target, decide whether discovery index should remain SQLite or switch to Meilisearch service mode
-4. If needed later, broaden rollback beyond alias promotion toward richer historical-state recovery semantics
+2. In a deployment target, decide whether discovery index should remain SQLite or switch to Meilisearch service mode
+3. If needed later, broaden rollback beyond alias promotion toward richer historical-state recovery semantics
 
 ## Current architectural verdict
 

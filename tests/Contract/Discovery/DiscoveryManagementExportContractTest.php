@@ -45,4 +45,19 @@ final class DiscoveryManagementExportContractTest extends AbstractDiscoveryWebTe
         self::assertIsArray($payload['data']);
         self::assertNotEmpty($payload['data']);
     }
+
+    public function testPlatformProbesExportRespectsEnvelopeContract(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('GET', '/management/discovery/platform/probes/export', [], [], $this->managementTokenServer());
+
+        self::assertResponseIsSuccessful();
+
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertDiscoveryEnvelopeContract($payload);
+        self::assertArrayHasKey('performedProbeCount', $payload['data']);
+        self::assertArrayHasKey('probes', $payload['data']);
+    }
+
 }

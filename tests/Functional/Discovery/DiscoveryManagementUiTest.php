@@ -132,6 +132,23 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertArrayHasKey('notes', $payload['data']);
     }
 
+    public function testManagementPlatformProbesExportReturnsReachabilitySummary(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('GET', '/management/discovery/platform/probes/export', [], [], $this->managementTokenServer());
+
+        self::assertResponseIsSuccessful();
+
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertTrue($payload['ok']);
+        self::assertSame('discovery.platform.probes', $payload['meta']['schemaFamily']);
+        self::assertSame(0, $payload['data']['performedProbeCount']);
+        self::assertSame(6, $payload['data']['skippedProbeCount']);
+        self::assertCount(6, $payload['data']['probes']);
+        self::assertSame('local_only', $payload['data']['probes'][0]['status']);
+    }
+
     public function testManagementPlatformExportReturnsPlatformDiagnostics(): void
     {
         $client = $this->createDiscoveryClient($this->managementTokenServer());
@@ -215,6 +232,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringContainsString('Recent operations', $content);
         self::assertStringContainsString('State topology', $content);
         self::assertStringContainsString('Platform diagnostics', $content);
+        self::assertStringContainsString('Run backend probes', $content);
         self::assertStringContainsString('Rollback posture', $content);
         self::assertStringContainsString('Recommended command', $content);
         self::assertStringContainsString('Execute rollback', $content);
