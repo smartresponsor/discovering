@@ -56,6 +56,7 @@ services:
   App\\ServiceInterface\\Discovery\\Document\\DiscoveryDocumentProviderInterface: '@App\\Service\\Discovery\\Document\\DiscoveryDocumentProvider'
   App\\ServiceInterface\\Discovery\\Overview\\DiscoveryOverviewServiceInterface: '@App\\Service\\Discovery\\Overview\\DiscoveryOverviewService'
   App\\Service\\Discovery\\Libsource\\Log\\LibsourceOperatorEventLogStoreInterface: '@App\\Service\\Discovery\\Libsource\\Log\\FileLibsourceOperatorEventLogStore'
+  App\\Service\\Discovery\\Operations\\DiscoveryOperationEventLogStoreInterface: '@App\\Service\\Discovery\\Operations\\FileDiscoveryOperationEventLogStore'
 
   App\\Service\\Discovery\\Document\\DiscoveryDocumentProvider:
     arguments:
@@ -72,6 +73,10 @@ services:
   App\\Service\\Discovery\\Libsource\\Log\\FileLibsourceOperatorEventLogStore:
     arguments:
       $path: '%kernel.project_dir%/var/discovery/libsource_operator_event_log.json'
+
+  App\\Service\\Discovery\\Operations\\FileDiscoveryOperationEventLogStore:
+    arguments:
+      $path: '%kernel.project_dir%/var/discovery/discovery_operation_event_log.json'
 
   App\\Service\\Discovery\\Adapter\\SqliteFtsDiscoveryAdapter:
     arguments:

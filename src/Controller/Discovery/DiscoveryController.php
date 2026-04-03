@@ -7,6 +7,7 @@ use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
 use App\Form\Discovery\DiscoverySearchType;
 use App\Service\Discovery\DiscoveryLearningService;
+use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,6 +21,7 @@ final class DiscoveryController extends AbstractController
     public function __construct(
         private readonly DiscoveryServiceInterface $discoveryService,
         private readonly DiscoveryLearningService $learningService,
+        private readonly DiscoveryOperationLogger $operationLogger,
     ) {
     }
 
@@ -31,6 +33,12 @@ final class DiscoveryController extends AbstractController
         $form = $this->createForm(DiscoverySearchType::class, $query);
         $form->handleRequest($request);
         $result = $this->discoveryService->discover($query);
+        $this->operationLogger->recordHttp('discovery.ui.query', context: [
+            'resource' => $result->query->resource,
+            'mode' => $result->query->mode,
+            'query' => $result->query->query,
+            'total' => $result->total,
+        ]);
 
         return $this->render('discovery/index.html.twig', [
             'form' => $form->createView(),
@@ -49,6 +57,12 @@ final class DiscoveryController extends AbstractController
             reference: (string) $request->request->get('reference', ''),
         );
 
+        $this->operationLogger->recordHttp('discovery.ui.feedback', context: [
+            'resource' => (string) $request->request->get('resource', 'global'),
+            'id' => (string) $request->request->get('id', ''),
+            'feedbackCount' => $count,
+        ]);
+
         $this->addFlash('success', sprintf('Recorded useful click (%d total).', $count));
 
         $returnTo = (string) $request->request->get('return_to', $this->generateUrl('app_discovery_index'));
@@ -60,8 +74,15 @@ final class DiscoveryController extends AbstractController
     public function api(Request $request): JsonResponse
     {
         $query = $this->buildDiscoveryQuery($request, false);
+        $result = $this->discoveryService->discover($query);
+        $this->operationLogger->recordHttp('discovery.api.query', context: [
+            'resource' => $result->query->resource,
+            'mode' => $result->query->mode,
+            'query' => $result->query->query,
+            'total' => $result->total,
+        ]);
 
-        return $this->json(['ok' => true, 'data' => $this->discoveryService->discover($query)->toArray()]);
+        return $this->json(['ok' => true, 'data' => $result->toArray()]);
     }
 
     #[Route('/api/discovery/click', name: 'app_discovery_api_click', methods: ['POST'])]
@@ -78,6 +99,12 @@ final class DiscoveryController extends AbstractController
             title: (string) ($payload['title'] ?? ''),
             reference: (string) ($payload['reference'] ?? ''),
         );
+
+        $this->operationLogger->recordHttp('discovery.api.click', context: [
+            'resource' => (string) ($payload['resource'] ?? 'global'),
+            'id' => (string) ($payload['id'] ?? ''),
+            'feedbackCount' => $count,
+        ]);
 
         return $this->json([
             'ok' => true,

@@ -37,6 +37,39 @@
 
     <div class="card mt-4">
         <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <h2 class="h5 mb-0">Recent operations</h2>
+                <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_operations_export') }}">Export operations</a>
+            </div>
+            <table class="table mt-3 mb-0">
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>Operation</th>
+                        <th>Request</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for operation in operations %}
+                        <tr>
+                            <td>{{ operation.occurredAt }}</td>
+                            <td>{{ operation.operation }}</td>
+                            <td><code>{{ operation.requestId }}</code></td>
+                            <td>{{ operation.status }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-muted">No operations have been recorded yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
             <h2 class="h5">Coverage by resource type</h2>
             <table class="table mt-3 mb-0">
                 <thead>

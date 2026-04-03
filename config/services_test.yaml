@@ -6,3 +6,7 @@ services:
   App\Service\Discovery\DiscoveryFeedbackStore:
     arguments:
       $path: '%kernel.project_dir%/var/discovery/discovering-feedback.test.sqlite'
+
+  App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore:
+    arguments:
+      $path: '%kernel.project_dir%/var/discovery/discovery-operation.test.json'

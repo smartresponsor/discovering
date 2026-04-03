@@ -16,6 +16,8 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         ]);
 
         self::assertResponseIsSuccessful();
+        self::assertTrue($client->getResponse()->headers->has('X-Request-Id'));
+        self::assertNotSame('', (string) $client->getResponse()->headers->get('X-Request-Id'));
 
         $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
@@ -69,6 +71,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         );
 
         self::assertResponseIsSuccessful();
+        self::assertTrue($client->getResponse()->headers->has('X-Request-Id'));
 
         $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
 

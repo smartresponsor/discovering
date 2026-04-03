@@ -54,7 +54,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
             mkdir($directory, 0o777, true);
         }
 
-        foreach (['discovering.test.sqlite', 'discovering-feedback.test.sqlite'] as $filename) {
+        foreach (['discovering.test.sqlite', 'discovering-feedback.test.sqlite', 'discovery-operation.test.json'] as $filename) {
             $path = $directory . '/' . $filename;
             if (is_file($path)) {
                 unlink($path);
