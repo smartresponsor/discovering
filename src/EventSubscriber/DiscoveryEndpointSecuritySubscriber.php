@@ -22,7 +22,7 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
 
     public static function getSubscribedEvents(): array
     {
-        return [KernelEvents::REQUEST => 'onKernelRequest'];
+        return [KernelEvents::REQUEST => ['onKernelRequest', 64]];
     }
 
     public function onKernelRequest(RequestEvent $event): void

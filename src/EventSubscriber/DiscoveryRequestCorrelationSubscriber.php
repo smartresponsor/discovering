@@ -16,8 +16,8 @@ final class DiscoveryRequestCorrelationSubscriber implements EventSubscriberInte
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST => 'onKernelRequest',
-            KernelEvents::RESPONSE => 'onKernelResponse',
+            KernelEvents::REQUEST => ['onKernelRequest', 128],
+            KernelEvents::RESPONSE => ['onKernelResponse', -128],
         ];
     }
 

@@ -5,6 +5,7 @@
 
 - token-gated management surfaces
 - token-gated API write surface for feedback events
+- scope-specific rate limiting for query, write, and management-mutation traffic
 - public read-only discovery query path
 - response correlation and operational logging
 - response hardening headers across discovery HTTP surfaces
@@ -35,7 +36,6 @@ All discovery responses currently emit:
 
 ## Known gaps
 - no per-user authentication or RBAC
-- no rate limiting yet
 - no token rotation workflow documented yet
 - no dedicated CSRF strategy beyond token-gated write endpoints
 - no formal secret backend integration
@@ -48,8 +48,8 @@ This baseline is sufficient for:
 - early internal integration
 
 Before broader shared deployment, add:
-- rate limiting
 - secret rotation and storage procedure
 - reverse proxy / TLS hardening runbook
 - CI security smoke execution
 - stronger mutation audit policy
+- distributed-safe throttling if multi-replica deployment becomes a target

@@ -32,9 +32,9 @@ This document covers the current `Discovering` HTTP surfaces and operator flows:
 
 **Impact:** relevance drift and reduced trust in feedback learning.
 
-**Current control:** dedicated write token header (`X-Discovery-Api-Write-Token`) and clear separation from read-only query paths.
+**Current control:** dedicated write token header (`X-Discovery-Api-Write-Token`), clear separation from read-only query paths, and scope-specific rate limiting.
 
-**Residual risk:** valid token holders can still over-submit unless later rate limiting and dedup heuristics are added.
+**Residual risk:** valid token holders can still submit bursts within the configured window unless later dedup heuristics are added.
 
 ### 3. Sensitive response caching
 **Threat:** browser or intermediary caches management exports or evolving search responses.
@@ -69,14 +69,13 @@ This document covers the current `Discovering` HTTP surfaces and operator flows:
 ## Out-of-scope for current slice
 - OAuth/SSO
 - per-user RBAC
-- rate limiting and anti-automation controls
 - encrypted secret backends / vault integration
 - external search backend network segmentation
 - end-to-end reverse proxy / TLS posture
 
 ## Next security priorities
-1. add rate limiting to feedback-write and management mutation paths
-2. add replay-resistant write protection or click dedup heuristics
-3. move management and write tokens to stronger operational secret handling
-4. add security smoke checks into CI
-5. add destructive-action confirmation and audit expansion for management mutations
+1. add replay-resistant write protection or click dedup heuristics
+2. move management and write tokens to stronger operational secret handling
+3. add security smoke checks into CI
+4. add destructive-action confirmation and audit expansion for management mutations
+5. replace local file-backed throttling with a stronger distributed coordination store if multi-replica deployment becomes a target

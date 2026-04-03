@@ -4,3 +4,10 @@ parameters:
   app.discovery.default_operation_log_path: '%kernel.project_dir%/var/discovery/discovery-operation.test.json'
   app.discovery.default_rebuild_evidence_path: '%kernel.project_dir%/var/discovery/discovery-rebuild-evidence.test.json'
   app.discovery.default_libsource_event_log_path: '%kernel.project_dir%/var/discovery/libsource-operator-event-log.test.json'
+  app.discovery.default_rate_limit_store_path: '%kernel.project_dir%/var/discovery/discovery-rate-limit.test.json'
+  app.discovery.default_query_rate_limit: 3
+  app.discovery.default_query_rate_limit_window_seconds: 60
+  app.discovery.default_write_rate_limit: 2
+  app.discovery.default_write_rate_limit_window_seconds: 60
+  app.discovery.default_management_mutation_rate_limit: 2
+  app.discovery.default_management_mutation_rate_limit_window_seconds: 60

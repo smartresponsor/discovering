@@ -16,6 +16,7 @@ final class DiscoveryStateTopologyBuilder
         private readonly string $operationLogPath,
         private readonly string $rebuildEvidencePath,
         private readonly string $libsourceEventLogPath,
+        private readonly string $rateLimitStorePath,
     ) {
     }
 
@@ -29,6 +30,7 @@ final class DiscoveryStateTopologyBuilder
             $this->jsonStore('operationLog', $this->operationLogPath, $localStateRoot),
             $this->jsonStore('rebuildEvidence', $this->rebuildEvidencePath, $localStateRoot),
             $this->jsonStore('libsourceEventLog', $this->libsourceEventLogPath, $localStateRoot),
+            $this->jsonStore('rateLimitStore', $this->rateLimitStorePath, $localStateRoot),
         ];
 
         $sharedStateConfigured = false;
@@ -50,7 +52,7 @@ final class DiscoveryStateTopologyBuilder
         }
 
         $notes[] = 'SQLite-backed discovery index and feedback state remain single-node oriented and are not treated as multi-replica write-safe.';
-        $notes[] = 'JSON file-backed operation and evidence stores use local file mutation semantics and are not treated as distributed coordination stores.';
+        $notes[] = 'JSON file-backed operation, evidence, and rate-limit stores use local file mutation semantics and are not treated as distributed coordination stores.';
         $notes[] = 'Shared-state environment overrides can externalize paths, but true multi-replica readiness still requires stronger coordination storage than SQLite and JSON files.';
 
         return new DiscoveryStateTopology(

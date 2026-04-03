@@ -4,6 +4,13 @@ parameters:
   app.discovery.default_operation_log_path: '%kernel.project_dir%/var/discovery/discovery_operation_event_log.json'
   app.discovery.default_rebuild_evidence_path: '%kernel.project_dir%/var/discovery/discovery_rebuild_evidence.json'
   app.discovery.default_libsource_event_log_path: '%kernel.project_dir%/var/discovery/libsource_operator_event_log.json'
+  app.discovery.default_rate_limit_store_path: '%kernel.project_dir%/var/discovery/discovery_rate_limit_store.json'
+  app.discovery.default_query_rate_limit: 60
+  app.discovery.default_query_rate_limit_window_seconds: 60
+  app.discovery.default_write_rate_limit: 20
+  app.discovery.default_write_rate_limit_window_seconds: 60
+  app.discovery.default_management_mutation_rate_limit: 10
+  app.discovery.default_management_mutation_rate_limit_window_seconds: 300
 
 services:
   _defaults:
@@ -86,6 +93,7 @@ services:
       $operationLogPath: '%env(default:app.discovery.default_operation_log_path:APP_DISCOVERY_OPERATION_LOG_PATH)%'
       $rebuildEvidencePath: '%env(default:app.discovery.default_rebuild_evidence_path:APP_DISCOVERY_REBUILD_EVIDENCE_PATH)%'
       $libsourceEventLogPath: '%env(default:app.discovery.default_libsource_event_log_path:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PATH)%'
+      $rateLimitStorePath: '%env(default:app.discovery.default_rate_limit_store_path:APP_DISCOVERY_RATE_LIMIT_STORE_PATH)%'
 
   App\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore:
     arguments:
@@ -98,6 +106,19 @@ services:
   App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore:
     arguments:
       $path: '%env(default:app.discovery.default_rebuild_evidence_path:APP_DISCOVERY_REBUILD_EVIDENCE_PATH)%'
+
+  App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore:
+    arguments:
+      $path: '%env(default:app.discovery.default_rate_limit_store_path:APP_DISCOVERY_RATE_LIMIT_STORE_PATH)%'
+
+  App\Service\Discovery\RateLimit\DiscoveryRateLimiter:
+    arguments:
+      $queryLimit: '%env(int:default:app.discovery.default_query_rate_limit:APP_DISCOVERY_QUERY_RATE_LIMIT)%'
+      $queryWindowSeconds: '%env(int:default:app.discovery.default_query_rate_limit_window_seconds:APP_DISCOVERY_QUERY_RATE_LIMIT_WINDOW_SECONDS)%'
+      $writeLimit: '%env(int:default:app.discovery.default_write_rate_limit:APP_DISCOVERY_WRITE_RATE_LIMIT)%'
+      $writeWindowSeconds: '%env(int:default:app.discovery.default_write_rate_limit_window_seconds:APP_DISCOVERY_WRITE_RATE_LIMIT_WINDOW_SECONDS)%'
+      $managementMutationLimit: '%env(int:default:app.discovery.default_management_mutation_rate_limit:APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT)%'
+      $managementMutationWindowSeconds: '%env(int:default:app.discovery.default_management_mutation_rate_limit_window_seconds:APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT_WINDOW_SECONDS)%'
 
   App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter:
     arguments:
