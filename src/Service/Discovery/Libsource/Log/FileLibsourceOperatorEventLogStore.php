@@ -52,6 +52,6 @@ final class FileLibsourceOperatorEventLogStore implements LibsourceOperatorEvent
             mkdir($directory, 0777, true);
         }
 
-        file_put_contents($this->path, $this->serializer->encodeMany($events));
+        file_put_contents($this->path, $this->serializer->encodeMany($events), LOCK_EX);
     }
 }

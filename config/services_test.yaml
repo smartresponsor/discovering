@@ -1,16 +1,6 @@
-services:
-  App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter:
-    arguments:
-      $path: '%kernel.project_dir%/var/discovery/discovering.test.sqlite'
-
-  App\Service\Discovery\DiscoveryFeedbackStore:
-    arguments:
-      $path: '%kernel.project_dir%/var/discovery/discovering-feedback.test.sqlite'
-
-  App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore:
-    arguments:
-      $path: '%kernel.project_dir%/var/discovery/discovery-operation.test.json'
-
-  App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore:
-    arguments:
-      $path: '%kernel.project_dir%/var/discovery/discovery-rebuild-evidence.test.json'
+parameters:
+  app.discovery.default_sqlite_path: '%kernel.project_dir%/var/discovery/discovering.test.sqlite'
+  app.discovery.default_feedback_path: '%kernel.project_dir%/var/discovery/discovering-feedback.test.sqlite'
+  app.discovery.default_operation_log_path: '%kernel.project_dir%/var/discovery/discovery-operation.test.json'
+  app.discovery.default_rebuild_evidence_path: '%kernel.project_dir%/var/discovery/discovery-rebuild-evidence.test.json'
+  app.discovery.default_libsource_event_log_path: '%kernel.project_dir%/var/discovery/libsource-operator-event-log.test.json'

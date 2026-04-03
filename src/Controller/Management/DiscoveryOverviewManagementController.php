@@ -7,6 +7,7 @@ namespace App\Controller\Management;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
 use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,6 +20,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
         private readonly DiscoveryOverviewServiceInterface $overviewService,
         private readonly DiscoveryOperationEventLogStoreInterface $operationLogStore,
         private readonly DiscoveryOperationLogger $operationLogger,
+        private readonly DiscoveryStateTopologyBuilder $stateTopologyBuilder,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
@@ -28,11 +30,13 @@ final class DiscoveryOverviewManagementController extends AbstractController
     {
         $overview = $this->overviewService->buildOverview();
         $operations = $this->operationLogStore->latest(10);
+        $stateTopology = $this->stateTopologyBuilder->build();
         $this->operationLogger->recordHttp('discovery.management.overview');
 
         return $this->render('management/discovery/overview.html.twig', [
             'overview' => $overview,
             'operations' => $operations,
+            'stateTopology' => $stateTopology,
         ]);
     }
 
@@ -81,5 +85,16 @@ final class DiscoveryOverviewManagementController extends AbstractController
             ],
             $this->operationLogStore->latest(50),
         ));
+    }
+
+    #[Route('/management/discovery/state-topology/export', name: 'app_management_discovery_state_topology_export', methods: ['GET'])]
+    public function exportStateTopology(): JsonResponse
+    {
+        $this->operationLogger->recordHttp('discovery.management.state_topology.export');
+
+        return $this->jsonResponseFactory->success($this->stateTopologyBuilder->build()->toArray(), [
+            'schemaFamily' => 'discovery.state.topology',
+            'schemaVersion' => 1,
+        ]);
     }
 }

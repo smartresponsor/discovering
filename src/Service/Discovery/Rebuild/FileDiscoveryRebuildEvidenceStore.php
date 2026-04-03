@@ -24,7 +24,7 @@ final class FileDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidenc
             @mkdir($directory, 0o777, true);
         }
 
-        file_put_contents($this->path, $this->serializer->encode($items));
+        file_put_contents($this->path, $this->serializer->encode($items), LOCK_EX);
     }
 
     public function latest(int $limit = 20): array

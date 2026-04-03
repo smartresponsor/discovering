@@ -116,6 +116,22 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringStartsWith('reb-', $payload['data'][0]['evidenceId']);
     }
 
+    public function testManagementStateTopologyExportReturnsDistributedReadinessPosture(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('GET', '/management/discovery/state-topology/export', [], [], $this->managementTokenServer());
+
+        self::assertResponseIsSuccessful();
+
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertTrue($payload['ok']);
+        self::assertSame('discovery.state.topology', $payload['meta']['schemaFamily']);
+        self::assertFalse($payload['data']['distributedReady']);
+        self::assertSame('local_file', $payload['data']['stores'][0]['storageMode']);
+        self::assertArrayHasKey('notes', $payload['data']);
+    }
+
     public function testManagementOverviewPageRenders(): void
     {
         $client = $this->createDiscoveryClient($this->managementTokenServer());
@@ -127,6 +143,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         self::assertStringContainsString('Discovery Management', $content);
         self::assertStringContainsString('Recent operations', $content);
+        self::assertStringContainsString('State topology', $content);
+        self::assertStringContainsString('Distributed ready', $content);
         self::assertStringContainsString('Coverage by resource type', $content);
         self::assertStringContainsString('Coverage by source', $content);
     }
