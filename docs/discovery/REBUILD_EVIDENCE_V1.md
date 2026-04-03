@@ -8,10 +8,12 @@ The evidence trail makes every rebuild auditable and explicitly reports whether 
 
 ## Current baseline
 
-- `deploymentMode`: `in_place`
-- `zeroDowntimeReady`: `false`
 - evidence is exported from `GET /management/discovery/rebuilds/export`
 - every rebuild summary carries an `evidenceId`
+- `deploymentMode` is explicit in every summary
+- adapters that support staged promotion may report `deploymentMode: staged_alias_swap`
+- adapters that do not support staged promotion continue to report `deploymentMode: in_place`
+- `zeroDowntimeReady` is backend- and deployment-mode-dependent rather than globally fixed
 
 ## Summary fields
 
@@ -27,7 +29,9 @@ The evidence trail makes every rebuild auditable and explicitly reports whether 
 - `indexedDocumentCount`
 - `skippedDocumentCount`
 - `indexedCountsByResource`
+- `stagedIndexes`
+- `aliasSwapApplied`
 
 ## Operational intent
 
-The current wave does **not** claim real alias-swap cutover support. Instead, it formalizes rebuild evidence so future staged-index and alias-swap work can be added without changing the evidence shape.
+The evidence contract is now stable enough to represent both in-place rebuilds and staged alias-swap promotions without changing shape. For SQLite-backed staged rebuild support, see `docs/discovery/STAGED_REBUILD_V1.md`.
