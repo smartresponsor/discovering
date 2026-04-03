@@ -16,13 +16,7 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $headers = $client->getResponse()->headers;
-        self::assertSame('nosniff', $headers->get('X-Content-Type-Options'));
-        self::assertSame('no-referrer', $headers->get('Referrer-Policy'));
-        self::assertSame('DENY', $headers->get('X-Frame-Options'));
-        self::assertSame('camera=(), microphone=(), geolocation=()', $headers->get('Permissions-Policy'));
-        self::assertSame("default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'", $headers->get('Content-Security-Policy'));
-        self::assertSame('no-store, private', $headers->get('Cache-Control'));
+        $this->assertDiscoverySecurityHeaders($client->getResponse());
     }
 
     public function testVersionedDiscoveryApiCarriesResponseSecurityHeaders(): void
@@ -35,11 +29,7 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $headers = $client->getResponse()->headers;
-        self::assertSame('nosniff', $headers->get('X-Content-Type-Options'));
-        self::assertSame('no-referrer', $headers->get('Referrer-Policy'));
-        self::assertSame('DENY', $headers->get('X-Frame-Options'));
-        self::assertSame('no-store, private', $headers->get('Cache-Control'));
+        $this->assertDiscoverySecurityHeaders($client->getResponse(), assertFullPolicy: false);
     }
 
     public function testManagementOverviewCarriesResponseSecurityHeaders(): void
@@ -69,10 +59,6 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseStatusCodeSame(401);
 
-        $headers = $client->getResponse()->headers;
-        self::assertSame('nosniff', $headers->get('X-Content-Type-Options'));
-        self::assertSame('no-referrer', $headers->get('Referrer-Policy'));
-        self::assertSame('DENY', $headers->get('X-Frame-Options'));
-        self::assertSame('no-store, private', $headers->get('Cache-Control'));
+        $this->assertDiscoverySecurityHeaders($client->getResponse(), assertFullPolicy: false);
     }
 }

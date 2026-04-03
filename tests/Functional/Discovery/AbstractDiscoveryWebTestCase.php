@@ -26,6 +26,7 @@ use const JSON_THROW_ON_ERROR;
 
 abstract class AbstractDiscoveryWebTestCase extends WebTestCase
 {
+    use DiscoveryHttpAssertionTrait;
     protected function setUp(): void
     {
         parent::setUp();

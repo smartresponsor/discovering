@@ -41,7 +41,8 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 25. `6cbb031` — ignore generated symfony config reference
 26. `b6ca96f` — add discovery health interpretation surfaces
 27. `117eafb` — finish discovery temp test cleanup on shared filesystem helpers
-28. `0d15112` — harden functional discovery test harness against configurable state paths
+28. `0c9e4e5` — harden functional discovery test harness
+29. consolidate functional discovery HTTP assertions
 
 ## Direct unfinished items
 

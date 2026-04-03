@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 
 final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 {
@@ -41,14 +40,12 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $client->request('GET', '/management/discovery/export', [], [], $this->managementTokenServer());
 
         self::assertResponseIsSuccessful();
-        self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $client->getResponse()->headers->get(DiscoveryJsonResponseFactory::API_VERSION_HEADER));
+        $this->assertDiscoveryResponseHeaders($client);
 
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $payload['apiVersion']);
-        self::assertFalse($payload['meta']['deprecatedAlias']);
-        self::assertSame('/management/discovery/export', $payload['meta']['canonicalPath']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/export');
         self::assertSame('sqlite-fts5', $payload['data']['backendName']);
         self::assertGreaterThanOrEqual(1, $payload['data']['totalDocuments']);
         self::assertArrayHasKey('briefing', $payload['data']['countsByResourceType']);
@@ -68,11 +65,12 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $managementClient->request('GET', '/management/discovery/operations/export', [], [], $this->managementTokenServer());
 
         self::assertResponseIsSuccessful();
-        self::assertTrue($managementClient->getResponse()->headers->has('X-Request-Id'));
+        $this->assertDiscoveryResponseHeaders($managementClient);
 
         $payload = $this->jsonResponsePayload($managementClient);
 
         self::assertTrue($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/operations/export');
         self::assertNotEmpty($payload['data']);
         self::assertContains('discovery.api.query', array_column($payload['data'], 'operation'));
     }
@@ -87,7 +85,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        self::assertSame('discovery.rebuild.summary', $payload['meta']['schemaFamily']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rebuild', 'discovery.rebuild.summary');
         self::assertSame('global', $payload['data']['resource']);
         self::assertSame('staged_alias_swap', $payload['data']['deploymentMode']);
         self::assertTrue($payload['data']['zeroDowntimeReady']);
@@ -109,7 +107,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($exportClient);
 
         self::assertTrue($payload['ok']);
-        self::assertSame('discovery.rebuild.summary.list', $payload['meta']['schemaFamily']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rebuilds/export', 'discovery.rebuild.summary.list');
         self::assertNotEmpty($payload['data']);
         self::assertSame('staged_alias_swap', $payload['data'][0]['deploymentMode']);
         self::assertTrue($payload['data'][0]['aliasSwapApplied']);
@@ -126,7 +124,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        self::assertSame('discovery.state.topology', $payload['meta']['schemaFamily']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/state-topology/export', 'discovery.state.topology');
         self::assertFalse($payload['data']['distributedReady']);
         self::assertSame('local_file', $payload['data']['stores'][0]['storageMode']);
         self::assertArrayHasKey('notes', $payload['data']);
@@ -142,7 +140,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        self::assertSame('discovery.platform.probes', $payload['meta']['schemaFamily']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/platform/probes/export', 'discovery.platform.probes');
         self::assertSame(0, $payload['data']['performedProbeCount']);
         self::assertSame(6, $payload['data']['skippedProbeCount']);
         self::assertSame('not_configured', $payload['data']['overallStatus']);
@@ -160,7 +158,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        self::assertSame('discovery.platform.diagnostics', $payload['meta']['schemaFamily']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/platform/export', 'discovery.platform.diagnostics');
         self::assertSame('sqlite-fts5', $payload['data']['backendName']);
         self::assertSame('sqlite', $payload['data']['indexStoreBackend']);
         self::assertTrue($payload['data']['stagedRebuildSupported']);
@@ -187,7 +185,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($exportClient);
 
         self::assertTrue($payload['ok']);
-        self::assertSame('discovery.rollback.plan', $payload['meta']['schemaFamily']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rollback/export', 'discovery.rollback.plan');
         self::assertSame('plan_ready', $payload['data']['status']);
         self::assertTrue($payload['data']['rollbackReady']);
         self::assertNotEmpty($payload['data']['currentEvidenceId']);
@@ -216,7 +214,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         $payload = $this->jsonResponsePayload($executeClient);
         self::assertTrue($payload['ok']);
-        self::assertSame('discovery.rollback.execution', $payload['meta']['schemaFamily']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rollback/execute', 'discovery.rollback.execution');
         self::assertTrue($payload['data']['executed']);
         self::assertSame('rollback_executed', $payload['data']['status']);
         self::assertSame('global', $payload['data']['alias']);

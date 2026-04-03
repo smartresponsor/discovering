@@ -21,12 +21,10 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
         $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery');
         self::assertSame('discovery_rate_limited', $payload['error']['code']);
         self::assertSame('query', $payload['error']['details']['scope']);
-        self::assertSame('query', $client->getResponse()->headers->get('X-RateLimit-Scope'));
-        self::assertSame('3', $client->getResponse()->headers->get('X-RateLimit-Limit'));
-        self::assertSame('0', $client->getResponse()->headers->get('X-RateLimit-Remaining'));
-        self::assertNotSame('', (string) $client->getResponse()->headers->get('Retry-After'));
+        $this->assertRateLimitHeaders($client->getResponse(), 'query', 3);
     }
 
     public function testApiWriteReturns429AfterConfiguredBurst(): void
@@ -48,9 +46,9 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
         $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click');
         self::assertSame('write', $payload['error']['details']['scope']);
-        self::assertSame('2', $client->getResponse()->headers->get('X-RateLimit-Limit'));
-        self::assertSame('0', $client->getResponse()->headers->get('X-RateLimit-Remaining'));
+        $this->assertRateLimitHeaders($client->getResponse(), 'write', 2);
     }
 
     public function testManagementMutationReturns429AfterConfiguredBurst(): void
@@ -65,8 +63,8 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
         $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rebuild');
         self::assertSame('management_mutation', $payload['error']['details']['scope']);
-        self::assertSame('2', $client->getResponse()->headers->get('X-RateLimit-Limit'));
-        self::assertSame('0', $client->getResponse()->headers->get('X-RateLimit-Remaining'));
+        $this->assertRateLimitHeaders($client->getResponse(), 'management_mutation', 2);
     }
 }

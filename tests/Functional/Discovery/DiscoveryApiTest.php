@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 
 final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
 {
@@ -18,16 +17,12 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         ]);
 
         self::assertResponseIsSuccessful();
-        self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $client->getResponse()->headers->get(DiscoveryJsonResponseFactory::API_VERSION_HEADER));
-        self::assertTrue($client->getResponse()->headers->has('X-Request-Id'));
-        self::assertNotSame('', (string) $client->getResponse()->headers->get('X-Request-Id'));
+        $this->assertDiscoveryResponseHeaders($client);
 
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $payload['apiVersion']);
-        self::assertFalse($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery');
         self::assertSame('briefing', $payload['data']['query']['resource']);
         self::assertGreaterThanOrEqual(1, $payload['data']['total']);
         self::assertSame('briefing-live-source-governance', $payload['data']['hits'][0]['id']);
@@ -43,11 +38,11 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         ]);
 
         self::assertResponseIsSuccessful();
+        $this->assertDiscoveryResponseHeaders($client);
 
         $payload = $this->jsonResponsePayload($client);
 
-        self::assertTrue($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery', deprecatedAlias: true);
     }
 
     public function testApiClickRequiresWriteToken(): void
@@ -63,11 +58,12 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         );
 
         self::assertResponseStatusCodeSame(401);
+        $this->assertDiscoveryResponseHeaders($client);
 
         $payload = $this->jsonResponsePayload($client);
 
         self::assertFalse($payload['ok']);
-        self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $payload['apiVersion']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click');
         self::assertSame('discovery_api_write_unauthorized', $payload['error']['code']);
         self::assertSame('Unauthorized discovery API write request.', $payload['error']['message']);
     }
@@ -85,13 +81,12 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         );
 
         self::assertResponseIsSuccessful();
-        self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $client->getResponse()->headers->get(DiscoveryJsonResponseFactory::API_VERSION_HEADER));
-        self::assertTrue($client->getResponse()->headers->has('X-Request-Id'));
+        $this->assertDiscoveryResponseHeaders($client);
 
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        self::assertSame('/api/v1/discovery/click', $payload['meta']['canonicalPath']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click');
         self::assertSame('briefing', $payload['data']['resource']);
         self::assertSame('briefing-live-source-governance', $payload['data']['id']);
         self::assertSame(1, $payload['data']['feedbackCount']);
