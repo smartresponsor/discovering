@@ -1,0 +1,8 @@
+services:
+  App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter:
+    arguments:
+      $path: '%kernel.project_dir%/var/discovery/discovering.test.sqlite'
+
+  App\Service\Discovery\DiscoveryFeedbackStore:
+    arguments:
+      $path: '%kernel.project_dir%/var/discovery/discovering-feedback.test.sqlite'

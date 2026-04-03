@@ -20,6 +20,11 @@ final class Kernel extends BaseKernel
         $loader->load($configDir . '/packages/*.yaml', 'glob');
         $loader->load($configDir . '/packages/' . $this->environment . '/*.yaml', 'glob');
         $loader->load($configDir . '/services.yaml');
+
+        $environmentServices = $configDir . '/services_' . $this->environment . '.yaml';
+        if (is_file($environmentServices)) {
+            $loader->load($environmentServices);
+        }
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void
