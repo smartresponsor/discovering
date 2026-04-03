@@ -8,6 +8,7 @@ final class DiscoveryBackendReachabilityReport
 {
     /**
      * @param list<DiscoveryBackendProbeResult> $probes
+     * @param list<string> $failingProbeNames
      * @param list<string> $notes
      */
     public function __construct(
@@ -16,7 +17,10 @@ final class DiscoveryBackendReachabilityReport
         public int $reachableProbeCount,
         public int $failingProbeCount,
         public int $skippedProbeCount,
+        public string $overallStatus,
+        public string $recommendedAction,
         public array $probes = [],
+        public array $failingProbeNames = [],
         public array $notes = [],
     ) {
     }
@@ -32,10 +36,13 @@ final class DiscoveryBackendReachabilityReport
             'reachableProbeCount' => $this->reachableProbeCount,
             'failingProbeCount' => $this->failingProbeCount,
             'skippedProbeCount' => $this->skippedProbeCount,
+            'overallStatus' => $this->overallStatus,
+            'recommendedAction' => $this->recommendedAction,
             'probes' => array_map(
                 static fn (DiscoveryBackendProbeResult $probe): array => $probe->toArray(),
                 $this->probes,
             ),
+            'failingProbeNames' => $this->failingProbeNames,
             'notes' => $this->notes,
         ];
     }

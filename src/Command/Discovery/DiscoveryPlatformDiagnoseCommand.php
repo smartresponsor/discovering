@@ -33,6 +33,9 @@ final class DiscoveryPlatformDiagnoseCommand extends Command
         $output->writeln(sprintf('Rollback status: %s', $diagnostics->rollbackStatus));
         $output->writeln(sprintf('Rollback ready: %s', $diagnostics->rollbackReady ? 'yes' : 'no'));
         $output->writeln(sprintf('Multi-replica-ready stores: %d', $diagnostics->coordinationReadyStoreCount));
+        $output->writeln(sprintf('Posture status: %s', $diagnostics->postureStatus));
+        $output->writeln(sprintf('Risk level: %s', $diagnostics->riskLevel));
+        $output->writeln(sprintf('Recommended action: %s', $diagnostics->recommendedAction));
 
         $output->writeln('Store backends:');
         foreach ($diagnostics->storeBackends as $name => $backend) {
@@ -59,6 +62,8 @@ final class DiscoveryPlatformDiagnoseCommand extends Command
         $output->writeln(sprintf('- reachable: %d', $probeReport->reachableProbeCount));
         $output->writeln(sprintf('- failing: %d', $probeReport->failingProbeCount));
         $output->writeln(sprintf('- skipped: %d', $probeReport->skippedProbeCount));
+        $output->writeln(sprintf('- overall status: %s', $probeReport->overallStatus));
+        $output->writeln(sprintf('- recommended action: %s', $probeReport->recommendedAction));
 
         return $probeReport->failingProbeCount === 0 ? Command::SUCCESS : Command::FAILURE;
     }

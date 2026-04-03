@@ -38,8 +38,11 @@ final class DiscoveryPlatformDiagnosticsBuilderTest extends TestCase
         self::assertTrue($diagnostics->stagedRebuildSupported);
         self::assertFalse($diagnostics->distributedReady);
         self::assertSame('no_evidence', $diagnostics->rollbackStatus);
+        self::assertSame('local_only', $diagnostics->postureStatus);
+        self::assertSame('medium', $diagnostics->riskLevel);
         self::assertContains('discoveryIndex', $diagnostics->blockingStores);
         self::assertContains('Active discovery adapter backend is sqlite-fts5.', $diagnostics->notes);
+        self::assertStringContainsString('single-node mode', $diagnostics->recommendedAction);
     }
 
     public function testBuildRecognizesDistributedReadyMeiliPosture(): void
@@ -112,9 +115,12 @@ final class DiscoveryPlatformDiagnosticsBuilderTest extends TestCase
         self::assertTrue($diagnostics->distributedReady);
         self::assertTrue($diagnostics->rollbackReady);
         self::assertSame('plan_ready', $diagnostics->rollbackStatus);
+        self::assertSame('degraded', $diagnostics->postureStatus);
+        self::assertSame('medium', $diagnostics->riskLevel);
         self::assertSame(6, $diagnostics->coordinationReadyStoreCount);
         self::assertSame([], $diagnostics->blockingStores);
         self::assertContains('Distributed-ready coordination is configured, but rebuild cutover still depends on backend-specific promotion semantics.', $diagnostics->notes);
+        self::assertStringContainsString('deployment cutover playbooks', $diagnostics->recommendedAction);
     }
 
     private function topologyBuilder(

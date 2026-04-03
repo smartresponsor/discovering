@@ -28,6 +28,8 @@ final class DiscoveryPlatformProbeCommand extends Command
         $output->writeln(sprintf('Reachable probes: %d', $report->reachableProbeCount));
         $output->writeln(sprintf('Failing probes: %d', $report->failingProbeCount));
         $output->writeln(sprintf('Skipped probes: %d', $report->skippedProbeCount));
+        $output->writeln(sprintf('Overall status: %s', $report->overallStatus));
+        $output->writeln(sprintf('Recommended action: %s', $report->recommendedAction));
         $output->writeln('Probes:');
 
         foreach ($report->probes as $probe) {
@@ -35,6 +37,10 @@ final class DiscoveryPlatformProbeCommand extends Command
             foreach ($probe->details as $detail) {
                 $output->writeln(sprintf('  · %s', $detail));
             }
+        }
+
+        if ($report->failingProbeNames !== []) {
+            $output->writeln(sprintf('Failing probes: %s', implode(', ', $report->failingProbeNames)));
         }
 
         if ($report->notes !== []) {

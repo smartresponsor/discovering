@@ -57,6 +57,8 @@ final class DiscoveryManagementExportContractTest extends AbstractDiscoveryWebTe
 
         self::assertDiscoveryEnvelopeContract($payload);
         self::assertArrayHasKey('performedProbeCount', $payload['data']);
+        self::assertArrayHasKey('overallStatus', $payload['data']);
+        self::assertArrayHasKey('recommendedAction', $payload['data']);
         self::assertArrayHasKey('probes', $payload['data']);
     }
 

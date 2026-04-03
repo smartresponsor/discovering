@@ -138,8 +138,8 @@
                 </div>
                 <div class="col-md-4">
                     <div class="border rounded p-3 h-100">
-                        <div class="text-muted small">Rollback status</div>
-                        <div class="fw-semibold">{{ platformDiagnostics.rollbackStatus }}</div>
+                        <div class="text-muted small">Posture status</div>
+                        <div class="fw-semibold">{{ platformDiagnostics.postureStatus }}</div>
                     </div>
                 </div>
             </div>
@@ -163,12 +163,20 @@
                         <td>{{ platformDiagnostics.rollbackReady ? 'yes' : 'no' }}</td>
                     </tr>
                     <tr>
+                        <th>Risk level</th>
+                        <td>{{ platformDiagnostics.riskLevel }}</td>
+                    </tr>
+                    <tr>
                         <th>Multi-replica-ready stores</th>
                         <td>{{ platformDiagnostics.coordinationReadyStoreCount }}</td>
                     </tr>
                     <tr>
                         <th>Blocking stores</th>
                         <td>{% if platformDiagnostics.blockingStores is empty %}none{% else %}{{ platformDiagnostics.blockingStores|join(', ') }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th>Recommended action</th>
+                        <td>{{ platformDiagnostics.recommendedAction }}</td>
                     </tr>
                 </tbody>
             </table>

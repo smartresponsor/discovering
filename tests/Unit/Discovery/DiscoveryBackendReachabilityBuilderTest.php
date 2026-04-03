@@ -10,12 +10,19 @@ use PHPUnit\Framework\TestCase;
 
 final class DiscoveryBackendReachabilityBuilderTest extends TestCase
 {
-    public function testBuildSkipsLocalOnlyStoresInSingleNodeMode(): void
+    public function testBuildMarksLocalOnlyModeAsNotConfigured(): void
     {
         $builder = new DiscoveryBackendReachabilityBuilder(
             transport: new class() implements DiscoveryProbeTransportInterface {
-                public function probeHttp(string $baseUrl, ?string $apiKey = null): array { return ['reachable' => false, 'details' => ['unexpected']]; }
-                public function probePdo(string $dsn, ?string $user = null, ?string $password = null): array { return ['reachable' => false, 'details' => ['unexpected']]; }
+                public function probeHttp(string $url, array $headers = []): array
+                {
+                    return ['reachable' => true, 'details' => ['HTTP 200']];
+                }
+
+                public function probePdo(string $dsn, ?string $user = null, ?string $password = null): array
+                {
+                    return ['reachable' => true, 'details' => ['SELECT 1']];
+                }
             },
             indexBackend: 'sqlite',
             meiliUrl: '',
@@ -48,14 +55,17 @@ final class DiscoveryBackendReachabilityBuilderTest extends TestCase
         self::assertSame(0, $report->reachableProbeCount);
         self::assertSame(0, $report->failingProbeCount);
         self::assertSame(6, $report->skippedProbeCount);
-        self::assertSame('local_only', $report->probes[0]->status);
+        self::assertSame('not_configured', $report->overallStatus);
+        self::assertSame([], $report->failingProbeNames);
+        self::assertStringContainsString('No shared backends are configured yet', $report->recommendedAction);
+        self::assertContains('No shared backend probes were performed because every configured store remains in local-only mode.', $report->notes);
     }
 
     public function testBuildProbesConfiguredSharedBackends(): void
     {
         $builder = new DiscoveryBackendReachabilityBuilder(
             transport: new class() implements DiscoveryProbeTransportInterface {
-                public function probeHttp(string $baseUrl, ?string $apiKey = null): array
+                public function probeHttp(string $url, array $headers = []): array
                 {
                     return ['reachable' => true, 'details' => ['HTTP 200']];
                 }
@@ -96,8 +106,11 @@ final class DiscoveryBackendReachabilityBuilderTest extends TestCase
         self::assertSame(4, $report->reachableProbeCount);
         self::assertSame(1, $report->failingProbeCount);
         self::assertSame(1, $report->skippedProbeCount);
+        self::assertSame('degraded', $report->overallStatus);
         self::assertSame('reachable', $report->probes[0]->status);
         self::assertSame('unreachable', $report->probes[2]->status);
+        self::assertSame(['operationLog'], $report->failingProbeNames);
+        self::assertStringContainsString('operationLog', $report->recommendedAction);
         self::assertContains('1 backend reachability probe(s) failed.', $report->notes);
     }
 }
