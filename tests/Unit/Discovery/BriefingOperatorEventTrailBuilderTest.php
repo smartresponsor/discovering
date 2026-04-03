@@ -15,15 +15,13 @@ final class BriefingOperatorEventTrailBuilderTest extends DiscoveryTempFilesyste
 {
     public function testItBuildsTrailFromCurrentRegistryStateAndLastAction(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-briefing-trail-');
-        $storageDirectory = $projectDir . '/resources/discovery/briefings';
-        mkdir($storageDirectory, 0777, true);
-        file_put_contents($storageDirectory . '/alpha.json', json_encode([
+        $projectDir = $this->createTempProjectDirectory('discovering-briefing-trail-');
+        $this->writeDiscoveryRegistryFile($projectDir, 'briefings', 'alpha.json', [
             ['resourceId' => 'briefing-alpha', 'title' => 'Alpha', 'body' => 'Alpha body'],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        file_put_contents($storageDirectory . '/beta.json', json_encode([
+        ]);
+        $this->writeDiscoveryRegistryFile($projectDir, 'briefings', 'beta.json', [
             ['resourceId' => 'briefing-beta', 'title' => 'Beta', 'body' => 'Beta body'],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         $builder = new BriefingOperatorEventTrailBuilder(new BriefingFileDiscoverySourceRecordRepository(
             $projectDir,
@@ -43,18 +41,11 @@ final class BriefingOperatorEventTrailBuilderTest extends DiscoveryTempFilesyste
         self::assertCount(4, $events);
         self::assertSame('registry:file', $events[2]->eventName);
         self::assertSame('registry:file', $events[3]->eventName);
-
-        @unlink($storageDirectory . '/alpha.json');
-        @unlink($storageDirectory . '/beta.json');
-        @rmdir($storageDirectory);
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 
     public function testItBuildsWarningTrailWhenRegistryIsEmpty(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-briefing-trail-empty-');
+        $projectDir = $this->createTempProjectDirectory('discovering-briefing-trail-empty-');
         $builder = new BriefingOperatorEventTrailBuilder(new BriefingFileDiscoverySourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
@@ -67,7 +58,5 @@ final class BriefingOperatorEventTrailBuilderTest extends DiscoveryTempFilesyste
         self::assertSame('warning', $events[0]->level);
         self::assertSame('registry:empty', $events[1]->eventName);
         self::assertSame('warning', $events[1]->level);
-
-        @rmdir($projectDir);
     }
 }

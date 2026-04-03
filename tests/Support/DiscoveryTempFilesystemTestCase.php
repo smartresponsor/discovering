@@ -25,6 +25,47 @@ abstract class DiscoveryTempFilesystemTestCase extends TestCase
         return $this->tempRoot() . '/' . $this->normalizePrefix($prefix) . bin2hex(random_bytes(6)) . $suffix;
     }
 
+    protected function createTempProjectDirectory(string $prefix): string
+    {
+        return $this->createTempDirectory($prefix);
+    }
+
+    protected function ensureDirectory(string $path): string
+    {
+        if (!is_dir($path)) {
+            mkdir($path, 0o777, true);
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param array<mixed> $payload
+     */
+    protected function writeJsonFile(string $path, array $payload): string
+    {
+        $this->ensureDirectory(dirname($path));
+        file_put_contents($path, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        return $path;
+    }
+
+    /**
+     * @param array<mixed> $records
+     */
+    protected function writeDiscoveryRegistryFile(string $projectDir, string $directoryName, string $fileName, array $records): string
+    {
+        return $this->writeJsonFile($projectDir . '/resources/discovery/' . trim($directoryName, '/') . '/' . ltrim($fileName, '/'), $records);
+    }
+
+    /**
+     * @param array<mixed> $records
+     */
+    protected function writeLegacyDiscoveryRegistryFile(string $projectDir, string $fileName, array $records): string
+    {
+        return $this->writeJsonFile($projectDir . '/resources/discovery/' . ltrim($fileName, '/'), $records);
+    }
+
     protected function tearDown(): void
     {
         parent::tearDown();

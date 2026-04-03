@@ -14,11 +14,9 @@ final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystem
 {
     public function testItBuildsManagementSurfaceFromLivePlaybookRecords(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-playbook-surface-');
-        $storageDirectory = $projectDir . '/resources/discovery/playbooks';
+        $projectDir = $this->createTempProjectDirectory('discovering-playbook-surface-');
 
-        mkdir($storageDirectory, 0777, true);
-        file_put_contents($storageDirectory . '/zeta.json', json_encode([
+        $this->writeDiscoveryRegistryFile($projectDir, 'playbooks', 'zeta.json', [
             [
                 'resourceId' => 'playbook-zeta',
                 'title' => 'Zeta playbook',
@@ -26,8 +24,8 @@ final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystem
                 'filters' => ['status' => 'active', 'visibility' => 'internal'],
                 'metadata' => ['tags' => ['zeta', 'ops']],
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        file_put_contents($storageDirectory . '/alpha.json', json_encode([
+        ]);
+        $this->writeDiscoveryRegistryFile($projectDir, 'playbooks', 'alpha.json', [
             [
                 'resourceId' => 'playbook-alpha',
                 'title' => 'Alpha playbook',
@@ -35,7 +33,7 @@ final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystem
                 'filters' => ['status' => 'draft', 'visibility' => 'public'],
                 'metadata' => ['tags' => ['alpha']],
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
@@ -56,12 +54,5 @@ final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystem
         self::assertSame('alpha.json', $surface->fileEntries[0]->fileName);
         self::assertSame(1, $surface->fileEntries[0]->recordCount);
         self::assertSame('zeta.json', $surface->fileEntries[1]->fileName);
-
-        @unlink($storageDirectory . '/alpha.json');
-        @unlink($storageDirectory . '/zeta.json');
-        @rmdir($storageDirectory);
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 }

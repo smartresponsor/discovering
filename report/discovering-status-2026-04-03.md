@@ -35,8 +35,9 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 20. `e335ae8` — add shared discovery index backend seam
 21. `26b1b5d` — add discovery platform diagnostics surface
 
-22. `d88d4f6` — add discovery backend reachability probes
-23. `3df2425` — harden discovery test temp filesystem discipline
+22. `8c96856` — add discovery backend reachability probes
+23. `14bfc5b` — harden discovery test temp filesystem discipline
+24. `434db3a` — harden directory-backed repository test resource fixtures
 
 ## Direct unfinished items
 
@@ -75,6 +76,7 @@ The current codebase is now ready for a proving wave centered on installation, r
 - platform diagnostics now exists as a CLI, management export, and overview surface for adapter capability, topology posture, and rollback readiness
 - explicit backend reachability probes now exist as a dedicated CLI and management export for Meilisearch and PDO-backed coordination targets
 - file- and SQLite-heavy behavioral/unit tests now share a dedicated temporary filesystem support layer instead of ad hoc `sys_get_temp_dir()` + manual cleanup patterns
+- briefing/playbook directory-backed repository and management unit tests now use shared project/resource fixture helpers with automatic teardown instead of hand-written `mkdir`/`unlink`/`rmdir` sequences
 
 ## Recommended next execution order
 

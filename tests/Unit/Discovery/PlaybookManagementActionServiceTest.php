@@ -14,12 +14,10 @@ final class PlaybookManagementActionServiceTest extends DiscoveryTempFilesystemT
 {
     public function testAuditRegistryReportsFilesAndRecords(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-playbook-action-audit-');
-        $storageDirectory = $projectDir . '/resources/discovery/playbooks';
-        mkdir($storageDirectory, 0777, true);
-        file_put_contents($storageDirectory . '/alpha.json', json_encode([
+        $projectDir = $this->createTempProjectDirectory('discovering-playbook-action-audit-');
+        $this->writeDiscoveryRegistryFile($projectDir, 'playbooks', 'alpha.json', [
             ['resourceId' => 'playbook-alpha', 'title' => 'Alpha', 'body' => 'Alpha body'],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         $service = new PlaybookManagementActionService(new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
@@ -33,17 +31,11 @@ final class PlaybookManagementActionServiceTest extends DiscoveryTempFilesystemT
         self::assertSame(1, $result->payload['fileCount']);
         self::assertSame(1, $result->payload['recordCount']);
         self::assertFalse($result->payload['legacyExists']);
-
-        @unlink($storageDirectory . '/alpha.json');
-        @rmdir($storageDirectory);
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 
     public function testEnsureSampleRegistrySeedsFilesWhenRegistryIsEmpty(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-playbook-action-seed-');
+        $projectDir = $this->createTempProjectDirectory('discovering-playbook-action-seed-');
         $service = new PlaybookManagementActionService(new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
@@ -61,24 +53,14 @@ final class PlaybookManagementActionServiceTest extends DiscoveryTempFilesystemT
         self::assertTrue($result->payload['created']);
         self::assertCount(2, $repository->listStorageFiles());
         self::assertCount(2, $repository->all());
-
-        foreach ($repository->listStorageFiles() as $path) {
-            @unlink($path);
-        }
-        @rmdir($repository->getStorageDirectoryPath());
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 
     public function testMigrateLegacyStorageMovesLegacyFileIntoRegistry(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-playbook-action-legacy-');
-        $legacyDirectory = $projectDir . '/resources/discovery';
-        mkdir($legacyDirectory, 0777, true);
-        file_put_contents($legacyDirectory . '/playbook_source_records.json', json_encode([
+        $projectDir = $this->createTempProjectDirectory('discovering-playbook-action-legacy-');
+        $this->writeLegacyDiscoveryRegistryFile($projectDir, 'playbook_source_records.json', [
             ['resourceId' => 'legacy-playbook', 'title' => 'Legacy', 'body' => 'Legacy body'],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
@@ -94,11 +76,5 @@ final class PlaybookManagementActionServiceTest extends DiscoveryTempFilesystemT
         self::assertFileExists($repository->getStoragePath());
         self::assertFileDoesNotExist($repository->getLegacyStoragePath());
         self::assertCount(1, $repository->all());
-
-        @unlink($repository->getStoragePath());
-        @rmdir($repository->getStorageDirectoryPath());
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 }

@@ -13,11 +13,9 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
 {
     public function testItAggregatesPlaybookRecordsFromDirectoryFiles(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-playbook-');
-        $storageDirectory = $projectDir . '/resources/discovery/playbooks';
+        $projectDir = $this->createTempProjectDirectory('discovering-playbook-');
 
-        mkdir($storageDirectory, 0777, true);
-        file_put_contents($storageDirectory . '/alpha.json', json_encode([
+        $this->writeDiscoveryRegistryFile($projectDir, 'playbooks', 'alpha.json', [
             [
                 'resourceId' => 'playbook-alpha',
                 'title' => 'Alpha playbook',
@@ -25,8 +23,8 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
                 'filters' => ['status' => 'active', 'visibility' => 'internal'],
                 'metadata' => ['tags' => ['alpha']],
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        file_put_contents($storageDirectory . '/beta.json', json_encode([
+        ]);
+        $this->writeDiscoveryRegistryFile($projectDir, 'playbooks', 'beta.json', [
             [
                 'resourceId' => 'playbook-beta',
                 'title' => 'Beta playbook',
@@ -35,7 +33,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
                 'filters' => ['status' => 'draft', 'visibility' => 'internal'],
                 'metadata' => ['tags' => ['beta']],
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
@@ -53,28 +51,19 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
         self::assertStringEndsWith('/resources/discovery/playbooks', $repository->getStorageDirectoryPath());
         self::assertSame('playbook-alpha', $records[0]->resourceId);
         self::assertSame('special-playbook', $records[1]->resourceType);
-
-        @unlink($storageDirectory . '/alpha.json');
-        @unlink($storageDirectory . '/beta.json');
-        @rmdir($storageDirectory);
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 
     public function testItUsesLegacyFallbackWhenDirectoryDoesNotExist(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-playbook-legacy-');
-        $legacyDirectory = $projectDir . '/resources/discovery';
+        $projectDir = $this->createTempProjectDirectory('discovering-playbook-legacy-');
 
-        mkdir($legacyDirectory, 0777, true);
-        file_put_contents($legacyDirectory . '/playbook_source_records.json', json_encode([
+        $this->writeLegacyDiscoveryRegistryFile($projectDir, 'playbook_source_records.json', [
             [
                 'resourceId' => 'legacy-playbook',
                 'title' => 'Legacy playbook',
                 'body' => 'Legacy body',
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
@@ -84,16 +73,11 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
 
         self::assertCount(1, $repository->all());
         self::assertSame([$repository->getLegacyStoragePath()], $repository->listStorageFiles());
-
-        @unlink($legacyDirectory . '/playbook_source_records.json');
-        @rmdir($legacyDirectory);
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 
     public function testItExportsAndReplacesPlaybookRecords(): void
     {
-        $projectDir = $this->createTempDirectory('discovering-playbook-export-');
+        $projectDir = $this->createTempProjectDirectory('discovering-playbook-export-');
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
@@ -101,11 +85,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
         );
 
         $importPath = $projectDir . '/import.json';
-        if (!is_dir($projectDir)) {
-            mkdir($projectDir, 0777, true);
-        }
-
-        file_put_contents($importPath, json_encode([
+        $this->writeJsonFile($importPath, [
             [
                 'resourceId' => 'playbook-gamma',
                 'title' => 'Gamma playbook',
@@ -113,7 +93,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
                 'filters' => ['status' => 'active'],
                 'metadata' => ['tags' => ['gamma']],
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         $importedCount = $repository->importFile($importPath);
         $exportedJson = $repository->exportJson();
@@ -121,19 +101,12 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
         self::assertSame(1, $importedCount);
         self::assertStringContainsString('"resourceId": "playbook-gamma"', $exportedJson);
         self::assertFileExists($repository->getStoragePath());
-
-        @unlink($importPath);
-        @unlink($repository->getStoragePath());
-        @rmdir(dirname($repository->getStoragePath()));
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 
     public function testItReturnsEmptyListWhenNoStorageExists(): void
     {
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
-            $this->createTempDirectory('discovering-playbook-missing-'),
+            $this->createTempProjectDirectory('discovering-playbook-missing-'),
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         );
