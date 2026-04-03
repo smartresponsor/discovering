@@ -19,7 +19,7 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseStatusCodeSame(429);
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
         self::assertSame('discovery_rate_limited', $payload['error']['code']);
         self::assertSame('query', $payload['error']['details']['scope']);
@@ -40,18 +40,13 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
                 [],
                 [],
                 $this->apiWriteTokenServer() + ['CONTENT_TYPE' => 'application/json'],
-                json_encode([
-                    'resource' => 'briefing',
-                    'id' => 'briefing-live-source-governance',
-                    'title' => 'Live source governance briefing',
-                    'reference' => 'briefing-live-source-governance',
-                ], JSON_THROW_ON_ERROR),
+                $this->jsonRequestBody($this->discoveryClickPayload()),
             );
         }
 
         self::assertResponseStatusCodeSame(429);
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
         self::assertSame('write', $payload['error']['details']['scope']);
         self::assertSame('2', $client->getResponse()->headers->get('X-RateLimit-Limit'));
@@ -68,7 +63,7 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseStatusCodeSame(429);
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
         self::assertSame('management_mutation', $payload['error']['details']['scope']);
         self::assertSame('2', $client->getResponse()->headers->get('X-RateLimit-Limit'));

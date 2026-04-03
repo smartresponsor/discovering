@@ -40,7 +40,8 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 24. `847e45c` — harden directory-backed repository test resource fixtures
 25. `6cbb031` — ignore generated symfony config reference
 26. `b6ca96f` — add discovery health interpretation surfaces
-27. finish discovery temp test cleanup on shared filesystem helpers
+27. `117eafb` — finish discovery temp test cleanup on shared filesystem helpers
+28. `0d15112` — harden functional discovery test harness against configurable state paths
 
 ## Direct unfinished items
 
@@ -80,6 +81,7 @@ The current codebase is now ready for a proving wave centered on installation, r
 - explicit backend reachability probes now exist as a dedicated CLI and management export for Meilisearch and PDO-backed coordination targets
 - file- and SQLite-heavy behavioral/unit tests now share a dedicated temporary filesystem support layer instead of ad hoc `sys_get_temp_dir()` + manual cleanup patterns
 - briefing/playbook directory-backed repository and management unit tests now use shared project/resource fixture helpers with automatic teardown instead of hand-written `mkdir`/`unlink`/`rmdir` sequences
+- functional discovery web tests now reset configured mutable state paths from test DI parameters and share common JSON/body helpers instead of hard-coded filenames and repeated inline payload decoding
 
 ## Recommended next execution order
 

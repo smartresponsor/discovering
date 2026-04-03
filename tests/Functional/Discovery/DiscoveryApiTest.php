@@ -22,7 +22,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         self::assertTrue($client->getResponse()->headers->has('X-Request-Id'));
         self::assertNotSame('', (string) $client->getResponse()->headers->get('X-Request-Id'));
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
         self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $payload['apiVersion']);
@@ -44,7 +44,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['meta']['deprecatedAlias']);
         self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
@@ -59,17 +59,12 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode([
-                'resource' => 'briefing',
-                'id' => 'briefing-live-source-governance',
-                'title' => 'Live source governance briefing',
-                'reference' => 'briefing-live-source-governance',
-            ], JSON_THROW_ON_ERROR),
+            $this->jsonRequestBody($this->discoveryClickPayload()),
         );
 
         self::assertResponseStatusCodeSame(401);
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertFalse($payload['ok']);
         self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $payload['apiVersion']);
@@ -86,19 +81,14 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
             [],
             [],
             $this->apiWriteTokenServer() + ['CONTENT_TYPE' => 'application/json'],
-            json_encode([
-                'resource' => 'briefing',
-                'id' => 'briefing-live-source-governance',
-                'title' => 'Live source governance briefing',
-                'reference' => 'briefing-live-source-governance',
-            ], JSON_THROW_ON_ERROR),
+            $this->jsonRequestBody($this->discoveryClickPayload()),
         );
 
         self::assertResponseIsSuccessful();
         self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $client->getResponse()->headers->get(DiscoveryJsonResponseFactory::API_VERSION_HEADER));
         self::assertTrue($client->getResponse()->headers->has('X-Request-Id'));
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
         self::assertSame('/api/v1/discovery/click', $payload['meta']['canonicalPath']);

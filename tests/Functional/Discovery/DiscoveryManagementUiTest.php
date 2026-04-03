@@ -43,7 +43,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertResponseIsSuccessful();
         self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $client->getResponse()->headers->get(DiscoveryJsonResponseFactory::API_VERSION_HEADER));
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
         self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $payload['apiVersion']);
@@ -70,7 +70,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertResponseIsSuccessful();
         self::assertTrue($managementClient->getResponse()->headers->has('X-Request-Id'));
 
-        $payload = json_decode((string) $managementClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($managementClient);
 
         self::assertTrue($payload['ok']);
         self::assertNotEmpty($payload['data']);
@@ -84,7 +84,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.rebuild.summary', $payload['meta']['schemaFamily']);
@@ -106,7 +106,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode((string) $exportClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($exportClient);
 
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.rebuild.summary.list', $payload['meta']['schemaFamily']);
@@ -123,7 +123,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.state.topology', $payload['meta']['schemaFamily']);
@@ -139,7 +139,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.platform.probes', $payload['meta']['schemaFamily']);
@@ -157,7 +157,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.platform.diagnostics', $payload['meta']['schemaFamily']);
@@ -184,7 +184,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode((string) $exportClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($exportClient);
 
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.rollback.plan', $payload['meta']['schemaFamily']);
@@ -204,7 +204,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         $exportClient = $this->createDiscoveryClient($this->managementTokenServer());
         $exportClient->request('GET', '/management/discovery/rollback/export', [], [], $this->managementTokenServer());
-        $planPayload = json_decode((string) $exportClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $planPayload = $this->jsonResponsePayload($exportClient);
 
         $executeClient = $this->createDiscoveryClient($this->managementTokenServer());
         $executeClient->request('POST', '/management/discovery/rollback/execute', [
@@ -214,7 +214,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $payload = json_decode((string) $executeClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = $this->jsonResponsePayload($executeClient);
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.rollback.execution', $payload['meta']['schemaFamily']);
         self::assertTrue($payload['data']['executed']);

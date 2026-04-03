@@ -64,12 +64,7 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
-            json_encode([
-                'resource' => 'briefing',
-                'id' => 'briefing-live-source-governance',
-                'title' => 'Live source governance briefing',
-                'reference' => 'briefing-live-source-governance',
-            ], JSON_THROW_ON_ERROR),
+            $this->jsonRequestBody($this->discoveryClickPayload()),
         );
 
         self::assertResponseStatusCodeSame(401);
