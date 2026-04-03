@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -51,17 +52,21 @@ final class DiscoveryRequestCorrelationSubscriber implements EventSubscriberInte
         }
 
         $requestId = $request->attributes->get(DiscoveryOperationLogger::REQUEST_ID_ATTRIBUTE);
-        if (!is_string($requestId) || $requestId === '') {
-            return;
+        if (is_string($requestId) && $requestId !== '') {
+            $event->getResponse()->headers->set(DiscoveryOperationLogger::REQUEST_ID_HEADER, $requestId);
         }
 
-        $event->getResponse()->headers->set(DiscoveryOperationLogger::REQUEST_ID_HEADER, $requestId);
+        $event->getResponse()->headers->set(
+            DiscoveryJsonResponseFactory::API_VERSION_HEADER,
+            DiscoveryJsonResponseFactory::API_VERSION,
+        );
     }
 
     private function isDiscoveryPath(string $path): bool
     {
         return str_starts_with($path, '/discovery')
             || str_starts_with($path, '/api/discovery')
+            || str_starts_with($path, '/api/v1/discovery')
             || str_starts_with($path, '/management/discovery');
     }
 }

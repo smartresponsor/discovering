@@ -7,6 +7,7 @@ use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
 use App\Form\Discovery\DiscoverySearchType;
 use App\Service\Discovery\DiscoveryLearningService;
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +23,7 @@ final class DiscoveryController extends AbstractController
         private readonly DiscoveryServiceInterface $discoveryService,
         private readonly DiscoveryLearningService $learningService,
         private readonly DiscoveryOperationLogger $operationLogger,
+        private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
 
@@ -71,6 +73,7 @@ final class DiscoveryController extends AbstractController
     }
 
     #[Route('/api/discovery', name: 'app_discovery_api', methods: ['GET'])]
+    #[Route('/api/v1/discovery', name: 'app_discovery_api_v1', methods: ['GET'])]
     public function api(Request $request): JsonResponse
     {
         $query = $this->buildDiscoveryQuery($request, false);
@@ -82,10 +85,11 @@ final class DiscoveryController extends AbstractController
             'total' => $result->total,
         ]);
 
-        return $this->json(['ok' => true, 'data' => $result->toArray()]);
+        return $this->jsonResponseFactory->success($result->toArray());
     }
 
     #[Route('/api/discovery/click', name: 'app_discovery_api_click', methods: ['POST'])]
+    #[Route('/api/v1/discovery/click', name: 'app_discovery_api_click_v1', methods: ['POST'])]
     public function click(Request $request): JsonResponse
     {
         $payload = json_decode($request->getContent(), true);
@@ -106,13 +110,10 @@ final class DiscoveryController extends AbstractController
             'feedbackCount' => $count,
         ]);
 
-        return $this->json([
-            'ok' => true,
-            'data' => [
-                'resource' => (string) ($payload['resource'] ?? 'global'),
-                'id' => (string) ($payload['id'] ?? ''),
-                'feedbackCount' => $count,
-            ],
+        return $this->jsonResponseFactory->success([
+            'resource' => (string) ($payload['resource'] ?? 'global'),
+            'id' => (string) ($payload['id'] ?? ''),
+            'feedbackCount' => $count,
         ]);
     }
 

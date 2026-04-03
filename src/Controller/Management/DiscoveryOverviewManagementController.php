@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Management;
 
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
@@ -18,6 +19,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
         private readonly DiscoveryOverviewServiceInterface $overviewService,
         private readonly DiscoveryOperationEventLogStoreInterface $operationLogStore,
         private readonly DiscoveryOperationLogger $operationLogger,
+        private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
 
@@ -40,7 +42,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
         $overview = $this->overviewService->buildOverview();
         $this->operationLogger->recordHttp('discovery.management.overview.export');
 
-        return $this->json([
+        return $this->jsonResponseFactory->success([
             'backendName' => $overview->backendName,
             'totalDocuments' => $overview->totalDocuments,
             'countsByResourceType' => $overview->countsByResourceType,
@@ -68,19 +70,16 @@ final class DiscoveryOverviewManagementController extends AbstractController
     {
         $this->operationLogger->recordHttp('discovery.management.operations.export');
 
-        return $this->json([
-            'ok' => true,
-            'data' => array_map(
-                static fn ($event): array => [
-                    'requestId' => $event->requestId,
-                    'channel' => $event->channel,
-                    'operation' => $event->operation,
-                    'status' => $event->status,
-                    'occurredAt' => $event->occurredAt,
-                    'context' => $event->context,
-                ],
-                $this->operationLogStore->latest(50),
-            ),
-        ]);
+        return $this->jsonResponseFactory->success(array_map(
+            static fn ($event): array => [
+                'requestId' => $event->requestId,
+                'channel' => $event->channel,
+                'operation' => $event->operation,
+                'status' => $event->status,
+                'occurredAt' => $event->occurredAt,
+                'context' => $event->context,
+            ],
+            $this->operationLogStore->latest(50),
+        ));
     }
 }

@@ -6,6 +6,7 @@ namespace App\Controller\Management;
 
 use App\Dto\Discovery\LibsourceEventLogQuery;
 use App\Dto\Discovery\LibsourceOperatorEvent;
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,7 @@ final class DiscoveryLibsourceLogManagementController extends AbstractController
 {
     public function __construct(
         private readonly LibsourceEventLogSurfaceBuilder $surfaceBuilder,
+        private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
 
@@ -36,7 +38,7 @@ final class DiscoveryLibsourceLogManagementController extends AbstractController
         $query = $this->createQuery($request);
         $surface = $this->surfaceBuilder->build($query);
 
-        return $this->json([
+        return $this->jsonResponseFactory->success([
             'backendClass' => $surface->backendClass,
             'totalEvents' => $surface->totalEvents,
             'filteredTotalEvents' => $surface->filteredTotalEvents,

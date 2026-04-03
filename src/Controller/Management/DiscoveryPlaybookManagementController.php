@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Management;
 
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Playbook\PlaybookManagementSurfaceActionResolver;
 use App\Service\Discovery\Playbook\PlaybookManagementSurfaceBuilder;
 use App\Service\Discovery\Playbook\PlaybookOperatorEventTrailBuilder;
@@ -16,11 +17,13 @@ use Symfony\Component\Routing\Attribute\Route;
 final class DiscoveryPlaybookManagementController extends AbstractDirectoryBackedFamilyManagementController
 {
     public function __construct(
+        DiscoveryJsonResponseFactory $jsonResponseFactory,
         private readonly PlaybookManagementSurfaceBuilder $surfaceBuilder,
         private readonly PlaybookManagementSurfaceActionResolver $actionResolver,
         private readonly PlaybookOperatorEventTrailBuilder $eventTrailBuilder,
         private readonly PlaybookFileDiscoverySourceRecordRepository $repository,
     ) {
+        parent::__construct($jsonResponseFactory);
     }
 
     #[Route('/management/discovery/playbook', name: 'app_management_discovery_playbook', methods: ['GET'])]

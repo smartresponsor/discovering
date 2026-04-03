@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Management;
 
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
 use App\Service\Discovery\Libsource\LibsourceManagementSurfaceActionResolver;
 use App\Service\Discovery\Libsource\LibsourceOperatorEventTrailBuilder;
@@ -21,6 +22,7 @@ final class DiscoveryLibsourceManagementController extends AbstractController
         private readonly LibsourceManagementSurfaceActionResolver $actionResolver,
         private readonly LibsourceOperatorEventTrailBuilder $eventTrailBuilder,
         private readonly DiscoverySourceRepositoryRegistry $repositoryRegistry,
+        private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
 
@@ -55,7 +57,7 @@ final class DiscoveryLibsourceManagementController extends AbstractController
                 $repository->all(),
             );
 
-        return $this->json([
+        return $this->jsonResponseFactory->success([
             'sourceName' => $repository->getSourceName(),
             'resourceType' => $repository->getResourceType(),
             'storagePath' => method_exists($repository, 'getStoragePath') ? $repository->getStoragePath() : null,
@@ -63,4 +65,3 @@ final class DiscoveryLibsourceManagementController extends AbstractController
         ]);
     }
 }
-

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Discovery;
 
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+
 final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 {
     public function testDiscoveryPageRendersWithSeededResult(): void
@@ -39,21 +41,25 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $client->request('GET', '/management/discovery/export', [], [], $this->managementTokenServer());
 
         self::assertResponseIsSuccessful();
+        self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $client->getResponse()->headers->get(DiscoveryJsonResponseFactory::API_VERSION_HEADER));
 
         $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
-        self::assertSame('sqlite-fts5', $payload['backendName']);
-        self::assertGreaterThanOrEqual(1, $payload['totalDocuments']);
-        self::assertArrayHasKey('briefing', $payload['countsByResourceType']);
-        self::assertArrayHasKey('briefing-file-source-provider', $payload['countsBySourceName']);
-        self::assertNotEmpty($payload['sampleDocuments']);
+        self::assertTrue($payload['ok']);
+        self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $payload['apiVersion']);
+        self::assertFalse($payload['meta']['deprecatedAlias']);
+        self::assertSame('/management/discovery/export', $payload['meta']['canonicalPath']);
+        self::assertSame('sqlite-fts5', $payload['data']['backendName']);
+        self::assertGreaterThanOrEqual(1, $payload['data']['totalDocuments']);
+        self::assertArrayHasKey('briefing', $payload['data']['countsByResourceType']);
+        self::assertArrayHasKey('briefing-file-source-provider', $payload['data']['countsBySourceName']);
+        self::assertNotEmpty($payload['data']['sampleDocuments']);
     }
-
 
     public function testManagementOperationsExportReturnsRecordedEvents(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/api/discovery', [
+        $client->request('GET', '/api/v1/discovery', [
             'query' => 'governance',
             'resource' => 'briefing',
         ]);

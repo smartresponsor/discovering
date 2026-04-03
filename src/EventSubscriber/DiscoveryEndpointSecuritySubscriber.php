@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -16,6 +16,7 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
     public function __construct(
         private readonly string $managementToken,
         private readonly string $apiWriteToken,
+        private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
 
@@ -48,10 +49,11 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
                 return;
             }
 
-            $event->setResponse(new JsonResponse([
-                'ok' => false,
-                'error' => 'Unauthorized discovery API write request.',
-            ], Response::HTTP_UNAUTHORIZED));
+            $event->setResponse($this->jsonResponseFactory->error(
+                code: 'discovery_api_write_unauthorized',
+                message: 'Unauthorized discovery API write request.',
+                status: Response::HTTP_UNAUTHORIZED,
+            ));
         }
     }
 
@@ -62,7 +64,8 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
 
     private function isProtectedApiWritePath(Request $request, string $path): bool
     {
-        return $request->isMethod(Request::METHOD_POST) && $path === '/api/discovery/click';
+        return $request->isMethod(Request::METHOD_POST)
+            && ($path === '/api/discovery/click' || $path === '/api/v1/discovery/click');
     }
 
     private function hasExpectedToken(Request $request, string $headerName, string $expectedToken): bool
