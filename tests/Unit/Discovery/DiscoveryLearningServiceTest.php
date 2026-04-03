@@ -6,13 +6,13 @@ namespace App\Tests\Unit\Discovery;
 use App\Dto\Discovery\DiscoveryHit;
 use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryLearningService;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DiscoveryLearningServiceTest extends TestCase
+final class DiscoveryLearningServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItCalculatesFeedbackBoostFromPersistedClicks(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-learning-' . uniqid('', true) . '.sqlite';
+        $path = $this->createTempFilePath('discovering-learning-', '.sqlite');
         $service = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
 
         $service->recordUsefulClick('playbook', 'playbook-1', 'Playbook', 'ref');

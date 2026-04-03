@@ -13,9 +13,9 @@ use App\Service\Discovery\DiscoveryModePresetService;
 use App\Service\Discovery\DiscoveryScoringService;
 use App\Service\Discovery\DiscoveryService;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DiscoveryModeBehaviorTest extends TestCase
+final class DiscoveryModeBehaviorTest extends DiscoveryTempFilesystemTestCase
 {
     public function testGovernanceModePrefersActiveBriefingOverActivePlaybookAndExcludesDrafts(): void
     {
@@ -103,7 +103,7 @@ final class DiscoveryModeBehaviorTest extends TestCase
      */
     private function createService(array $rows): DiscoveryService
     {
-        $feedbackPath = sys_get_temp_dir() . '/discovering-mode-behavior-' . uniqid('', true) . '.sqlite';
+        $feedbackPath = $this->createTempFilePath('discovering-mode-behavior-', '.sqlite');
         $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($feedbackPath));
 
         return new DiscoveryService(

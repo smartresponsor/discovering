@@ -7,13 +7,13 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class BriefingFileDiscoverySourceRecordRepositoryTest extends TestCase
+final class BriefingFileDiscoverySourceRecordRepositoryTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItAggregatesBriefingRecordsFromDirectoryFiles(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-briefing-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-briefing-');
         $storageDirectory = $projectDir . '/resources/discovery/briefings';
 
         mkdir($storageDirectory, 0777, true);
@@ -64,7 +64,7 @@ final class BriefingFileDiscoverySourceRecordRepositoryTest extends TestCase
 
     public function testItUsesLegacyFallbackWhenDirectoryDoesNotExist(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-briefing-legacy-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-briefing-legacy-');
         $legacyDirectory = $projectDir . '/resources/discovery';
 
         mkdir($legacyDirectory, 0777, true);

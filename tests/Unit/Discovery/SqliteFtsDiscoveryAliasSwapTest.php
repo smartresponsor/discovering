@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Discovery;
 
 use App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class SqliteFtsDiscoveryAliasSwapTest extends TestCase
+final class SqliteFtsDiscoveryAliasSwapTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItServesSearchesFromSwappedAliasTarget(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-alias-' . bin2hex(random_bytes(4)) . '.sqlite';
+        $path = $this->createTempFilePath('discovering-alias-', '.sqlite');
         if (is_file($path)) {
             unlink($path);
         }

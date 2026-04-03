@@ -8,13 +8,13 @@ use App\Service\Discovery\Playbook\PlaybookManagementSurfaceBuilder;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class PlaybookManagementSurfaceBuilderTest extends TestCase
+final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsManagementSurfaceFromLivePlaybookRecords(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-surface-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-surface-');
         $storageDirectory = $projectDir . '/resources/discovery/playbooks';
 
         mkdir($storageDirectory, 0777, true);

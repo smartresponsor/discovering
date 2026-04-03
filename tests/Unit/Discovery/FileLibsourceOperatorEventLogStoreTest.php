@@ -7,13 +7,13 @@ namespace App\Tests\Unit\Discovery;
 use App\Dto\Discovery\LibsourceOperatorEvent;
 use App\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore;
 use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class FileLibsourceOperatorEventLogStoreTest extends TestCase
+final class FileLibsourceOperatorEventLogStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItPersistsAndClearsEventsInJsonFile(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-libsource-log-' . uniqid('', true) . '.json';
+        $path = $this->createTempFilePath('discovering-libsource-log-', '.json');
         $store = new FileLibsourceOperatorEventLogStore($path, new LibsourceOperatorEventJsonSerializer());
 
         $store->append(new LibsourceOperatorEvent('action:inspect', 'info', 'Inspected source.', ['sourceName' => 'project-source-provider']));

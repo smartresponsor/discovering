@@ -8,13 +8,13 @@ use App\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class BriefingManagementSurfaceBuilderTest extends TestCase
+final class BriefingManagementSurfaceBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsManagementSurfaceFromLiveBriefingRecords(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-briefing-surface-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-briefing-surface-');
         $storageDirectory = $projectDir . '/resources/discovery/briefings';
 
         mkdir($storageDirectory, 0777, true);

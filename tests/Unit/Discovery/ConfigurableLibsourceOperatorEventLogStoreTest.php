@@ -9,13 +9,13 @@ use App\Service\Discovery\Libsource\Log\ConfigurableLibsourceOperatorEventLogSto
 use App\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore;
 use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
 use App\Service\Discovery\Libsource\Log\PdoLibsourceOperatorEventLogStore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class ConfigurableLibsourceOperatorEventLogStoreTest extends TestCase
+final class ConfigurableLibsourceOperatorEventLogStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testSelectsFileBackendWhenConfigured(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-libsource-log-' . bin2hex(random_bytes(6)) . '.json';
+        $path = $this->createTempFilePath('discovering-libsource-log-', '.json');
         $store = new ConfigurableLibsourceOperatorEventLogStore(
             new FileLibsourceOperatorEventLogStore($path, new LibsourceOperatorEventJsonSerializer()),
             new PdoLibsourceOperatorEventLogStore('', null, null, 'discovery_libsource_operator_event_log'),
@@ -32,7 +32,7 @@ final class ConfigurableLibsourceOperatorEventLogStoreTest extends TestCase
 
     public function testRejectsUnknownBackend(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-libsource-log-' . bin2hex(random_bytes(6)) . '.json';
+        $path = $this->createTempFilePath('discovering-libsource-log-', '.json');
         $store = new ConfigurableLibsourceOperatorEventLogStore(
             new FileLibsourceOperatorEventLogStore($path, new LibsourceOperatorEventJsonSerializer()),
             new PdoLibsourceOperatorEventLogStore('', null, null, 'discovery_libsource_operator_event_log'),

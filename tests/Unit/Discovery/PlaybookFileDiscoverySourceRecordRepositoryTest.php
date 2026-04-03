@@ -7,13 +7,13 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class PlaybookFileDiscoverySourceRecordRepositoryTest extends TestCase
+final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItAggregatesPlaybookRecordsFromDirectoryFiles(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-');
         $storageDirectory = $projectDir . '/resources/discovery/playbooks';
 
         mkdir($storageDirectory, 0777, true);
@@ -64,7 +64,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends TestCase
 
     public function testItUsesLegacyFallbackWhenDirectoryDoesNotExist(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-legacy-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-legacy-');
         $legacyDirectory = $projectDir . '/resources/discovery';
 
         mkdir($legacyDirectory, 0777, true);
@@ -93,7 +93,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends TestCase
 
     public function testItExportsAndReplacesPlaybookRecords(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-export-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-export-');
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
@@ -133,7 +133,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends TestCase
     public function testItReturnsEmptyListWhenNoStorageExists(): void
     {
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
-            sys_get_temp_dir() . '/discovering-playbook-missing-' . uniqid('', true),
+            $this->createTempDirectory('discovering-playbook-missing-'),
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         );

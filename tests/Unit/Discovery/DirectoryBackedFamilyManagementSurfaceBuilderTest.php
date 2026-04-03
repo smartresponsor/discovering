@@ -8,13 +8,13 @@ use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySour
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DirectoryBackedFamilyManagementSurfaceBuilderTest extends TestCase
+final class DirectoryBackedFamilyManagementSurfaceBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsReusableManagementSurfaceFromDirectoryBackedRepository(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-family-surface-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-family-surface-');
         $storageDirectory = $projectDir . '/resources/discovery/family';
 
         mkdir($storageDirectory, 0777, true);

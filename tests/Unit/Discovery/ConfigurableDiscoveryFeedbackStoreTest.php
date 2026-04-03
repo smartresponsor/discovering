@@ -7,13 +7,13 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\ConfigurableDiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\PdoDiscoveryFeedbackStore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class ConfigurableDiscoveryFeedbackStoreTest extends TestCase
+final class ConfigurableDiscoveryFeedbackStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItFallsBackToSqlitePathStoreWhenPdoBackendHasNoDsn(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-feedback-configurable-' . uniqid('', true) . '.sqlite';
+        $path = $this->createTempFilePath('discovering-feedback-configurable-', '.sqlite');
         $store = new ConfigurableDiscoveryFeedbackStore(
             sqliteStore: new DiscoveryFeedbackStore($path),
             pdoStore: new PdoDiscoveryFeedbackStore('', null, null, 'discovery_feedback_test'),
@@ -29,7 +29,7 @@ final class ConfigurableDiscoveryFeedbackStoreTest extends TestCase
 
     public function testItUsesPdoStoreWhenConfigured(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-feedback-configurable-unused-' . uniqid('', true) . '.sqlite';
+        $path = $this->createTempFilePath('discovering-feedback-configurable-unused-', '.sqlite');
         $store = new ConfigurableDiscoveryFeedbackStore(
             sqliteStore: new DiscoveryFeedbackStore($path),
             pdoStore: new PdoDiscoveryFeedbackStore('sqlite::memory:', null, null, 'discovery_feedback_test'),

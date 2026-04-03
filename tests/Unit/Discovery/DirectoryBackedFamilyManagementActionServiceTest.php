@@ -8,13 +8,13 @@ use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySour
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DirectoryBackedFamilyManagementActionServiceTest extends TestCase
+final class DirectoryBackedFamilyManagementActionServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItAuditsSeedsAndMigratesUsingSharedFamilyActionLogic(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-family-actions-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-family-actions-');
         $legacyDirectory = $projectDir . '/resources/discovery';
         mkdir($legacyDirectory, 0777, true);
         file_put_contents($legacyDirectory . '/family_source_records.json', json_encode([

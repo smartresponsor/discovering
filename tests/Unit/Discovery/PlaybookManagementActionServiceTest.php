@@ -8,13 +8,13 @@ use App\Service\Discovery\Playbook\PlaybookManagementActionService;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class PlaybookManagementActionServiceTest extends TestCase
+final class PlaybookManagementActionServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testAuditRegistryReportsFilesAndRecords(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-action-audit-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-action-audit-');
         $storageDirectory = $projectDir . '/resources/discovery/playbooks';
         mkdir($storageDirectory, 0777, true);
         file_put_contents($storageDirectory . '/alpha.json', json_encode([
@@ -43,7 +43,7 @@ final class PlaybookManagementActionServiceTest extends TestCase
 
     public function testEnsureSampleRegistrySeedsFilesWhenRegistryIsEmpty(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-action-seed-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-action-seed-');
         $service = new PlaybookManagementActionService(new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
@@ -73,7 +73,7 @@ final class PlaybookManagementActionServiceTest extends TestCase
 
     public function testMigrateLegacyStorageMovesLegacyFileIntoRegistry(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-action-legacy-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-action-legacy-');
         $legacyDirectory = $projectDir . '/resources/discovery';
         mkdir($legacyDirectory, 0777, true);
         file_put_contents($legacyDirectory . '/playbook_source_records.json', json_encode([

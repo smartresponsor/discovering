@@ -9,13 +9,13 @@ use App\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class BriefingOperatorEventTrailBuilderTest extends TestCase
+final class BriefingOperatorEventTrailBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsTrailFromCurrentRegistryStateAndLastAction(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-briefing-trail-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-briefing-trail-');
         $storageDirectory = $projectDir . '/resources/discovery/briefings';
         mkdir($storageDirectory, 0777, true);
         file_put_contents($storageDirectory . '/alpha.json', json_encode([
@@ -54,7 +54,7 @@ final class BriefingOperatorEventTrailBuilderTest extends TestCase
 
     public function testItBuildsWarningTrailWhenRegistryIsEmpty(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-briefing-trail-empty-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-briefing-trail-empty-');
         $builder = new BriefingOperatorEventTrailBuilder(new BriefingFileDiscoverySourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),

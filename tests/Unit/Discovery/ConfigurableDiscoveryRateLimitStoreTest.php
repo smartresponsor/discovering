@@ -7,13 +7,13 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\RateLimit\ConfigurableDiscoveryRateLimitStore;
 use App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
 use App\Service\Discovery\RateLimit\PdoDiscoveryRateLimitStore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class ConfigurableDiscoveryRateLimitStoreTest extends TestCase
+final class ConfigurableDiscoveryRateLimitStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testSelectsFileBackendWhenConfigured(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-rate-limit-configurable-' . bin2hex(random_bytes(6)) . '.json';
+        $path = $this->createTempFilePath('discovering-rate-limit-configurable-', '.json');
         $store = new ConfigurableDiscoveryRateLimitStore(
             new FileDiscoveryRateLimitStore($path),
             new PdoDiscoveryRateLimitStore('', null, null, 'discovery_rate_limit_bucket'),
@@ -29,7 +29,7 @@ final class ConfigurableDiscoveryRateLimitStoreTest extends TestCase
 
     public function testRejectsUnknownBackend(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-rate-limit-configurable-' . bin2hex(random_bytes(6)) . '.json';
+        $path = $this->createTempFilePath('discovering-rate-limit-configurable-', '.json');
         $store = new ConfigurableDiscoveryRateLimitStore(
             new FileDiscoveryRateLimitStore($path),
             new PdoDiscoveryRateLimitStore('', null, null, 'discovery_rate_limit_bucket'),

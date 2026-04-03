@@ -36,6 +36,7 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 21. `26b1b5d` — add discovery platform diagnostics surface
 
 22. `d88d4f6` — add discovery backend reachability probes
+23. `3df2425` — harden discovery test temp filesystem discipline
 
 ## Direct unfinished items
 
@@ -73,10 +74,11 @@ The current codebase is now ready for a proving wave centered on installation, r
 - discovery index backend selection now exists between local SQLite FTS and shared Meilisearch service mode
 - platform diagnostics now exists as a CLI, management export, and overview surface for adapter capability, topology posture, and rollback readiness
 - explicit backend reachability probes now exist as a dedicated CLI and management export for Meilisearch and PDO-backed coordination targets
+- file- and SQLite-heavy behavioral/unit tests now share a dedicated temporary filesystem support layer instead of ad hoc `sys_get_temp_dir()` + manual cleanup patterns
 
 ## Recommended next execution order
 
-1. Run PHPUnit suites and fix runtime regressions
+1. Run PHPUnit suites and fix remaining runtime regressions
 2. In a deployment target, decide whether discovery index should remain SQLite or switch to Meilisearch service mode
 3. If needed later, broaden rollback beyond alias promotion toward richer historical-state recovery semantics
 

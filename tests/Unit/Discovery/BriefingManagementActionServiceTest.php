@@ -8,13 +8,13 @@ use App\Service\Discovery\Briefing\BriefingManagementActionService;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class BriefingManagementActionServiceTest extends TestCase
+final class BriefingManagementActionServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testAuditRegistryReportsFilesAndRecords(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-briefing-action-audit-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-briefing-action-audit-');
         $storageDirectory = $projectDir . '/resources/discovery/briefings';
         mkdir($storageDirectory, 0777, true);
         file_put_contents($storageDirectory . '/alpha.json', json_encode([
@@ -43,7 +43,7 @@ final class BriefingManagementActionServiceTest extends TestCase
 
     public function testEnsureSampleRegistrySeedsFilesWhenRegistryIsEmpty(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-briefing-action-seed-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-briefing-action-seed-');
         $service = new BriefingManagementActionService(new BriefingFileDiscoverySourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
@@ -73,7 +73,7 @@ final class BriefingManagementActionServiceTest extends TestCase
 
     public function testMigrateLegacyStorageMovesLegacyFileIntoRegistry(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-briefing-action-legacy-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-briefing-action-legacy-');
         $legacyDirectory = $projectDir . '/resources/discovery';
         mkdir($legacyDirectory, 0777, true);
         file_put_contents($legacyDirectory . '/briefing_source_records.json', json_encode([

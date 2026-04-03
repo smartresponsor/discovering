@@ -7,9 +7,9 @@ namespace App\Tests\Unit\Discovery;
 use App\Dto\Discovery\DiscoveryOperationEvent;
 use App\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
 use App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class FileDiscoveryOperationEventLogStoreTest extends TestCase
+final class FileDiscoveryOperationEventLogStoreTest extends DiscoveryTempFilesystemTestCase
 {
     private string $path;
 
@@ -17,7 +17,7 @@ final class FileDiscoveryOperationEventLogStoreTest extends TestCase
     {
         parent::setUp();
 
-        $this->path = sys_get_temp_dir() . '/discovering-operation-log-' . bin2hex(random_bytes(4)) . '.json';
+        $this->path = $this->createTempFilePath('discovering-operation-log-', '.json');
     }
 
     protected function tearDown(): void

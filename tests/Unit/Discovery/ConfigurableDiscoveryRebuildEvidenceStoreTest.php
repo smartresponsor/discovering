@@ -9,13 +9,13 @@ use App\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore;
 use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
 use App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
 use App\Service\Discovery\Rebuild\PdoDiscoveryRebuildEvidenceStore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class ConfigurableDiscoveryRebuildEvidenceStoreTest extends TestCase
+final class ConfigurableDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testSelectsFileBackendWhenConfigured(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-rebuild-evidence-' . bin2hex(random_bytes(6)) . '.json';
+        $path = $this->createTempFilePath('discovering-rebuild-evidence-', '.json');
         $store = new ConfigurableDiscoveryRebuildEvidenceStore(
             new FileDiscoveryRebuildEvidenceStore($path, new DiscoveryRebuildEvidenceJsonSerializer()),
             new PdoDiscoveryRebuildEvidenceStore('', null, null, 'discovery_rebuild_evidence'),
@@ -32,7 +32,7 @@ final class ConfigurableDiscoveryRebuildEvidenceStoreTest extends TestCase
 
     public function testRejectsUnknownBackend(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-rebuild-evidence-' . bin2hex(random_bytes(6)) . '.json';
+        $path = $this->createTempFilePath('discovering-rebuild-evidence-', '.json');
         $store = new ConfigurableDiscoveryRebuildEvidenceStore(
             new FileDiscoveryRebuildEvidenceStore($path, new DiscoveryRebuildEvidenceJsonSerializer()),
             new PdoDiscoveryRebuildEvidenceStore('', null, null, 'discovery_rebuild_evidence'),

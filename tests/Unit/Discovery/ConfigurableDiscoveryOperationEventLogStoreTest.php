@@ -9,13 +9,13 @@ use App\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore
 use App\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
 use App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
 use App\Service\Discovery\Operations\PdoDiscoveryOperationEventLogStore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class ConfigurableDiscoveryOperationEventLogStoreTest extends TestCase
+final class ConfigurableDiscoveryOperationEventLogStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testSelectsFileBackendWhenConfigured(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-operation-log-' . bin2hex(random_bytes(6)) . '.json';
+        $path = $this->createTempFilePath('discovering-operation-log-', '.json');
         $store = new ConfigurableDiscoveryOperationEventLogStore(
             new FileDiscoveryOperationEventLogStore($path, new DiscoveryOperationEventJsonSerializer()),
             new PdoDiscoveryOperationEventLogStore('', null, null, 'discovery_operation_event_log'),
@@ -32,7 +32,7 @@ final class ConfigurableDiscoveryOperationEventLogStoreTest extends TestCase
 
     public function testRejectsUnknownBackend(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-operation-log-' . bin2hex(random_bytes(6)) . '.json';
+        $path = $this->createTempFilePath('discovering-operation-log-', '.json');
         $store = new ConfigurableDiscoveryOperationEventLogStore(
             new FileDiscoveryOperationEventLogStore($path, new DiscoveryOperationEventJsonSerializer()),
             new PdoDiscoveryOperationEventLogStore('', null, null, 'discovery_operation_event_log'),

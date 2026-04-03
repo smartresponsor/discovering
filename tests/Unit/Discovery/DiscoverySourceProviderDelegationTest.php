@@ -18,9 +18,9 @@ use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRep
 use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DiscoverySourceProviderDelegationTest extends TestCase
+final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesystemTestCase
 {
     public function testProjectProviderDelegatesToRepository(): void
     {
@@ -60,7 +60,7 @@ final class DiscoverySourceProviderDelegationTest extends TestCase
 
     public function testPlaybookProviderDelegatesToFileBackedRepository(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-provider-playbook-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-provider-playbook-');
         $resourceDirectory = $projectDir . '/resources/discovery';
 
         mkdir($resourceDirectory, 0777, true);
@@ -90,7 +90,7 @@ final class DiscoverySourceProviderDelegationTest extends TestCase
 
     public function testBriefingProviderDelegatesToFileBackedRepository(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-provider-briefing-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-provider-briefing-');
         $storageDirectory = $projectDir . '/resources/discovery/briefings';
 
         mkdir($storageDirectory, 0777, true);

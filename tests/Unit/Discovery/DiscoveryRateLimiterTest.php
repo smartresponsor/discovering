@@ -6,16 +6,16 @@ namespace App\Tests\Unit\Discovery;
 
 use App\Service\Discovery\RateLimit\DiscoveryRateLimiter;
 use App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-final class DiscoveryRateLimiterTest extends TestCase
+final class DiscoveryRateLimiterTest extends DiscoveryTempFilesystemTestCase
 {
     private string $path;
 
     protected function setUp(): void
     {
-        $this->path = sys_get_temp_dir() . '/discovering-rate-limit-' . bin2hex(random_bytes(6)) . '.json';
+        $this->path = $this->createTempFilePath('discovering-rate-limit-', '.json');
     }
 
     protected function tearDown(): void

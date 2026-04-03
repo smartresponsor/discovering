@@ -7,13 +7,13 @@ namespace App\Tests\Unit\Discovery;
 use App\Dto\Discovery\DiscoveryRebuildSummary;
 use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
 use App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class FileDiscoveryRebuildEvidenceStoreTest extends TestCase
+final class FileDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItPersistsAndReturnsLatestRebuildEvidence(): void
     {
-        $directory = sys_get_temp_dir() . '/discovering-rebuild-evidence-' . bin2hex(random_bytes(4));
+        $directory = $this->createTempDirectory('discovering-rebuild-evidence-');
         mkdir($directory, 0o777, true);
         $path = $directory . '/rebuild-evidence.json';
 

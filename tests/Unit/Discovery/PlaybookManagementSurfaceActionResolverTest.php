@@ -9,14 +9,14 @@ use App\Service\Discovery\Playbook\PlaybookManagementSurfaceActionResolver;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-final class PlaybookManagementSurfaceActionResolverTest extends TestCase
+final class PlaybookManagementSurfaceActionResolverTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItResolvesAuditRegistryAction(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-resolver-audit-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-resolver-audit-');
         $resolver = new PlaybookManagementSurfaceActionResolver(new PlaybookManagementActionService(
             new PlaybookFileDiscoverySourceRecordRepository(
                 $projectDir,
@@ -35,7 +35,7 @@ final class PlaybookManagementSurfaceActionResolverTest extends TestCase
 
     public function testItResolvesEnsureSampleRegistryAction(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-resolver-seed-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-playbook-resolver-seed-');
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
