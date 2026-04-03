@@ -14,7 +14,6 @@ final class FileDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempFilesyste
     public function testItPersistsAndReturnsLatestRebuildEvidence(): void
     {
         $directory = $this->createTempDirectory('discovering-rebuild-evidence-');
-        mkdir($directory, 0o777, true);
         $path = $directory . '/rebuild-evidence.json';
 
         $store = new FileDiscoveryRebuildEvidenceStore($path, new DiscoveryRebuildEvidenceJsonSerializer());

@@ -17,17 +17,9 @@ final class FileDiscoveryOperationEventLogStoreTest extends DiscoveryTempFilesys
     {
         parent::setUp();
 
-        $this->path = $this->createTempFilePath('discovering-operation-log-', '.json');
+        $this->path = $this->createTempJsonPath('discovering-operation-log-');
     }
 
-    protected function tearDown(): void
-    {
-        if (is_file($this->path)) {
-            unlink($this->path);
-        }
-
-        parent::tearDown();
-    }
 
     public function testAppendAndLatestPersistOperationEvents(): void
     {

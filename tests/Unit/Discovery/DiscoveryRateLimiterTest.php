@@ -15,15 +15,9 @@ final class DiscoveryRateLimiterTest extends DiscoveryTempFilesystemTestCase
 
     protected function setUp(): void
     {
-        $this->path = $this->createTempFilePath('discovering-rate-limit-', '.json');
+        $this->path = $this->createTempJsonPath('discovering-rate-limit-');
     }
 
-    protected function tearDown(): void
-    {
-        if (is_file($this->path)) {
-            unlink($this->path);
-        }
-    }
 
     public function testQueryScopeExceedsConfiguredLimit(): void
     {

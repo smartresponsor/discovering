@@ -13,7 +13,7 @@ final class ConfigurableDiscoveryRateLimitStoreTest extends DiscoveryTempFilesys
 {
     public function testSelectsFileBackendWhenConfigured(): void
     {
-        $path = $this->createTempFilePath('discovering-rate-limit-configurable-', '.json');
+        $path = $this->createTempJsonPath('discovering-rate-limit-configurable-');
         $store = new ConfigurableDiscoveryRateLimitStore(
             new FileDiscoveryRateLimitStore($path),
             new PdoDiscoveryRateLimitStore('', null, null, 'discovery_rate_limit_bucket'),
@@ -24,12 +24,11 @@ final class ConfigurableDiscoveryRateLimitStoreTest extends DiscoveryTempFilesys
 
         self::assertSame(1, $bucket['count']);
         self::assertFileExists($path);
-        unlink($path);
     }
 
     public function testRejectsUnknownBackend(): void
     {
-        $path = $this->createTempFilePath('discovering-rate-limit-configurable-', '.json');
+        $path = $this->createTempJsonPath('discovering-rate-limit-configurable-');
         $store = new ConfigurableDiscoveryRateLimitStore(
             new FileDiscoveryRateLimitStore($path),
             new PdoDiscoveryRateLimitStore('', null, null, 'discovery_rate_limit_bucket'),

@@ -37,7 +37,10 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 
 22. `8c96856` — add discovery backend reachability probes
 23. `14bfc5b` — harden discovery test temp filesystem discipline
-24. `434db3a` — harden directory-backed repository test resource fixtures
+24. `847e45c` — harden directory-backed repository test resource fixtures
+25. `6cbb031` — ignore generated symfony config reference
+26. `b6ca96f` — add discovery health interpretation surfaces
+27. finish discovery temp test cleanup on shared filesystem helpers
 
 ## Direct unfinished items
 
@@ -98,3 +101,6 @@ Update: `config/reference.php` is treated as generated Symfony app reference out
 
 
 Update: platform diagnostics and backend probes now expose operator-friendly health interpretation fields (`postureStatus`, `riskLevel`, `overallStatus`, `recommendedAction`) instead of leaving operators with only raw topology and probe counters.
+
+
+Update: temp filesystem support now exposes dedicated sqlite/json path helpers, and remaining file-backed unit tests now rely on automatic temp-root teardown instead of manual `unlink()` cleanup.

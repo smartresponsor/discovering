@@ -15,7 +15,7 @@ final class ConfigurableDiscoveryOperationEventLogStoreTest extends DiscoveryTem
 {
     public function testSelectsFileBackendWhenConfigured(): void
     {
-        $path = $this->createTempFilePath('discovering-operation-log-', '.json');
+        $path = $this->createTempJsonPath('discovering-operation-log-');
         $store = new ConfigurableDiscoveryOperationEventLogStore(
             new FileDiscoveryOperationEventLogStore($path, new DiscoveryOperationEventJsonSerializer()),
             new PdoDiscoveryOperationEventLogStore('', null, null, 'discovery_operation_event_log'),
@@ -27,12 +27,11 @@ final class ConfigurableDiscoveryOperationEventLogStoreTest extends DiscoveryTem
 
         self::assertFileExists($path);
         self::assertCount(1, $store->all());
-        unlink($path);
     }
 
     public function testRejectsUnknownBackend(): void
     {
-        $path = $this->createTempFilePath('discovering-operation-log-', '.json');
+        $path = $this->createTempJsonPath('discovering-operation-log-');
         $store = new ConfigurableDiscoveryOperationEventLogStore(
             new FileDiscoveryOperationEventLogStore($path, new DiscoveryOperationEventJsonSerializer()),
             new PdoDiscoveryOperationEventLogStore('', null, null, 'discovery_operation_event_log'),

@@ -10,7 +10,7 @@ final class SqliteFtsDiscoveryAdapterTest extends DiscoveryTempFilesystemTestCas
 {
     public function testItReturnsFtsScoreAndContentForNonEmptyQueries(): void
     {
-        $path = $this->createTempFilePath('discovering-sqlite-', '.sqlite');
+        $path = $this->createTempSqlitePath('discovering-sqlite-');
         $adapter = new SqliteFtsDiscoveryAdapter($path);
 
         $adapter->upsert('global', 'briefing-1', [
@@ -29,6 +29,5 @@ final class SqliteFtsDiscoveryAdapterTest extends DiscoveryTempFilesystemTestCas
         self::assertIsNumeric($results[0]['ftsScore']);
         self::assertSame('Search portability governance context', $results[0]['content']);
 
-        @unlink($path);
     }
 }

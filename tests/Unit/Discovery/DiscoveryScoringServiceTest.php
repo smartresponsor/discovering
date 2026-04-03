@@ -15,7 +15,7 @@ final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItRanksHitsAndAppliesFeedbackBoost(): void
     {
-        $path = $this->createTempFilePath('discovering-scoring-feedback-', '.sqlite');
+        $path = $this->createTempSqlitePath('discovering-scoring-feedback-');
         $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
         $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
         $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
@@ -50,6 +50,5 @@ final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
         self::assertGreaterThan(0.0, $rankedHits[0]->feedbackBoost);
         self::assertContains('feedback boost 4.75', $rankedHits[0]->matchReasons);
 
-        @unlink($path);
     }
 }

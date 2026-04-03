@@ -13,7 +13,7 @@ final class ConfigurableDiscoveryFeedbackStoreTest extends DiscoveryTempFilesyst
 {
     public function testItFallsBackToSqlitePathStoreWhenPdoBackendHasNoDsn(): void
     {
-        $path = $this->createTempFilePath('discovering-feedback-configurable-', '.sqlite');
+        $path = $this->createTempSqlitePath('discovering-feedback-configurable-');
         $store = new ConfigurableDiscoveryFeedbackStore(
             sqliteStore: new DiscoveryFeedbackStore($path),
             pdoStore: new PdoDiscoveryFeedbackStore('', null, null, 'discovery_feedback_test'),
@@ -24,12 +24,11 @@ final class ConfigurableDiscoveryFeedbackStoreTest extends DiscoveryTempFilesyst
         self::assertSame(1, $store->recordClick('briefing', 'briefing-1', 'Title', 'reference'));
         self::assertSame(1, $store->getClickCount('briefing', 'briefing-1'));
 
-        @unlink($path);
     }
 
     public function testItUsesPdoStoreWhenConfigured(): void
     {
-        $path = $this->createTempFilePath('discovering-feedback-configurable-unused-', '.sqlite');
+        $path = $this->createTempSqlitePath('discovering-feedback-configurable-unused-');
         $store = new ConfigurableDiscoveryFeedbackStore(
             sqliteStore: new DiscoveryFeedbackStore($path),
             pdoStore: new PdoDiscoveryFeedbackStore('sqlite::memory:', null, null, 'discovery_feedback_test'),
@@ -41,6 +40,5 @@ final class ConfigurableDiscoveryFeedbackStoreTest extends DiscoveryTempFilesyst
         self::assertSame(1, $store->getClickCount('briefing', 'briefing-2'));
         self::assertSame(0, $store->getClickCount('briefing', 'missing-hit'));
 
-        @unlink($path);
     }
 }

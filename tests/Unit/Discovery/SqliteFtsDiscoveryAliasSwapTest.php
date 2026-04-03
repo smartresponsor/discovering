@@ -11,10 +11,7 @@ final class SqliteFtsDiscoveryAliasSwapTest extends DiscoveryTempFilesystemTestC
 {
     public function testItServesSearchesFromSwappedAliasTarget(): void
     {
-        $path = $this->createTempFilePath('discovering-alias-', '.sqlite');
-        if (is_file($path)) {
-            unlink($path);
-        }
+        $path = $this->createTempSqlitePath('discovering-alias-');
 
         $adapter = new SqliteFtsDiscoveryAdapter($path);
         $adapter->upsert('global', 'legacy', [
@@ -40,8 +37,5 @@ final class SqliteFtsDiscoveryAliasSwapTest extends DiscoveryTempFilesystemTestC
         self::assertSame('staged', $rows[0]['id']);
         self::assertSame('Staged document', $rows[0]['title']);
 
-        if (is_file($path)) {
-            unlink($path);
-        }
     }
 }

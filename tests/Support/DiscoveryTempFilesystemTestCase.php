@@ -30,6 +30,17 @@ abstract class DiscoveryTempFilesystemTestCase extends TestCase
         return $this->createTempDirectory($prefix);
     }
 
+
+    protected function createTempSqlitePath(string $prefix): string
+    {
+        return $this->createTempFilePath($prefix, '.sqlite');
+    }
+
+    protected function createTempJsonPath(string $prefix): string
+    {
+        return $this->createTempFilePath($prefix, '.json');
+    }
+
     protected function ensureDirectory(string $path): string
     {
         if (!is_dir($path)) {

@@ -10,13 +10,12 @@ final class DiscoveryFeedbackStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItPersistsAndIncrementsFeedbackCounts(): void
     {
-        $path = $this->createTempFilePath('discovering-feedback-', '.sqlite');
+        $path = $this->createTempSqlitePath('discovering-feedback-');
         $store = new DiscoveryFeedbackStore($path);
 
         self::assertSame(1, $store->recordClick('briefing', 'briefing-1', 'Title', 'reference'));
         self::assertSame(2, $store->recordClick('briefing', 'briefing-1', 'Title', 'reference'));
         self::assertSame(2, $store->getClickCount('briefing', 'briefing-1'));
 
-        @unlink($path);
     }
 }

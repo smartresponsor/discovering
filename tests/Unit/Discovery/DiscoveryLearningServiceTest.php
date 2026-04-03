@@ -12,7 +12,7 @@ final class DiscoveryLearningServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItCalculatesFeedbackBoostFromPersistedClicks(): void
     {
-        $path = $this->createTempFilePath('discovering-learning-', '.sqlite');
+        $path = $this->createTempSqlitePath('discovering-learning-');
         $service = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
 
         $service->recordUsefulClick('playbook', 'playbook-1', 'Playbook', 'ref');
@@ -24,6 +24,5 @@ final class DiscoveryLearningServiceTest extends DiscoveryTempFilesystemTestCase
         self::assertSame(3, $service->getFeedbackCount($hit));
         self::assertGreaterThan(0.0, $service->calculateFeedbackBoost(3));
 
-        @unlink($path);
     }
 }
