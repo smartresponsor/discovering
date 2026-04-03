@@ -132,6 +132,25 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertArrayHasKey('notes', $payload['data']);
     }
 
+    public function testManagementPlatformExportReturnsPlatformDiagnostics(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('GET', '/management/discovery/platform/export', [], [], $this->managementTokenServer());
+
+        self::assertResponseIsSuccessful();
+
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertTrue($payload['ok']);
+        self::assertSame('discovery.platform.diagnostics', $payload['meta']['schemaFamily']);
+        self::assertSame('sqlite-fts5', $payload['data']['backendName']);
+        self::assertSame('sqlite', $payload['data']['indexStoreBackend']);
+        self::assertTrue($payload['data']['stagedRebuildSupported']);
+        self::assertFalse($payload['data']['distributedReady']);
+        self::assertArrayHasKey('blockingStores', $payload['data']);
+        self::assertArrayHasKey('notes', $payload['data']);
+    }
+
 
     public function testManagementRollbackExportReturnsRollbackPlan(): void
     {
@@ -195,10 +214,12 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringContainsString('Discovery Management', $content);
         self::assertStringContainsString('Recent operations', $content);
         self::assertStringContainsString('State topology', $content);
+        self::assertStringContainsString('Platform diagnostics', $content);
         self::assertStringContainsString('Rollback posture', $content);
         self::assertStringContainsString('Recommended command', $content);
         self::assertStringContainsString('Execute rollback', $content);
         self::assertStringContainsString('Distributed ready', $content);
+        self::assertStringContainsString('Multi-replica-ready stores', $content);
         self::assertStringContainsString('Coverage by resource type', $content);
         self::assertStringContainsString('Coverage by source', $content);
     }

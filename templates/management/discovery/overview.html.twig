@@ -114,6 +114,79 @@
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center gap-3">
                 <div>
+                    <h2 class="h5 mb-1">Platform diagnostics</h2>
+                    <p class="text-muted mb-0">Operator-facing snapshot of adapter capability, distributed readiness, and rollback posture.</p>
+                </div>
+                <a class="btn btn-outline-secondary btn-sm" href="{{ path('app_management_discovery_platform_export') }}">Export platform diagnostics</a>
+            </div>
+
+            <div class="row g-3 mt-1">
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Index store backend</div>
+                        <div class="fw-semibold">{{ platformDiagnostics.indexStoreBackend }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Staged rebuild supported</div>
+                        <div class="fw-semibold">{{ platformDiagnostics.stagedRebuildSupported ? 'yes' : 'no' }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Rollback status</div>
+                        <div class="fw-semibold">{{ platformDiagnostics.rollbackStatus }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <table class="table mt-3 mb-0">
+                <tbody>
+                    <tr>
+                        <th>Active adapter backend</th>
+                        <td>{{ platformDiagnostics.backendName }}</td>
+                    </tr>
+                    <tr>
+                        <th>Shared state configured</th>
+                        <td>{{ platformDiagnostics.sharedStateConfigured ? 'yes' : 'no' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Distributed ready</th>
+                        <td>{{ platformDiagnostics.distributedReady ? 'yes' : 'no' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Rollback ready</th>
+                        <td>{{ platformDiagnostics.rollbackReady ? 'yes' : 'no' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Multi-replica-ready stores</th>
+                        <td>{{ platformDiagnostics.coordinationReadyStoreCount }}</td>
+                    </tr>
+                    <tr>
+                        <th>Blocking stores</th>
+                        <td>{% if platformDiagnostics.blockingStores is empty %}none{% else %}{{ platformDiagnostics.blockingStores|join(', ') }}{% endif %}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {% if platformDiagnostics.notes is not empty %}
+                <div class="mt-3">
+                    <h3 class="h6 text-muted">Platform notes</h3>
+                    <ul class="mb-0">
+                        {% for note in platformDiagnostics.notes %}
+                            <li>{{ note }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center gap-3">
+                <div>
                     <h2 class="h5 mb-1">Rollback posture</h2>
                     <p class="text-muted mb-0">Current rollback plan derived from rebuild evidence history.</p>
                 </div>

@@ -32,7 +32,8 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 17. `6a36629` — prove runtime boot on current slice
 18. `734d5b9` — add shared coordination backends for discovery operator stores
 19. `c4f4249` — add shared feedback coordination seam
-20. `dca0919` — add shared discovery index backend seam
+20. `e335ae8` — add shared discovery index backend seam
+21. `b6e9f5a` — add discovery platform diagnostics surface
 
 ## Direct unfinished items
 
@@ -68,11 +69,12 @@ The current codebase is now ready for a proving wave centered on installation, r
 - rate limiting now exists for query, write, and management-mutation discovery paths instead of remaining only a documented security gap
 - rollback posture, guarded execution, CLI commands, and operator runbooks now exist instead of rollback clarity remaining only implicit
 - discovery index backend selection now exists between local SQLite FTS and shared Meilisearch service mode
+- platform diagnostics now exists as a CLI, management export, and overview surface for adapter capability, topology posture, and rollback readiness
 
 ## Recommended next execution order
 
 1. Run PHPUnit suites and fix runtime regressions
-2. Verify Composer-installed tooling (`phpstan`, `php-cs-fixer`) on the active slice
+2. Add backend reachability probes for the active discovery platform mode (especially Meilisearch and PDO-backed coordination stores)
 3. In a deployment target, decide whether discovery index should remain SQLite or switch to Meilisearch service mode
 4. If needed later, broaden rollback beyond alias promotion toward richer historical-state recovery semantics
 

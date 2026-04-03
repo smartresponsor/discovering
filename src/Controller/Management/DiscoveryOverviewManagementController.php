@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller\Management;
 
+use App\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
@@ -24,6 +25,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
         private readonly DiscoveryOperationEventLogStoreInterface $operationLogStore,
         private readonly DiscoveryOperationLogger $operationLogger,
         private readonly DiscoveryStateTopologyBuilder $stateTopologyBuilder,
+        private readonly DiscoveryPlatformDiagnosticsBuilder $platformDiagnosticsBuilder,
         private readonly DiscoveryRollbackPlanBuilder $rollbackPlanBuilder,
         private readonly DiscoveryRollbackExecutor $rollbackExecutor,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
@@ -36,6 +38,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
         $overview = $this->overviewService->buildOverview();
         $operations = $this->operationLogStore->latest(10);
         $stateTopology = $this->stateTopologyBuilder->build();
+        $platformDiagnostics = $this->platformDiagnosticsBuilder->build();
         $rollbackPlan = $this->rollbackPlanBuilder->build();
         $this->operationLogger->recordHttp('discovery.management.overview');
 
@@ -43,6 +46,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
             'overview' => $overview,
             'operations' => $operations,
             'stateTopology' => $stateTopology,
+            'platformDiagnostics' => $platformDiagnostics,
             'rollbackPlan' => $rollbackPlan,
         ]);
     }
@@ -121,6 +125,18 @@ final class DiscoveryOverviewManagementController extends AbstractController
 
         return $this->jsonResponseFactory->success($this->rollbackPlanBuilder->build()->toArray(), [
             'schemaFamily' => 'discovery.rollback.plan',
+            'schemaVersion' => 1,
+        ]);
+    }
+
+
+    #[Route('/management/discovery/platform/export', name: 'app_management_discovery_platform_export', methods: ['GET'])]
+    public function exportPlatformDiagnostics(): JsonResponse
+    {
+        $this->operationLogger->recordHttp('discovery.management.platform.export');
+
+        return $this->jsonResponseFactory->success($this->platformDiagnosticsBuilder->build()->toArray(), [
+            'schemaFamily' => 'discovery.platform.diagnostics',
             'schemaVersion' => 1,
         ]);
     }
