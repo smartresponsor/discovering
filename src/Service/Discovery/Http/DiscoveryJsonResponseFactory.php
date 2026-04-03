@@ -72,12 +72,15 @@ final class DiscoveryJsonResponseFactory
         $path = $request instanceof Request ? $request->getPathInfo() : null;
         $canonicalPath = $path !== null ? $this->canonicalPath($path) : null;
 
+        $descriptiveMeta = array_replace([
+            'schemaFamily' => DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY,
+            'schemaVersion' => DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION,
+        ], $meta);
+
         return [
             'canonicalPath' => $canonicalPath,
             'deprecatedAlias' => $path !== null && $canonicalPath !== null && $canonicalPath !== $path,
-            'schemaFamily' => DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY,
-            'schemaVersion' => DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION,
-        ] + $meta;
+        ] + $descriptiveMeta;
     }
 
     private function resolveRequestId(): ?string

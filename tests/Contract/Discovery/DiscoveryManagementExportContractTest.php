@@ -55,7 +55,7 @@ final class DiscoveryManagementExportContractTest extends AbstractDiscoveryWebTe
 
         $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
-        self::assertDiscoveryEnvelopeContract($payload);
+        self::assertDiscoveryEnvelopeContract($payload, 'discovery.platform.probes');
         self::assertArrayHasKey('performedProbeCount', $payload['data']);
         self::assertArrayHasKey('overallStatus', $payload['data']);
         self::assertArrayHasKey('recommendedAction', $payload['data']);

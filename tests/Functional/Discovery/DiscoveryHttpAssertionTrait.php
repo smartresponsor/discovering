@@ -15,6 +15,7 @@ trait DiscoveryHttpAssertionTrait
         array $payload,
         string $canonicalPath,
         ?string $schemaFamily = null,
+        string|int|null $schemaVersion = null,
         bool $deprecatedAlias = false,
     ): void {
         self::assertArrayHasKey('ok', $payload);
@@ -23,11 +24,15 @@ trait DiscoveryHttpAssertionTrait
         self::assertArrayHasKey('meta', $payload);
         self::assertIsArray($payload['meta']);
         self::assertSame(DiscoveryApiContract::API_VERSION, $payload['apiVersion']);
-        self::assertSame(DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY, $payload['meta']['schemaFamily'] ?? null);
-        self::assertSame(DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION, $payload['meta']['schemaVersion'] ?? null);
+
+        $expectedSchemaFamily = $schemaFamily ?? DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY;
+        $expectedSchemaVersion = $schemaVersion
+            ?? ($schemaFamily === null ? DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION : 1);
+
+        self::assertSame($expectedSchemaFamily, $payload['meta']['schemaFamily'] ?? null);
+        self::assertSame($expectedSchemaVersion, $payload['meta']['schemaVersion'] ?? null);
         self::assertSame($canonicalPath, $payload['meta']['canonicalPath'] ?? null);
         self::assertSame($deprecatedAlias, $payload['meta']['deprecatedAlias'] ?? null);
-
     }
 
     protected function assertDiscoveryResponseHeaders(KernelBrowser $client): void

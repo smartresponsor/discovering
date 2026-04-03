@@ -12,16 +12,24 @@ trait DiscoveryApiContractAssertions
     /**
      * @param array<string, mixed> $payload
      */
-    private static function assertDiscoveryEnvelopeContract(array $payload): void
-    {
+    private static function assertDiscoveryEnvelopeContract(
+        array $payload,
+        ?string $expectedSchemaFamily = null,
+        string|int|null $expectedSchemaVersion = null,
+    ): void {
         Assert::assertArrayHasKey('ok', $payload);
         Assert::assertArrayHasKey('apiVersion', $payload);
         Assert::assertArrayHasKey('requestId', $payload);
         Assert::assertArrayHasKey('meta', $payload);
         Assert::assertIsArray($payload['meta']);
         Assert::assertSame(DiscoveryApiContract::API_VERSION, $payload['apiVersion']);
-        Assert::assertSame(DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY, $payload['meta']['schemaFamily'] ?? null);
-        Assert::assertSame(DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION, $payload['meta']['schemaVersion'] ?? null);
+
+        $schemaFamily = $expectedSchemaFamily ?? DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY;
+        $schemaVersion = $expectedSchemaVersion
+            ?? ($expectedSchemaFamily === null ? DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION : 1);
+
+        Assert::assertSame($schemaFamily, $payload['meta']['schemaFamily'] ?? null);
+        Assert::assertSame($schemaVersion, $payload['meta']['schemaVersion'] ?? null);
         Assert::assertArrayHasKey('canonicalPath', $payload['meta']);
         Assert::assertArrayHasKey('deprecatedAlias', $payload['meta']);
 

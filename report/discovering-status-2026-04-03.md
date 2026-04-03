@@ -83,6 +83,7 @@ The current codebase is now ready for a proving wave centered on installation, r
 - file- and SQLite-heavy behavioral/unit tests now share a dedicated temporary filesystem support layer instead of ad hoc `sys_get_temp_dir()` + manual cleanup patterns
 - briefing/playbook directory-backed repository and management unit tests now use shared project/resource fixture helpers with automatic teardown instead of hand-written `mkdir`/`unlink`/`rmdir` sequences
 - functional discovery web tests now reset configured mutable state paths from test DI parameters and share common JSON/body helpers instead of hard-coded filenames and repeated inline payload decoding
+- JSON response schema metadata now preserves payload-specific `schemaFamily`/`schemaVersion` overrides in response `meta`, while response headers remain fixed to the shared envelope contract
 
 ## Recommended next execution order
 
@@ -107,3 +108,6 @@ Update: platform diagnostics and backend probes now expose operator-friendly hea
 
 
 Update: temp filesystem support now exposes dedicated sqlite/json path helpers, and remaining file-backed unit tests now rely on automatic temp-root teardown instead of manual `unlink()` cleanup.
+
+
+Update: discovery JSON response metadata now distinguishes shared envelope headers from payload-specific `meta.schemaFamily`/`meta.schemaVersion`, so management exports can advertise their own contracts without losing the common outer envelope.
