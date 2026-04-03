@@ -7,6 +7,7 @@ namespace App\Controller\Management;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
 use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
 use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,6 +22,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
         private readonly DiscoveryOperationEventLogStoreInterface $operationLogStore,
         private readonly DiscoveryOperationLogger $operationLogger,
         private readonly DiscoveryStateTopologyBuilder $stateTopologyBuilder,
+        private readonly DiscoveryRollbackPlanBuilder $rollbackPlanBuilder,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
@@ -31,12 +33,14 @@ final class DiscoveryOverviewManagementController extends AbstractController
         $overview = $this->overviewService->buildOverview();
         $operations = $this->operationLogStore->latest(10);
         $stateTopology = $this->stateTopologyBuilder->build();
+        $rollbackPlan = $this->rollbackPlanBuilder->build();
         $this->operationLogger->recordHttp('discovery.management.overview');
 
         return $this->render('management/discovery/overview.html.twig', [
             'overview' => $overview,
             'operations' => $operations,
             'stateTopology' => $stateTopology,
+            'rollbackPlan' => $rollbackPlan,
         ]);
     }
 
@@ -66,6 +70,18 @@ final class DiscoveryOverviewManagementController extends AbstractController
                 ],
                 $this->operationLogStore->latest(25),
             ),
+        ]);
+    }
+
+
+    #[Route('/management/discovery/rollback/export', name: 'app_management_discovery_rollback_export', methods: ['GET'])]
+    public function exportRollbackPlan(): JsonResponse
+    {
+        $this->operationLogger->recordHttp('discovery.management.rollback.export');
+
+        return $this->jsonResponseFactory->success($this->rollbackPlanBuilder->build()->toArray(), [
+            'schemaFamily' => 'discovery.rollback.plan',
+            'schemaVersion' => 1,
         ]);
     }
 

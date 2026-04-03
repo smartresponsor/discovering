@@ -132,6 +132,29 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertArrayHasKey('notes', $payload['data']);
     }
 
+
+    public function testManagementRollbackExportReturnsRollbackPlan(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+
+        $exportClient = $this->createDiscoveryClient($this->managementTokenServer());
+        $exportClient->request('GET', '/management/discovery/rollback/export', [], [], $this->managementTokenServer());
+
+        self::assertResponseIsSuccessful();
+
+        $payload = json_decode((string) $exportClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertTrue($payload['ok']);
+        self::assertSame('discovery.rollback.plan', $payload['meta']['schemaFamily']);
+        self::assertSame('plan_ready', $payload['data']['status']);
+        self::assertTrue($payload['data']['rollbackReady']);
+        self::assertNotEmpty($payload['data']['currentEvidenceId']);
+        self::assertNotEmpty($payload['data']['previousEvidenceId']);
+        self::assertNotEmpty($payload['data']['recommendedCommand']);
+    }
+
     public function testManagementOverviewPageRenders(): void
     {
         $client = $this->createDiscoveryClient($this->managementTokenServer());
@@ -144,6 +167,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringContainsString('Discovery Management', $content);
         self::assertStringContainsString('Recent operations', $content);
         self::assertStringContainsString('State topology', $content);
+        self::assertStringContainsString('Rollback posture', $content);
+        self::assertStringContainsString('Recommended command', $content);
         self::assertStringContainsString('Distributed ready', $content);
         self::assertStringContainsString('Coverage by resource type', $content);
         self::assertStringContainsString('Coverage by source', $content);

@@ -27,7 +27,8 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 12. `2b2c85a` — add ci runtime verification baseline
 13. `263baac` — document discovery threat model and harden response headers
 14. `1d7f16e` — add discovery state topology and shared-state seam
-15. `9512adb` — add discovery rate limiting baseline
+15. `dc3330a` — add discovery rate limiting baseline
+16. `e97378b` — add discovery rollback planning baseline
 
 ## Direct unfinished items
 
@@ -43,11 +44,11 @@ The repository can now describe mutable discovery state paths and can externaliz
 
 **Impact:** the platform seam is clearer, but a true distributed posture still requires stronger coordination stores than shared files.
 
-### 3. Operational runbooks remain thinner than the code baseline
+### 3. Rollback planning now exists, but rollback execution remains manual
 
-There is now rebuild evidence, staged rebuild support, request correlation, operation logs, and CI docs. However, operator runbooks for full recovery, rollback drills, and cutover procedures are still lighter than the implementation surface.
+The repository now exposes rollback posture from rebuild evidence, including current and previous evidence ids, physical index targets, and a recommended operator command. However, actual alias rollback is still a manual operator action rather than an automated execution primitive.
 
-**Impact:** the code is ahead of the operational playbook.
+**Impact:** rollback clarity is stronger, but rollback automation is still pending.
 
 ### 4. Full install-and-run verification remains the strongest next proving step
 
@@ -61,14 +62,15 @@ The current codebase is now ready for a proving wave centered on installation, r
 - the previous documentation contradiction between rebuild evidence and staged rebuild support was aligned
 - format-only CRLF churn was explicitly identified and discarded instead of being allowed into history
 - rate limiting now exists for query, write, and management-mutation discovery paths instead of remaining only a documented security gap
+- rollback posture, export, CLI planning command, and operator runbooks now exist instead of rollback clarity remaining only implicit
 
 ## Recommended next execution order
 
 1. Prove installability with `composer install`
 2. Run PHPUnit suites and fix runtime regressions
 3. Run `bin/console` command smoke checks
-4. Expand rollback and operator runbooks around staged rebuild and cutover
-5. Decide whether shared-state overrides are enough for the target deployment, or whether discovery state and throttling must move to stronger coordination backends
+4. Decide whether shared-state overrides are enough for the target deployment, or whether discovery state and throttling must move to stronger coordination backends
+5. If needed later, automate rollback execution instead of stopping at rollback planning
 
 ## Current architectural verdict
 
