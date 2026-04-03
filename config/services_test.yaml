@@ -10,3 +10,7 @@ services:
   App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore:
     arguments:
       $path: '%kernel.project_dir%/var/discovery/discovery-operation.test.json'
+
+  App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore:
+    arguments:
+      $path: '%kernel.project_dir%/var/discovery/discovery-rebuild-evidence.test.json'

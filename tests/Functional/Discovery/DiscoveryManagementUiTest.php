@@ -77,6 +77,41 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertContains('discovery.api.query', array_column($payload['data'], 'operation'));
     }
 
+    public function testManagementRebuildReturnsEvidenceSummary(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+
+        self::assertResponseIsSuccessful();
+
+        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertTrue($payload['ok']);
+        self::assertSame('discovery.rebuild.summary', $payload['meta']['schemaFamily']);
+        self::assertSame('global', $payload['data']['resource']);
+        self::assertSame('in_place', $payload['data']['deploymentMode']);
+        self::assertFalse($payload['data']['zeroDowntimeReady']);
+        self::assertStringStartsWith('reb-', $payload['data']['evidenceId']);
+    }
+
+    public function testManagementRebuildExportReturnsRecordedEvidence(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+
+        $exportClient = $this->createDiscoveryClient($this->managementTokenServer());
+        $exportClient->request('GET', '/management/discovery/rebuilds/export', [], [], $this->managementTokenServer());
+
+        self::assertResponseIsSuccessful();
+
+        $payload = json_decode((string) $exportClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        self::assertTrue($payload['ok']);
+        self::assertSame('discovery.rebuild.summary.list', $payload['meta']['schemaFamily']);
+        self::assertNotEmpty($payload['data']);
+        self::assertStringStartsWith('reb-', $payload['data'][0]['evidenceId']);
+    }
+
     public function testManagementOverviewPageRenders(): void
     {
         $client = $this->createDiscoveryClient($this->managementTokenServer());

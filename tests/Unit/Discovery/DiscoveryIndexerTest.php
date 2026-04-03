@@ -81,7 +81,7 @@ final class DiscoveryIndexerTest extends TestCase
         };
 
         $indexer = new DiscoveryIndexer($adapter, $documentProvider);
-        $indexer->rebuild(new ReindexRequest(resource: 'briefing'));
+        $summary = $indexer->rebuild(new ReindexRequest(resource: 'briefing'));
 
         self::assertSame([
             ['type' => 'createIndex', 'resource' => 'global'],
@@ -89,6 +89,15 @@ final class DiscoveryIndexerTest extends TestCase
             ['type' => 'upsert', 'resource' => 'global', 'id' => 'briefing-1'],
             ['type' => 'upsert', 'resource' => 'briefing', 'id' => 'briefing-1'],
         ], $operations);
+        self::assertSame('briefing', $summary->resource);
+        self::assertSame('full', $summary->rebuildMode);
+        self::assertSame('test-backend', $summary->backendName);
+        self::assertFalse($summary->zeroDowntimeReady);
+        self::assertSame(2, $summary->candidateDocumentCount);
+        self::assertSame(1, $summary->indexedDocumentCount);
+        self::assertSame(1, $summary->skippedDocumentCount);
+        self::assertSame(['global' => 1, 'briefing' => 1], $summary->indexedCountsByResource);
+        self::assertStringStartsWith('reb-', $summary->evidenceId);
     }
 
     public function testItRemovesFromResourceAndGlobalIndexes(): void
