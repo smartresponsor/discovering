@@ -67,7 +67,7 @@ final class DiscoveryRollbackPlanBuilderTest extends TestCase
         self::assertSame('reb-previous', $plan->previousEvidenceId);
         self::assertSame('discovering__reb_current', $plan->currentPhysicalIndex);
         self::assertSame('discovering__reb_previous', $plan->rollbackTargetPhysicalIndex);
-        self::assertSame('discovering:rollback:plan --current=reb-current --target=reb-previous', $plan->recommendedCommand);
+        self::assertSame('discovering:rollback:execute --current=reb-current --target=reb-previous', $plan->recommendedCommand);
     }
 
     public function testBuildReturnsNoPreviousCandidateWhenOnlyOneGlobalRebuildExists(): void

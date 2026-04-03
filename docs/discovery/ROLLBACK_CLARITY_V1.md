@@ -4,7 +4,7 @@ The repository now distinguishes three separate concepts:
 
 1. **Rebuild evidence** — historical record of what was indexed and how.
 2. **Rollback planning** — current operator posture derived from recent global rebuild evidence.
-3. **Rollback execution** — still manual and externalized.
+3. **Rollback execution** — available as an explicit alias-promotion primitive when rollback posture is ready.
 
 ## Current contract
 
@@ -29,4 +29,9 @@ The repository now distinguishes three separate concepts:
 
 ## Important limitation
 
-`recommendedCommand` is a planning artifact, not an automatic execution primitive. Actual alias rollback remains an operator step.
+`recommendedCommand` now points to the guarded execution primitive. Rollback remains intentionally narrow: it promotes an earlier physical index alias target, but it does not reconstruct historical document state.
+
+
+## Execution status
+
+Rollback is no longer plan-only. Alias rollback execution now exists as an explicit primitive, while historical content recreation still remains out of scope.

@@ -8,10 +8,12 @@ use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
 use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
 use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -23,6 +25,7 @@ final class DiscoveryOverviewManagementController extends AbstractController
         private readonly DiscoveryOperationLogger $operationLogger,
         private readonly DiscoveryStateTopologyBuilder $stateTopologyBuilder,
         private readonly DiscoveryRollbackPlanBuilder $rollbackPlanBuilder,
+        private readonly DiscoveryRollbackExecutor $rollbackExecutor,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
@@ -73,6 +76,43 @@ final class DiscoveryOverviewManagementController extends AbstractController
         ]);
     }
 
+
+
+    #[Route('/management/discovery/rollback/execute', name: 'app_management_discovery_rollback_execute', methods: ['POST'])]
+    public function executeRollback(Request $request): JsonResponse
+    {
+        $currentEvidenceId = trim((string) $request->request->get('current', $request->query->get('current', '')));
+        $targetEvidenceId = trim((string) $request->request->get('target', $request->query->get('target', '')));
+
+        $result = $this->rollbackExecutor->execute(
+            expectedCurrentEvidenceId: $currentEvidenceId === '' ? null : $currentEvidenceId,
+            expectedTargetEvidenceId: $targetEvidenceId === '' ? null : $targetEvidenceId,
+        );
+
+        $this->operationLogger->recordHttp(
+            'discovery.management.rollback.execute',
+            status: $result->executed ? 'ok' : 'blocked',
+            context: $result->toArray(),
+        );
+
+        if (!$result->executed) {
+            return $this->jsonResponseFactory->error(
+                'discovery_rollback_blocked',
+                'Discovery rollback execution was blocked by the current rollback posture.',
+                JsonResponse::HTTP_CONFLICT,
+                $result->toArray(),
+                [
+                    'schemaFamily' => 'discovery.rollback.execution',
+                    'schemaVersion' => 1,
+                ],
+            );
+        }
+
+        return $this->jsonResponseFactory->success($result->toArray(), [
+            'schemaFamily' => 'discovery.rollback.execution',
+            'schemaVersion' => 1,
+        ]);
+    }
 
     #[Route('/management/discovery/rollback/export', name: 'app_management_discovery_rollback_export', methods: ['GET'])]
     public function exportRollbackPlan(): JsonResponse

@@ -155,6 +155,34 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertNotEmpty($payload['data']['recommendedCommand']);
     }
 
+
+    public function testManagementRollbackExecutePromotesRollbackTarget(): void
+    {
+        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+
+        $exportClient = $this->createDiscoveryClient($this->managementTokenServer());
+        $exportClient->request('GET', '/management/discovery/rollback/export', [], [], $this->managementTokenServer());
+        $planPayload = json_decode((string) $exportClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        $executeClient = $this->createDiscoveryClient($this->managementTokenServer());
+        $executeClient->request('POST', '/management/discovery/rollback/execute', [
+            'current' => $planPayload['data']['currentEvidenceId'],
+            'target' => $planPayload['data']['previousEvidenceId'],
+        ], [], $this->managementTokenServer());
+
+        self::assertResponseIsSuccessful();
+
+        $payload = json_decode((string) $executeClient->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        self::assertTrue($payload['ok']);
+        self::assertSame('discovery.rollback.execution', $payload['meta']['schemaFamily']);
+        self::assertTrue($payload['data']['executed']);
+        self::assertSame('rollback_executed', $payload['data']['status']);
+        self::assertSame('global', $payload['data']['alias']);
+        self::assertNotEmpty($payload['data']['targetPhysicalIndex']);
+    }
+
     public function testManagementOverviewPageRenders(): void
     {
         $client = $this->createDiscoveryClient($this->managementTokenServer());
@@ -169,6 +197,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringContainsString('State topology', $content);
         self::assertStringContainsString('Rollback posture', $content);
         self::assertStringContainsString('Recommended command', $content);
+        self::assertStringContainsString('Execute rollback', $content);
         self::assertStringContainsString('Distributed ready', $content);
         self::assertStringContainsString('Coverage by resource type', $content);
         self::assertStringContainsString('Coverage by source', $content);

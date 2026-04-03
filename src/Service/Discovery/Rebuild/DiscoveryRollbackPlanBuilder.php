@@ -82,7 +82,7 @@ final class DiscoveryRollbackPlanBuilder
 
         $notes = [];
         if (!$current->aliasSwapApplied || $current->deploymentMode !== 'staged_alias_swap') {
-            $notes[] = 'Latest rebuild did not complete as a staged alias swap; rollback remains a manual operator action.';
+            $notes[] = 'Latest rebuild did not complete as a staged alias swap; rollback execution may be blocked or require a different target posture.';
         }
         $notes[] = 'Validate query smoke checks and management export health before and after performing rollback.';
 
@@ -93,7 +93,7 @@ final class DiscoveryRollbackPlanBuilder
             previousEvidenceId: $previous->evidenceId,
             currentPhysicalIndex: $currentPhysicalIndex,
             rollbackTargetPhysicalIndex: $previousPhysicalIndex,
-            recommendedCommand: sprintf('discovering:rollback:plan --current=%s --target=%s', $current->evidenceId, $previous->evidenceId),
+            recommendedCommand: sprintf('discovering:rollback:execute --current=%s --target=%s', $current->evidenceId, $previous->evidenceId),
             notes: $notes,
         );
     }

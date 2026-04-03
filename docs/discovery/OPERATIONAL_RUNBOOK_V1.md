@@ -28,3 +28,8 @@ This runbook describes the minimum operator loop around discovery rebuilds, expo
 ## Recovery notes
 
 Rollback planning is available now. Rollback execution is still an operator action and is not yet an automatic promotion command.
+
+
+## Rollback execution
+
+When rollback posture is ready, operators can now execute rollback with `discovering:rollback:execute --current=<evidence> --target=<evidence>` or the guarded management mutation endpoint.
