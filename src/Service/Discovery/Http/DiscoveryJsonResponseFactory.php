@@ -11,8 +11,10 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 final class DiscoveryJsonResponseFactory
 {
-    public const string API_VERSION = 'v1';
-    public const string API_VERSION_HEADER = 'X-Discovery-Api-Version';
+    public const string API_VERSION = DiscoveryApiContract::API_VERSION;
+    public const string API_VERSION_HEADER = DiscoveryApiContract::API_VERSION_HEADER;
+    public const string SCHEMA_FAMILY_HEADER = DiscoveryApiContract::SCHEMA_FAMILY_HEADER;
+    public const string SCHEMA_VERSION_HEADER = DiscoveryApiContract::SCHEMA_VERSION_HEADER;
 
     public function __construct(private readonly RequestStack $requestStack)
     {
@@ -73,6 +75,8 @@ final class DiscoveryJsonResponseFactory
         return [
             'canonicalPath' => $canonicalPath,
             'deprecatedAlias' => $path !== null && $canonicalPath !== null && $canonicalPath !== $path,
+            'schemaFamily' => DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY,
+            'schemaVersion' => DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION,
         ] + $meta;
     }
 
@@ -96,6 +100,8 @@ final class DiscoveryJsonResponseFactory
     private function applyHeaders(JsonResponse $response): JsonResponse
     {
         $response->headers->set(self::API_VERSION_HEADER, self::API_VERSION);
+        $response->headers->set(self::SCHEMA_FAMILY_HEADER, DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY);
+        $response->headers->set(self::SCHEMA_VERSION_HEADER, DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION);
 
         $requestId = $this->resolveRequestId();
         if (is_string($requestId) && $requestId !== '') {
