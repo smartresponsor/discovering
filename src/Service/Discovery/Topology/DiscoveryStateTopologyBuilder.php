@@ -12,6 +12,9 @@ final class DiscoveryStateTopologyBuilder
     public function __construct(
         private readonly string $projectDir,
         private readonly string $discoverySqlitePath,
+        private readonly string $indexBackend,
+        private readonly string $meiliUrl,
+        private readonly string $meiliIndexPrefix,
         private readonly string $feedbackPath,
         private readonly string $feedbackBackend,
         private readonly string $feedbackPdoDsn,
@@ -40,7 +43,7 @@ final class DiscoveryStateTopologyBuilder
         $localStateRoot = $this->normalizePath($this->projectDir . '/var/discovery');
 
         $stores = [
-            $this->sqliteStore('discoveryIndex', $this->discoverySqlitePath, $localStateRoot),
+            $this->discoveryIndexStore($localStateRoot),
             $this->feedbackStore($localStateRoot),
             $this->coordinationStore('operationLog', $this->operationLogPath, $this->operationLogBackend, $this->operationLogPdoDsn, $this->operationLogPdoTable, $localStateRoot, 'shared-event-history'),
             $this->coordinationStore('rebuildEvidence', $this->rebuildEvidencePath, $this->rebuildEvidenceBackend, $this->rebuildEvidencePdoDsn, $this->rebuildEvidencePdoTable, $localStateRoot, 'shared-evidence-history'),
@@ -68,8 +71,15 @@ final class DiscoveryStateTopologyBuilder
             $notes[] = 'One or more discovery state stores are configured outside the local var/discovery root or through a shared coordination backend.';
         }
 
+        $indexUsesMeili = strtolower(trim($this->indexBackend)) === 'meili' && trim($this->meiliUrl) !== '';
         $feedbackUsesPdo = strtolower(trim($this->feedbackBackend)) === 'pdo' && trim($this->feedbackPdoDsn) !== '';
-        if ($feedbackUsesPdo) {
+        if ($indexUsesMeili && $feedbackUsesPdo) {
+            $notes[] = 'Discovery index uses a shared Meilisearch backend.';
+            $notes[] = 'Feedback learning uses a shared PDO coordination backend.';
+        } elseif ($indexUsesMeili) {
+            $notes[] = 'Discovery index uses a shared Meilisearch backend.';
+            $notes[] = 'Feedback learning still remains SQLite-oriented until a shared PDO backend is configured.';
+        } elseif ($feedbackUsesPdo) {
             $notes[] = 'Feedback learning uses a shared PDO coordination backend.';
             $notes[] = 'SQLite-backed discovery index state still remains single-node oriented and is not treated as multi-replica write-safe.';
         } else {
@@ -96,7 +106,11 @@ final class DiscoveryStateTopologyBuilder
             }
         }
 
-        if ($feedbackUsesPdo) {
+        if ($indexUsesMeili && $feedbackUsesPdo) {
+            $notes[] = 'Overall distributed readiness can be treated as true when stronger coordination stores are configured for the remaining mutable discovery state.';
+        } elseif ($indexUsesMeili) {
+            $notes[] = 'Overall distributed readiness still remains false until feedback state moves beyond SQLite single-node storage.';
+        } elseif ($feedbackUsesPdo) {
             $notes[] = 'Overall distributed readiness still remains false until discovery index moves beyond SQLite single-node storage.';
         } elseif ($strongerStoreNotes !== []) {
             $notes[] = 'Overall distributed readiness still remains false until discovery index and feedback state move beyond SQLite single-node storage.';
@@ -109,6 +123,29 @@ final class DiscoveryStateTopologyBuilder
             stores: $stores,
             notes: $notes,
         );
+    }
+
+    private function discoveryIndexStore(string $localStateRoot): DiscoveryStateStoreDescriptor
+    {
+        if (strtolower(trim($this->indexBackend)) === 'meili') {
+            $sharedConfigured = trim($this->meiliUrl) !== '';
+            $prefix = trim($this->meiliIndexPrefix);
+            $path = trim($this->meiliUrl) === ''
+                ? sprintf('meili:%s', $prefix === '' ? 'discovering' : $prefix)
+                : sprintf('%s#%s', trim($this->meiliUrl), $prefix === '' ? 'discovering' : $prefix);
+
+            return new DiscoveryStateStoreDescriptor(
+                name: 'discoveryIndex',
+                backend: 'meilisearch',
+                path: $path,
+                storageMode: 'service',
+                sharedConfigured: $sharedConfigured,
+                multiReplicaWriteReady: $sharedConfigured,
+                concerns: ['search-service-coordination', 'eventual-index-convergence'],
+            );
+        }
+
+        return $this->sqliteStore('discoveryIndex', $this->discoverySqlitePath, $localStateRoot);
     }
 
     private function sqliteStore(string $name, string $path, string $localStateRoot): DiscoveryStateStoreDescriptor

@@ -19,6 +19,7 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
         self::assertFalse($topology->distributedReady);
         self::assertSame('/workspace/discovering/var/discovery', $topology->localStateRoot);
         self::assertCount(6, $topology->stores);
+        self::assertSame('sqlite', $topology->stores[0]->backend);
         self::assertSame('local_file', $topology->stores[0]->storageMode);
         self::assertFalse($topology->stores[0]->sharedConfigured);
         self::assertContains('All discovery state paths still resolve under the local var/discovery root.', $topology->notes);
@@ -90,8 +91,41 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
         self::assertContains('Overall distributed readiness still remains false until discovery index moves beyond SQLite single-node storage.', $topology->notes);
     }
 
+
+    public function testBuildCanTreatTopologyAsDistributedReadyWhenIndexAndMutableStateUseSharedBackends(): void
+    {
+        $builder = $this->builder(
+            indexBackend: 'meili',
+            meiliUrl: 'http://meili.internal:7700',
+            meiliIndexPrefix: 'discovering_prod',
+            feedbackBackend: 'pdo',
+            feedbackPdoDsn: 'pgsql:host=db.internal;dbname=discovering',
+            operationLogBackend: 'pdo',
+            operationLogPdoDsn: 'pgsql:host=db.internal;dbname=discovering',
+            rebuildEvidenceBackend: 'pdo',
+            rebuildEvidencePdoDsn: 'pgsql:host=db.internal;dbname=discovering',
+            libsourceEventLogBackend: 'pdo',
+            libsourceEventLogPdoDsn: 'pgsql:host=db.internal;dbname=discovering',
+            rateLimitBackend: 'pdo',
+            rateLimitPdoDsn: 'pgsql:host=db.internal;dbname=discovering',
+        );
+
+        $topology = $builder->build();
+
+        self::assertTrue($topology->sharedStateConfigured);
+        self::assertTrue($topology->distributedReady);
+        self::assertSame('meilisearch', $topology->stores[0]->backend);
+        self::assertSame('service', $topology->stores[0]->storageMode);
+        self::assertTrue($topology->stores[0]->multiReplicaWriteReady);
+        self::assertContains('Discovery index uses a shared Meilisearch backend.', $topology->notes);
+        self::assertContains('Overall distributed readiness can be treated as true when stronger coordination stores are configured for the remaining mutable discovery state.', $topology->notes);
+    }
+
     private function builder(
         string $discoverySqlitePath = '/workspace/discovering/var/discovery/discovering.sqlite',
+        string $indexBackend = 'sqlite',
+        string $meiliUrl = '',
+        string $meiliIndexPrefix = 'discovering',
         string $feedbackPath = '/workspace/discovering/var/discovery/discovering-feedback.sqlite',
         string $feedbackBackend = 'sqlite_path',
         string $feedbackPdoDsn = '',
@@ -116,6 +150,9 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
         return new DiscoveryStateTopologyBuilder(
             projectDir: '/workspace/discovering',
             discoverySqlitePath: $discoverySqlitePath,
+            indexBackend: $indexBackend,
+            meiliUrl: $meiliUrl,
+            meiliIndexPrefix: $meiliIndexPrefix,
             feedbackPath: $feedbackPath,
             feedbackBackend: $feedbackBackend,
             feedbackPdoDsn: $feedbackPdoDsn,

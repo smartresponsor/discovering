@@ -1,5 +1,9 @@
 parameters:
   app.discovery.default_sqlite_path: '%kernel.project_dir%/var/discovery/discovering.sqlite'
+  app.discovery.default_index_backend: 'sqlite'
+  app.discovery.default_meili_url: ''
+  app.discovery.default_meili_api_key: ''
+  app.discovery.default_meili_index_prefix: 'discovering'
   app.discovery.default_feedback_path: '%kernel.project_dir%/var/discovery/discovering-feedback.sqlite'
   app.discovery.default_feedback_backend: 'sqlite_path'
   app.discovery.default_feedback_pdo_dsn: ''
@@ -89,7 +93,7 @@ services:
     arguments:
       $projectDir: '%kernel.project_dir%'
 
-  App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface: '@App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter'
+  App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface: '@App\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter'
   App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface: '@App\Service\Discovery\Indexer\DiscoveryIndexer'
   App\ServiceInterface\Discovery\DiscoveryServiceInterface: '@App\Service\Discovery\DiscoveryService'
   App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface: '@App\Service\Discovery\Document\DiscoveryDocumentProvider'
@@ -118,6 +122,9 @@ services:
     arguments:
       $projectDir: '%kernel.project_dir%'
       $discoverySqlitePath: '%env(default:app.discovery.default_sqlite_path:APP_DISCOVERY_SQLITE_PATH)%'
+      $indexBackend: '%env(default:app.discovery.default_index_backend:APP_DISCOVERY_INDEX_BACKEND)%'
+      $meiliUrl: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
+      $meiliIndexPrefix: '%env(default:app.discovery.default_meili_index_prefix:APP_DISCOVERY_MEILI_INDEX_PREFIX)%'
       $feedbackPath: '%env(default:app.discovery.default_feedback_path:APP_DISCOVERY_FEEDBACK_SQLITE_PATH)%'
       $feedbackBackend: '%env(default:app.discovery.default_feedback_backend:APP_DISCOVERY_FEEDBACK_BACKEND)%'
       $feedbackPdoDsn: '%env(default:app.discovery.default_feedback_pdo_dsn:APP_DISCOVERY_FEEDBACK_PDO_DSN)%'
@@ -213,9 +220,20 @@ services:
       $managementMutationLimit: '%env(int:default:app.discovery.default_management_mutation_rate_limit:APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT)%'
       $managementMutationWindowSeconds: '%env(int:default:app.discovery.default_management_mutation_rate_limit_window_seconds:APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT_WINDOW_SECONDS)%'
 
+  App\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter:
+    arguments:
+      $backend: '%env(default:app.discovery.default_index_backend:APP_DISCOVERY_INDEX_BACKEND)%'
+      $meiliBase: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
+
   App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter:
     arguments:
       $path: '%env(default:app.discovery.default_sqlite_path:APP_DISCOVERY_SQLITE_PATH)%'
+
+  App\Service\Discovery\Adapter\MeiliDiscoveryAdapter:
+    arguments:
+      $base: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
+      $key: '%env(default:app.discovery.default_meili_api_key:APP_DISCOVERY_MEILI_API_KEY)%'
+      $indexPrefix: '%env(default:app.discovery.default_meili_index_prefix:APP_DISCOVERY_MEILI_INDEX_PREFIX)%'
 
   App\Service\Discovery\DiscoveryFeedbackStoreInterface: '@App\Service\Discovery\ConfigurableDiscoveryFeedbackStore'
 

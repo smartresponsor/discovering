@@ -8,31 +8,34 @@ use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterfa
 
 final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
 {
-    public function __construct(private readonly ?string $base = null, private readonly ?string $key = null)
-    {
+    public function __construct(
+        private readonly ?string $base = null,
+        private readonly ?string $key = null,
+        private readonly string $indexPrefix = '',
+    ) {
     }
 
     public function upsert(string $resource, string $id, array $document): void
     {
         $payload = $document;
         $payload['id'] = $id;
-        $this->request('POST', sprintf('/indexes/%s/documents', $resource), [$payload]);
+        $this->request('POST', sprintf('/indexes/%s/documents', $this->indexUid($resource)), [$payload]);
     }
 
     public function remove(string $resource, string $id): void
     {
-        $this->request('DELETE', sprintf('/indexes/%s/documents/%s', $resource, $id));
+        $this->request('DELETE', sprintf('/indexes/%s/documents/%s', $this->indexUid($resource), $id));
     }
 
     public function search(string $resource, string $query, int $limit = 20, int $offset = 0): array
     {
-        $response = $this->request('POST', sprintf('/indexes/%s/search', $resource), ['q' => $query, 'limit' => $limit, 'offset' => $offset]);
+        $response = $this->request('POST', sprintf('/indexes/%s/search', $this->indexUid($resource)), ['q' => $query, 'limit' => $limit, 'offset' => $offset]);
         return $response['hits'] ?? [];
     }
 
     public function createIndex(string $resource): void
     {
-        $this->request('POST', '/indexes', ['uid' => $resource]);
+        $this->request('POST', '/indexes', ['uid' => $this->indexUid($resource)]);
     }
 
     public function swapAlias(string $from, string $to): void
@@ -47,6 +50,23 @@ final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface, Discover
     public function supportsStagedRebuild(): bool
     {
         return false;
+    }
+
+
+    private function indexUid(string $resource): string
+    {
+        $normalized = preg_replace('/[^a-z0-9_]+/i', '_', strtolower($resource)) ?: 'global';
+        $normalized = trim($normalized, '_') ?: 'global';
+        $prefix = trim($this->indexPrefix);
+
+        if ($prefix === '') {
+            return $normalized;
+        }
+
+        $normalizedPrefix = preg_replace('/[^a-z0-9_]+/i', '_', strtolower($prefix)) ?: 'discovery';
+        $normalizedPrefix = trim($normalizedPrefix, '_') ?: 'discovery';
+
+        return $normalizedPrefix . '__' . $normalized;
     }
 
     /** @return array<string, mixed> */
