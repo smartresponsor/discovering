@@ -86,8 +86,8 @@
                 {% for document in overview.sampleDocuments %}
                     <div class="list-group-item">
                         <div class="fw-semibold">{{ document.title }}</div>
-                        <div class="small text-muted">{{ document.resourceType }} / {{ document.resourceId }}</div>
-                        <div class="mt-2">{{ document.body }}</div>
+                        <div class="small text-muted">{{ document.resource }} / {{ document.id }}</div>
+                        <div class="mt-2">{{ document.content }}</div>
                     </div>
                 {% endfor %}
             </div>

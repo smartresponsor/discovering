@@ -38,6 +38,11 @@ final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface
     {
     }
 
+    public function getBackendName(): string
+    {
+        return 'meilisearch';
+    }
+
     /** @return array<string, mixed> */
     private function request(string $method, string $path, ?array $body = null): array
     {

@@ -91,6 +91,11 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface
     {
     }
 
+    public function getBackendName(): string
+    {
+        return 'sqlite-fts5';
+    }
+
     private function normalizeIndexName(string $resource): string
     {
         $normalized = preg_replace('/[^a-z0-9_]+/i', '_', strtolower($resource)) ?: 'global';
