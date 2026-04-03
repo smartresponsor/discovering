@@ -18,7 +18,12 @@ final class Kernel extends BaseKernel
         $configDir = $this->getProjectDir() . '/config';
 
         $loader->load($configDir . '/packages/*.yaml', 'glob');
-        $loader->load($configDir . '/packages/' . $this->environment . '/*.yaml', 'glob');
+
+        $environmentPackagesDir = $configDir . '/packages/' . $this->environment;
+        if (is_dir($environmentPackagesDir)) {
+            $loader->load($environmentPackagesDir . '/*.yaml', 'glob');
+        }
+
         $loader->load($configDir . '/services.yaml');
 
         $environmentServices = $configDir . '/services_' . $this->environment . '.yaml';
@@ -31,6 +36,10 @@ final class Kernel extends BaseKernel
     {
         $configDir = $this->getProjectDir() . '/config/routes';
         $routes->import($configDir . '/*.yaml');
-        $routes->import($configDir . '/' . $this->environment . '/*.yaml');
+
+        $environmentRoutesDir = $configDir . '/' . $this->environment;
+        if (is_dir($environmentRoutesDir)) {
+            $routes->import($environmentRoutesDir . '/*.yaml');
+        }
     }
 }

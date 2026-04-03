@@ -86,6 +86,10 @@ services:
     arguments:
       $sourceProviders: !tagged_iterator app.discovery_source_provider
 
+  App\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder:
+    arguments:
+      $sourceProviders: !tagged_iterator app.discovery_source_provider
+
   App\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry:
     arguments:
       $repositories: !tagged_iterator app.discovery_source_repository
