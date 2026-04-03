@@ -16,7 +16,10 @@ final class DiscoveryStateTopologyBuilder
         private readonly string $operationLogPath,
         private readonly string $rebuildEvidencePath,
         private readonly string $libsourceEventLogPath,
+        private readonly string $rateLimitBackend,
         private readonly string $rateLimitStorePath,
+        private readonly string $rateLimitPdoDsn,
+        private readonly string $rateLimitPdoTable,
     ) {
     }
 
@@ -30,7 +33,7 @@ final class DiscoveryStateTopologyBuilder
             $this->jsonStore('operationLog', $this->operationLogPath, $localStateRoot),
             $this->jsonStore('rebuildEvidence', $this->rebuildEvidencePath, $localStateRoot),
             $this->jsonStore('libsourceEventLog', $this->libsourceEventLogPath, $localStateRoot),
-            $this->jsonStore('rateLimitStore', $this->rateLimitStorePath, $localStateRoot),
+            $this->rateLimitStore($localStateRoot),
         ];
 
         $sharedStateConfigured = false;
@@ -49,11 +52,18 @@ final class DiscoveryStateTopologyBuilder
 
         if (!$sharedStateConfigured) {
             $notes[] = 'All discovery state paths still resolve under the local var/discovery root.';
+        } else {
+            $notes[] = 'One or more discovery state stores are configured outside the local var/discovery root or through a shared coordination backend.';
         }
 
         $notes[] = 'SQLite-backed discovery index and feedback state remain single-node oriented and are not treated as multi-replica write-safe.';
-        $notes[] = 'JSON file-backed operation, evidence, and rate-limit stores use local file mutation semantics and are not treated as distributed coordination stores.';
-        $notes[] = 'Shared-state environment overrides can externalize paths, but true multi-replica readiness still requires stronger coordination storage than SQLite and JSON files.';
+        $notes[] = 'JSON file-backed operation, evidence, and libsource event stores use local file mutation semantics and are not treated as distributed coordination stores.';
+
+        if (strtolower(trim($this->rateLimitBackend)) === 'pdo' && trim($this->rateLimitPdoDsn) !== '') {
+            $notes[] = 'Rate limiting can now use a shared PDO coordination backend, but overall distributed readiness still remains false until other mutable discovery stores move beyond SQLite and JSON files.';
+        } else {
+            $notes[] = 'Rate limiting still defaults to a JSON file store unless a stronger PDO coordination backend is configured.';
+        }
 
         return new DiscoveryStateTopology(
             localStateRoot: $localStateRoot,
@@ -104,6 +114,35 @@ final class DiscoveryStateTopologyBuilder
             multiReplicaWriteReady: false,
             concerns: $concerns,
         );
+    }
+
+    private function rateLimitStore(string $localStateRoot): DiscoveryStateStoreDescriptor
+    {
+        $backend = strtolower(trim($this->rateLimitBackend));
+        if ($backend === 'pdo') {
+            $dsn = trim($this->rateLimitPdoDsn);
+            $sharedConfigured = $dsn !== '';
+            $sqliteDsn = str_starts_with(strtolower($dsn), 'sqlite:');
+
+            $concerns = ['database-coordination-store'];
+            if ($sqliteDsn) {
+                $concerns[] = 'sqlite-single-writer';
+            } else {
+                $concerns[] = 'shared-counter-coordination';
+            }
+
+            return new DiscoveryStateStoreDescriptor(
+                name: 'rateLimitStore',
+                backend: 'pdo_table',
+                path: $dsn === '' ? sprintf('pdo:%s', $this->rateLimitPdoTable) : sprintf('%s#%s', $dsn, $this->rateLimitPdoTable),
+                storageMode: 'database',
+                sharedConfigured: $sharedConfigured,
+                multiReplicaWriteReady: $sharedConfigured && !$sqliteDsn,
+                concerns: $concerns,
+            );
+        }
+
+        return $this->jsonStore('rateLimitStore', $this->rateLimitStorePath, $localStateRoot);
     }
 
     private function isLocalStatePath(string $path, string $localStateRoot): bool

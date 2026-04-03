@@ -1,40 +1,31 @@
-# Discovery Rate Limiting v1
+# Discovery rate limiting v1
 
-## Scope
-The current rate-limiting baseline protects three discovery traffic classes:
+This document describes the current anti-abuse baseline for discovery query, write, and management mutation surfaces.
 
-- `query` — public read paths (`/discovery`, `/api/discovery`, `/api/v1/discovery`)
-- `write` — feedback-write paths (`/discovery/feedback`, `/api/discovery/click`, `/api/v1/discovery/click`)
-- `management_mutation` — management mutation flows (for example `POST /management/discovery/rebuild` or management actions triggered with `?action=...`)
+## Current scopes
 
-## Current implementation
-The limiter uses a lightweight fixed-window file-backed store. This is intentionally modest but explicit:
+- `query`
+- `write`
+- `management_mutation`
 
-- file-backed JSON bucket state
-- per-scope counting
-- actor bucket derived from client IP and token fingerprint where relevant
-- explicit `429` handling
-- response headers with reset metadata
+## Default backend
 
-## Headers
-Discovery rate-limited surfaces now emit:
+The default rate-limit store remains a local JSON file so the component stays lightweight in single-node development.
 
-- `X-RateLimit-Limit`
-- `X-RateLimit-Remaining`
-- `X-RateLimit-Reset`
-- `X-RateLimit-Scope`
-- `Retry-After` when a request is rejected
+## Shared coordination seam
 
-## Environment overrides
-Optional overrides:
+A stronger coordination seam now exists for throttling through a PDO-backed store.
 
-- `APP_DISCOVERY_RATE_LIMIT_STORE_PATH`
-- `APP_DISCOVERY_QUERY_RATE_LIMIT`
-- `APP_DISCOVERY_QUERY_RATE_LIMIT_WINDOW_SECONDS`
-- `APP_DISCOVERY_WRITE_RATE_LIMIT`
-- `APP_DISCOVERY_WRITE_RATE_LIMIT_WINDOW_SECONDS`
-- `APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT`
-- `APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT_WINDOW_SECONDS`
+Environment knobs:
 
-## Operational caveat
-This baseline is **not** treated as distributed-safe. The limiter state is file-backed and appropriate for local or single-node usage only. It reduces obvious abuse paths but does not yet provide multi-replica coordination.
+- `APP_DISCOVERY_RATE_LIMIT_BACKEND=file|pdo`
+- `APP_DISCOVERY_RATE_LIMIT_PDO_DSN=`
+- `APP_DISCOVERY_RATE_LIMIT_PDO_USER=`
+- `APP_DISCOVERY_RATE_LIMIT_PDO_PASSWORD=`
+- `APP_DISCOVERY_RATE_LIMIT_PDO_TABLE=`
+
+When `APP_DISCOVERY_RATE_LIMIT_BACKEND=pdo`, rate limiting no longer depends on a JSON file and can coordinate counters through a shared database table.
+
+## Important limits of this wave
+
+This wave improves anti-abuse coordination for throttling only. Discovery index state, feedback, rebuild evidence, and operator logs still remain SQLite/JSON-file oriented, so overall distributed readiness is still not claimed.

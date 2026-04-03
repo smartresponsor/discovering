@@ -5,6 +5,11 @@ parameters:
   app.discovery.default_rebuild_evidence_path: '%kernel.project_dir%/var/discovery/discovery-rebuild-evidence.test.json'
   app.discovery.default_libsource_event_log_path: '%kernel.project_dir%/var/discovery/libsource-operator-event-log.test.json'
   app.discovery.default_rate_limit_store_path: '%kernel.project_dir%/var/discovery/discovery-rate-limit.test.json'
+  app.discovery.default_rate_limit_backend: 'file'
+  app.discovery.default_rate_limit_pdo_dsn: ''
+  app.discovery.default_rate_limit_pdo_user: ''
+  app.discovery.default_rate_limit_pdo_password: ''
+  app.discovery.default_rate_limit_pdo_table: 'discovery_rate_limit_bucket_test'
   app.discovery.default_query_rate_limit: 3
   app.discovery.default_query_rate_limit_window_seconds: 60
   app.discovery.default_write_rate_limit: 2

@@ -12,7 +12,7 @@ namespace App\Service\Discovery\RateLimit;
  *   "scope|actor": {"count": 1, "resetAt": 1712160000}
  * }
  */
-final class FileDiscoveryRateLimitStore
+final class FileDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterface
 {
     public function __construct(private readonly string $path)
     {

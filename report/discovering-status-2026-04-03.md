@@ -78,3 +78,6 @@ The current codebase is now ready for a proving wave centered on installation, r
 
 
 Update: rollback execution is now implemented as an alias-promotion primitive and is no longer manual-only when the rollback plan is ready.
+
+
+Update: rate limiting now supports an optional PDO-backed coordination store, so throttling no longer has to remain JSON-file-only when shared coordination is needed. Overall distributed readiness still remains false until other mutable discovery stores move beyond SQLite and local JSON files.

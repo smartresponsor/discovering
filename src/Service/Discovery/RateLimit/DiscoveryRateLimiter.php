@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 final class DiscoveryRateLimiter
 {
     public function __construct(
-        private readonly FileDiscoveryRateLimitStore $store,
+        private readonly DiscoveryRateLimitStoreInterface $store,
         private readonly int $queryLimit,
         private readonly int $queryWindowSeconds,
         private readonly int $writeLimit,
