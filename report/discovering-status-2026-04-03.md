@@ -29,20 +29,22 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 14. `1d7f16e` — add discovery state topology and shared-state seam
 15. `dc3330a` — add discovery rate limiting baseline
 16. `e97378b` — add discovery rollback planning baseline
+17. `6a36629` — prove runtime boot on current slice
+18. `af78e98` — add shared coordination backends for discovery operator stores
 
 ## Direct unfinished items
 
-### 1. Runtime installability is designed but not yet proven in this environment
+### 1. Runtime boot is now proven, but full test execution still depends on environment completeness
 
-The repository now has a Symfony bootstrap baseline, PHPUnit suites, CI wiring, and clearer contracts. However, this environment did not contain installed `vendor/` dependencies, so a real `composer install`, `bin/console`, and `phpunit` execution was not confirmed here.
+The current slice now boots through real Symfony console paths: `bin/console list --raw`, `lint:container`, and `debug:router` were proven after boot blockers were removed. However, full PHPUnit execution still depends on the active environment having the required PHP extensions and an aligned installed `vendor/` toolset.
 
-**Impact:** architecture and test contours are much stronger than before, but runtime proof is still pending.
+**Impact:** runtime credibility is materially stronger than before, but full test execution still remains the next proving step.
 
 ### 2. Shared-state externalization is now inspectable, but distributed readiness still remains false
 
-The repository can now describe mutable discovery state paths and can externalize them through environment-level path overrides. However, the current state backends remain SQLite and JSON-file oriented, so the component is still not treated as multi-replica write-ready.
+The repository can now describe mutable discovery state paths and can externalize them through environment-level path overrides. Rate limiting, operation history, rebuild evidence, and libsource event history can now all move from JSON files to PDO-backed coordination tables. However, the discovery index and feedback state remain SQLite-oriented, so the component is still not treated as multi-replica write-ready.
 
-**Impact:** the platform seam is clearer, but a true distributed posture still requires stronger coordination stores than shared files.
+**Impact:** the platform seam is clearer and stronger than before, but a true distributed posture still requires discovery index and feedback state to move beyond single-node SQLite semantics.
 
 ### 3. Rollback execution now exists, but it remains intentionally narrow
 
@@ -66,11 +68,10 @@ The current codebase is now ready for a proving wave centered on installation, r
 
 ## Recommended next execution order
 
-1. Prove installability with `composer install`
-2. Run PHPUnit suites and fix runtime regressions
-3. Run `bin/console` command smoke checks
-4. Decide whether shared-state overrides are enough for the target deployment, or whether discovery state and throttling must move to stronger coordination backends
-5. If needed later, broaden rollback beyond alias promotion toward richer historical-state recovery semantics
+1. Run PHPUnit suites and fix runtime regressions
+2. Verify Composer-installed tooling (`phpstan`, `php-cs-fixer`) on the active slice
+3. Decide whether shared-state overrides are enough for the target deployment, or whether discovery state and operator history must move to stronger coordination backends
+4. If needed later, broaden rollback beyond alias promotion toward richer historical-state recovery semantics
 
 ## Current architectural verdict
 
@@ -80,4 +81,4 @@ The current codebase is now ready for a proving wave centered on installation, r
 Update: rollback execution is now implemented as an alias-promotion primitive and is no longer manual-only when the rollback plan is ready.
 
 
-Update: rate limiting now supports an optional PDO-backed coordination store, so throttling no longer has to remain JSON-file-only when shared coordination is needed. Overall distributed readiness still remains false until other mutable discovery stores move beyond SQLite and local JSON files.
+Update: rate limiting, operation history, rebuild evidence, and libsource event history now all support optional PDO-backed coordination stores. Overall distributed readiness still remains false until discovery index and feedback state move beyond SQLite.

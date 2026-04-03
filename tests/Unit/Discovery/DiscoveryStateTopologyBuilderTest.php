@@ -11,18 +11,7 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
 {
     public function testBuildMarksLocalVarDiscoveryPathsAsLocalAndNotDistributedReady(): void
     {
-        $builder = new DiscoveryStateTopologyBuilder(
-            projectDir: '/workspace/discovering',
-            discoverySqlitePath: '/workspace/discovering/var/discovery/discovering.sqlite',
-            feedbackSqlitePath: '/workspace/discovering/var/discovery/discovering-feedback.sqlite',
-            operationLogPath: '/workspace/discovering/var/discovery/discovery-operation-log.json',
-            rebuildEvidencePath: '/workspace/discovering/var/discovery/discovery-rebuild-evidence.json',
-            libsourceEventLogPath: '/workspace/discovering/var/discovery/libsource-operator-event-log.json',
-            rateLimitBackend: 'file',
-            rateLimitStorePath: '/workspace/discovering/var/discovery/discovery-rate-limit.json',
-            rateLimitPdoDsn: '',
-            rateLimitPdoTable: 'discovery_rate_limit_bucket',
-        );
+        $builder = $this->builder();
 
         $topology = $builder->build();
 
@@ -37,17 +26,13 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
 
     public function testBuildRecognizesExternalizedPathsButKeepsDistributedReadinessFalse(): void
     {
-        $builder = new DiscoveryStateTopologyBuilder(
-            projectDir: '/workspace/discovering',
+        $builder = $this->builder(
             discoverySqlitePath: '/mnt/shared/discovering/discovering.sqlite',
             feedbackSqlitePath: '/mnt/shared/discovering/discovering-feedback.sqlite',
             operationLogPath: '/mnt/shared/discovering/discovery-operation-log.json',
             rebuildEvidencePath: '/mnt/shared/discovering/discovery-rebuild-evidence.json',
             libsourceEventLogPath: '/mnt/shared/discovering/libsource-operator-event-log.json',
-            rateLimitBackend: 'file',
             rateLimitStorePath: '/mnt/shared/discovering/discovery-rate-limit.json',
-            rateLimitPdoDsn: '',
-            rateLimitPdoTable: 'discovery_rate_limit_bucket',
         );
 
         $topology = $builder->build();
@@ -60,31 +45,74 @@ final class DiscoveryStateTopologyBuilderTest extends TestCase
         self::assertContains('shared-filesystem-append-risk', $topology->stores[2]->concerns);
     }
 
-    public function testBuildMarksPdoRateLimitStoreAsSharedCoordinationBackend(): void
+    public function testBuildMarksPdoCoordinationStoresAsSharedButStillNotOverallDistributedReady(): void
     {
-        $builder = new DiscoveryStateTopologyBuilder(
-            projectDir: '/workspace/discovering',
-            discoverySqlitePath: '/workspace/discovering/var/discovery/discovering.sqlite',
-            feedbackSqlitePath: '/workspace/discovering/var/discovery/discovering-feedback.sqlite',
-            operationLogPath: '/workspace/discovering/var/discovery/discovery-operation-log.json',
-            rebuildEvidencePath: '/workspace/discovering/var/discovery/discovery-rebuild-evidence.json',
-            libsourceEventLogPath: '/workspace/discovering/var/discovery/libsource-operator-event-log.json',
+        $builder = $this->builder(
+            operationLogBackend: 'pdo',
+            operationLogPdoDsn: 'pgsql:host=db.internal;dbname=discovering',
+            rebuildEvidenceBackend: 'pdo',
+            rebuildEvidencePdoDsn: 'pgsql:host=db.internal;dbname=discovering',
+            libsourceEventLogBackend: 'pdo',
+            libsourceEventLogPdoDsn: 'pgsql:host=db.internal;dbname=discovering',
             rateLimitBackend: 'pdo',
-            rateLimitStorePath: '/workspace/discovering/var/discovery/discovery-rate-limit.json',
             rateLimitPdoDsn: 'pgsql:host=db.internal;dbname=discovering',
-            rateLimitPdoTable: 'discovery_rate_limit_bucket',
         );
 
         $topology = $builder->build();
-        $rateLimitStore = $topology->stores[5];
 
         self::assertTrue($topology->sharedStateConfigured);
         self::assertFalse($topology->distributedReady);
-        self::assertSame('pdo_table', $rateLimitStore->backend);
-        self::assertSame('database', $rateLimitStore->storageMode);
-        self::assertTrue($rateLimitStore->sharedConfigured);
-        self::assertTrue($rateLimitStore->multiReplicaWriteReady);
-        self::assertContains('shared-counter-coordination', $rateLimitStore->concerns);
-        self::assertContains('Rate limiting can now use a shared PDO coordination backend, but overall distributed readiness still remains false until other mutable discovery stores move beyond SQLite and JSON files.', $topology->notes);
+        self::assertSame('pdo_table', $topology->stores[2]->backend);
+        self::assertSame('pdo_table', $topology->stores[3]->backend);
+        self::assertSame('pdo_table', $topology->stores[4]->backend);
+        self::assertSame('pdo_table', $topology->stores[5]->backend);
+        self::assertTrue($topology->stores[2]->multiReplicaWriteReady);
+        self::assertTrue($topology->stores[5]->multiReplicaWriteReady);
+        self::assertContains('Operation log uses a shared PDO coordination backend.', $topology->notes);
+        self::assertContains('Rebuild evidence uses a shared PDO coordination backend.', $topology->notes);
+        self::assertContains('Libsource event log uses a shared PDO coordination backend.', $topology->notes);
+    }
+
+    private function builder(
+        string $discoverySqlitePath = '/workspace/discovering/var/discovery/discovering.sqlite',
+        string $feedbackSqlitePath = '/workspace/discovering/var/discovery/discovering-feedback.sqlite',
+        string $operationLogPath = '/workspace/discovering/var/discovery/discovery-operation-log.json',
+        string $operationLogBackend = 'file',
+        string $operationLogPdoDsn = '',
+        string $operationLogPdoTable = 'discovery_operation_event_log',
+        string $rebuildEvidencePath = '/workspace/discovering/var/discovery/discovery-rebuild-evidence.json',
+        string $rebuildEvidenceBackend = 'file',
+        string $rebuildEvidencePdoDsn = '',
+        string $rebuildEvidencePdoTable = 'discovery_rebuild_evidence',
+        string $libsourceEventLogPath = '/workspace/discovering/var/discovery/libsource-operator-event-log.json',
+        string $libsourceEventLogBackend = 'file',
+        string $libsourceEventLogPdoDsn = '',
+        string $libsourceEventLogPdoTable = 'discovery_libsource_operator_event_log',
+        string $rateLimitBackend = 'file',
+        string $rateLimitStorePath = '/workspace/discovering/var/discovery/discovery-rate-limit.json',
+        string $rateLimitPdoDsn = '',
+        string $rateLimitPdoTable = 'discovery_rate_limit_bucket',
+    ): DiscoveryStateTopologyBuilder {
+        return new DiscoveryStateTopologyBuilder(
+            projectDir: '/workspace/discovering',
+            discoverySqlitePath: $discoverySqlitePath,
+            feedbackSqlitePath: $feedbackSqlitePath,
+            operationLogPath: $operationLogPath,
+            operationLogBackend: $operationLogBackend,
+            operationLogPdoDsn: $operationLogPdoDsn,
+            operationLogPdoTable: $operationLogPdoTable,
+            rebuildEvidencePath: $rebuildEvidencePath,
+            rebuildEvidenceBackend: $rebuildEvidenceBackend,
+            rebuildEvidencePdoDsn: $rebuildEvidencePdoDsn,
+            rebuildEvidencePdoTable: $rebuildEvidencePdoTable,
+            libsourceEventLogPath: $libsourceEventLogPath,
+            libsourceEventLogBackend: $libsourceEventLogBackend,
+            libsourceEventLogPdoDsn: $libsourceEventLogPdoDsn,
+            libsourceEventLogPdoTable: $libsourceEventLogPdoTable,
+            rateLimitBackend: $rateLimitBackend,
+            rateLimitStorePath: $rateLimitStorePath,
+            rateLimitPdoDsn: $rateLimitPdoDsn,
+            rateLimitPdoTable: $rateLimitPdoTable,
+        );
     }
 }

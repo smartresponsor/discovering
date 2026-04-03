@@ -11,11 +11,16 @@ The topology export now makes mutable discovery state inspectable instead of imp
 - libsource event log
 - rate-limit store
 
-## New stronger coordination seam
+## Stronger coordination seams
 
-The rate-limit store can now be configured as a PDO-backed coordination table instead of a JSON file.
+The following stores can now be configured as PDO-backed coordination tables instead of JSON files:
 
-This changes the rate-limit descriptor from:
+- operation log
+- rebuild evidence
+- libsource event log
+- rate-limit store
+
+This changes each descriptor from:
 
 - `backend: json_file`
 - `storageMode: local_file|shared_file`
@@ -27,11 +32,9 @@ into:
 
 ## Why distributedReady can still remain false
 
-Even when rate limiting uses a shared PDO backend, overall discovery state still includes:
+Even when these stores use shared PDO backends, overall discovery state still includes:
 
 - SQLite-backed search index state
 - SQLite-backed feedback state
-- JSON-file-backed operation and evidence logs
-- JSON-file-backed libsource operator event logs
 
-So the topology can now show **one stronger coordination store** without falsely claiming that the whole component is multi-replica write-ready.
+So the topology can now show **multiple stronger coordination stores** without falsely claiming that the whole component is multi-replica write-ready.

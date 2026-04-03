@@ -14,8 +14,17 @@ final class DiscoveryStateTopologyBuilder
         private readonly string $discoverySqlitePath,
         private readonly string $feedbackSqlitePath,
         private readonly string $operationLogPath,
+        private readonly string $operationLogBackend,
+        private readonly string $operationLogPdoDsn,
+        private readonly string $operationLogPdoTable,
         private readonly string $rebuildEvidencePath,
+        private readonly string $rebuildEvidenceBackend,
+        private readonly string $rebuildEvidencePdoDsn,
+        private readonly string $rebuildEvidencePdoTable,
         private readonly string $libsourceEventLogPath,
+        private readonly string $libsourceEventLogBackend,
+        private readonly string $libsourceEventLogPdoDsn,
+        private readonly string $libsourceEventLogPdoTable,
         private readonly string $rateLimitBackend,
         private readonly string $rateLimitStorePath,
         private readonly string $rateLimitPdoDsn,
@@ -30,9 +39,9 @@ final class DiscoveryStateTopologyBuilder
         $stores = [
             $this->sqliteStore('discoveryIndex', $this->discoverySqlitePath, $localStateRoot),
             $this->sqliteStore('feedbackStore', $this->feedbackSqlitePath, $localStateRoot),
-            $this->jsonStore('operationLog', $this->operationLogPath, $localStateRoot),
-            $this->jsonStore('rebuildEvidence', $this->rebuildEvidencePath, $localStateRoot),
-            $this->jsonStore('libsourceEventLog', $this->libsourceEventLogPath, $localStateRoot),
+            $this->coordinationStore('operationLog', $this->operationLogPath, $this->operationLogBackend, $this->operationLogPdoDsn, $this->operationLogPdoTable, $localStateRoot, 'shared-event-history'),
+            $this->coordinationStore('rebuildEvidence', $this->rebuildEvidencePath, $this->rebuildEvidenceBackend, $this->rebuildEvidencePdoDsn, $this->rebuildEvidencePdoTable, $localStateRoot, 'shared-evidence-history'),
+            $this->coordinationStore('libsourceEventLog', $this->libsourceEventLogPath, $this->libsourceEventLogBackend, $this->libsourceEventLogPdoDsn, $this->libsourceEventLogPdoTable, $localStateRoot, 'shared-operator-history'),
             $this->rateLimitStore($localStateRoot),
         ];
 
@@ -57,12 +66,26 @@ final class DiscoveryStateTopologyBuilder
         }
 
         $notes[] = 'SQLite-backed discovery index and feedback state remain single-node oriented and are not treated as multi-replica write-safe.';
-        $notes[] = 'JSON file-backed operation, evidence, and libsource event stores use local file mutation semantics and are not treated as distributed coordination stores.';
 
-        if (strtolower(trim($this->rateLimitBackend)) === 'pdo' && trim($this->rateLimitPdoDsn) !== '') {
-            $notes[] = 'Rate limiting can now use a shared PDO coordination backend, but overall distributed readiness still remains false until other mutable discovery stores move beyond SQLite and JSON files.';
+        $strongerStoreNotes = [];
+        foreach ([
+            ['name' => 'operation log', 'backend' => $this->operationLogBackend, 'dsn' => $this->operationLogPdoDsn],
+            ['name' => 'rebuild evidence', 'backend' => $this->rebuildEvidenceBackend, 'dsn' => $this->rebuildEvidencePdoDsn],
+            ['name' => 'libsource event log', 'backend' => $this->libsourceEventLogBackend, 'dsn' => $this->libsourceEventLogPdoDsn],
+            ['name' => 'rate limiting', 'backend' => $this->rateLimitBackend, 'dsn' => $this->rateLimitPdoDsn],
+        ] as $candidate) {
+            if (strtolower(trim((string) $candidate['backend'])) === 'pdo' && trim((string) $candidate['dsn']) !== '') {
+                $strongerStoreNotes[] = sprintf('%s uses a shared PDO coordination backend.', ucfirst((string) $candidate['name']));
+            }
+        }
+
+        if ($strongerStoreNotes === []) {
+            $notes[] = 'Operation, evidence, libsource event, and rate-limit stores still default to local JSON files unless their stronger PDO coordination backends are configured.';
         } else {
-            $notes[] = 'Rate limiting still defaults to a JSON file store unless a stronger PDO coordination backend is configured.';
+            foreach ($strongerStoreNotes as $note) {
+                $notes[] = $note;
+            }
+            $notes[] = 'Overall distributed readiness still remains false until discovery index and feedback state move beyond SQLite single-node storage.';
         }
 
         return new DiscoveryStateTopology(
@@ -116,25 +139,29 @@ final class DiscoveryStateTopologyBuilder
         );
     }
 
-    private function rateLimitStore(string $localStateRoot): DiscoveryStateStoreDescriptor
-    {
-        $backend = strtolower(trim($this->rateLimitBackend));
-        if ($backend === 'pdo') {
-            $dsn = trim($this->rateLimitPdoDsn);
+    private function coordinationStore(
+        string $name,
+        string $path,
+        string $backend,
+        string $pdoDsn,
+        string $pdoTable,
+        string $localStateRoot,
+        string $coordinationConcern,
+    ): DiscoveryStateStoreDescriptor {
+        if (strtolower(trim($backend)) === 'pdo') {
+            $dsn = trim($pdoDsn);
             $sharedConfigured = $dsn !== '';
             $sqliteDsn = str_starts_with(strtolower($dsn), 'sqlite:');
 
-            $concerns = ['database-coordination-store'];
+            $concerns = ['database-coordination-store', $coordinationConcern];
             if ($sqliteDsn) {
                 $concerns[] = 'sqlite-single-writer';
-            } else {
-                $concerns[] = 'shared-counter-coordination';
             }
 
             return new DiscoveryStateStoreDescriptor(
-                name: 'rateLimitStore',
+                name: $name,
                 backend: 'pdo_table',
-                path: $dsn === '' ? sprintf('pdo:%s', $this->rateLimitPdoTable) : sprintf('%s#%s', $dsn, $this->rateLimitPdoTable),
+                path: $dsn === '' ? sprintf('pdo:%s', $pdoTable) : sprintf('%s#%s', $dsn, $pdoTable),
                 storageMode: 'database',
                 sharedConfigured: $sharedConfigured,
                 multiReplicaWriteReady: $sharedConfigured && !$sqliteDsn,
@@ -142,7 +169,20 @@ final class DiscoveryStateTopologyBuilder
             );
         }
 
-        return $this->jsonStore('rateLimitStore', $this->rateLimitStorePath, $localStateRoot);
+        return $this->jsonStore($name, $path, $localStateRoot);
+    }
+
+    private function rateLimitStore(string $localStateRoot): DiscoveryStateStoreDescriptor
+    {
+        return $this->coordinationStore(
+            name: 'rateLimitStore',
+            path: $this->rateLimitStorePath,
+            backend: $this->rateLimitBackend,
+            pdoDsn: $this->rateLimitPdoDsn,
+            pdoTable: $this->rateLimitPdoTable,
+            localStateRoot: $localStateRoot,
+            coordinationConcern: 'shared-counter-coordination',
+        );
     }
 
     private function isLocalStatePath(string $path, string $localStateRoot): bool

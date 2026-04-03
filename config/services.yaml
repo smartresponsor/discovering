@@ -2,8 +2,23 @@ parameters:
   app.discovery.default_sqlite_path: '%kernel.project_dir%/var/discovery/discovering.sqlite'
   app.discovery.default_feedback_path: '%kernel.project_dir%/var/discovery/discovering-feedback.sqlite'
   app.discovery.default_operation_log_path: '%kernel.project_dir%/var/discovery/discovery_operation_event_log.json'
+  app.discovery.default_operation_log_backend: 'file'
+  app.discovery.default_operation_log_pdo_dsn: ''
+  app.discovery.default_operation_log_pdo_user: ''
+  app.discovery.default_operation_log_pdo_password: ''
+  app.discovery.default_operation_log_pdo_table: 'discovery_operation_event_log'
   app.discovery.default_rebuild_evidence_path: '%kernel.project_dir%/var/discovery/discovery_rebuild_evidence.json'
+  app.discovery.default_rebuild_evidence_backend: 'file'
+  app.discovery.default_rebuild_evidence_pdo_dsn: ''
+  app.discovery.default_rebuild_evidence_pdo_user: ''
+  app.discovery.default_rebuild_evidence_pdo_password: ''
+  app.discovery.default_rebuild_evidence_pdo_table: 'discovery_rebuild_evidence'
   app.discovery.default_libsource_event_log_path: '%kernel.project_dir%/var/discovery/libsource_operator_event_log.json'
+  app.discovery.default_libsource_event_log_backend: 'file'
+  app.discovery.default_libsource_event_log_pdo_dsn: ''
+  app.discovery.default_libsource_event_log_pdo_user: ''
+  app.discovery.default_libsource_event_log_pdo_password: ''
+  app.discovery.default_libsource_event_log_pdo_table: 'discovery_libsource_operator_event_log'
   app.discovery.default_rate_limit_store_path: '%kernel.project_dir%/var/discovery/discovery_rate_limit_store.json'
   app.discovery.default_rate_limit_backend: 'file'
   app.discovery.default_rate_limit_pdo_dsn: ''
@@ -74,9 +89,9 @@ services:
   App\ServiceInterface\Discovery\DiscoveryServiceInterface: '@App\Service\Discovery\DiscoveryService'
   App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface: '@App\Service\Discovery\Document\DiscoveryDocumentProvider'
   App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface: '@App\Service\Discovery\Overview\DiscoveryOverviewService'
-  App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface: '@App\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore'
-  App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface: '@App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore'
-  App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface: '@App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore'
+  App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface: '@App\Service\Discovery\Libsource\Log\ConfigurableLibsourceOperatorEventLogStore'
+  App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface: '@App\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore'
+  App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface: '@App\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore'
 
   App\Service\Discovery\Document\DiscoveryDocumentProvider:
     arguments:
@@ -100,8 +115,17 @@ services:
       $discoverySqlitePath: '%env(default:app.discovery.default_sqlite_path:APP_DISCOVERY_SQLITE_PATH)%'
       $feedbackSqlitePath: '%env(default:app.discovery.default_feedback_path:APP_DISCOVERY_FEEDBACK_SQLITE_PATH)%'
       $operationLogPath: '%env(default:app.discovery.default_operation_log_path:APP_DISCOVERY_OPERATION_LOG_PATH)%'
+      $operationLogBackend: '%env(default:app.discovery.default_operation_log_backend:APP_DISCOVERY_OPERATION_LOG_BACKEND)%'
+      $operationLogPdoDsn: '%env(default:app.discovery.default_operation_log_pdo_dsn:APP_DISCOVERY_OPERATION_LOG_PDO_DSN)%'
+      $operationLogPdoTable: '%env(default:app.discovery.default_operation_log_pdo_table:APP_DISCOVERY_OPERATION_LOG_PDO_TABLE)%'
       $rebuildEvidencePath: '%env(default:app.discovery.default_rebuild_evidence_path:APP_DISCOVERY_REBUILD_EVIDENCE_PATH)%'
+      $rebuildEvidenceBackend: '%env(default:app.discovery.default_rebuild_evidence_backend:APP_DISCOVERY_REBUILD_EVIDENCE_BACKEND)%'
+      $rebuildEvidencePdoDsn: '%env(default:app.discovery.default_rebuild_evidence_pdo_dsn:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_DSN)%'
+      $rebuildEvidencePdoTable: '%env(default:app.discovery.default_rebuild_evidence_pdo_table:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_TABLE)%'
       $libsourceEventLogPath: '%env(default:app.discovery.default_libsource_event_log_path:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PATH)%'
+      $libsourceEventLogBackend: '%env(default:app.discovery.default_libsource_event_log_backend:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_BACKEND)%'
+      $libsourceEventLogPdoDsn: '%env(default:app.discovery.default_libsource_event_log_pdo_dsn:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_DSN)%'
+      $libsourceEventLogPdoTable: '%env(default:app.discovery.default_libsource_event_log_pdo_table:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_TABLE)%'
       $rateLimitBackend: '%env(default:app.discovery.default_rate_limit_backend:APP_DISCOVERY_RATE_LIMIT_BACKEND)%'
       $rateLimitStorePath: '%env(default:app.discovery.default_rate_limit_store_path:APP_DISCOVERY_RATE_LIMIT_STORE_PATH)%'
       $rateLimitPdoDsn: '%env(default:app.discovery.default_rate_limit_pdo_dsn:APP_DISCOVERY_RATE_LIMIT_PDO_DSN)%'
@@ -111,13 +135,49 @@ services:
     arguments:
       $path: '%env(default:app.discovery.default_libsource_event_log_path:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PATH)%'
 
+  App\Service\Discovery\Libsource\Log\PdoLibsourceOperatorEventLogStore:
+    arguments:
+      $dsn: '%env(default:app.discovery.default_libsource_event_log_pdo_dsn:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_DSN)%'
+      $user: '%env(default:app.discovery.default_libsource_event_log_pdo_user:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_USER)%'
+      $password: '%env(default:app.discovery.default_libsource_event_log_pdo_password:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_PASSWORD)%'
+      $tableName: '%env(default:app.discovery.default_libsource_event_log_pdo_table:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_TABLE)%'
+
+  App\Service\Discovery\Libsource\Log\ConfigurableLibsourceOperatorEventLogStore:
+    arguments:
+      $backend: '%env(default:app.discovery.default_libsource_event_log_backend:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_BACKEND)%'
+      $pdoDsn: '%env(default:app.discovery.default_libsource_event_log_pdo_dsn:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_DSN)%'
+
   App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore:
     arguments:
       $path: '%env(default:app.discovery.default_operation_log_path:APP_DISCOVERY_OPERATION_LOG_PATH)%'
 
+  App\Service\Discovery\Operations\PdoDiscoveryOperationEventLogStore:
+    arguments:
+      $dsn: '%env(default:app.discovery.default_operation_log_pdo_dsn:APP_DISCOVERY_OPERATION_LOG_PDO_DSN)%'
+      $user: '%env(default:app.discovery.default_operation_log_pdo_user:APP_DISCOVERY_OPERATION_LOG_PDO_USER)%'
+      $password: '%env(default:app.discovery.default_operation_log_pdo_password:APP_DISCOVERY_OPERATION_LOG_PDO_PASSWORD)%'
+      $tableName: '%env(default:app.discovery.default_operation_log_pdo_table:APP_DISCOVERY_OPERATION_LOG_PDO_TABLE)%'
+
+  App\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore:
+    arguments:
+      $backend: '%env(default:app.discovery.default_operation_log_backend:APP_DISCOVERY_OPERATION_LOG_BACKEND)%'
+      $pdoDsn: '%env(default:app.discovery.default_operation_log_pdo_dsn:APP_DISCOVERY_OPERATION_LOG_PDO_DSN)%'
+
   App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore:
     arguments:
       $path: '%env(default:app.discovery.default_rebuild_evidence_path:APP_DISCOVERY_REBUILD_EVIDENCE_PATH)%'
+
+  App\Service\Discovery\Rebuild\PdoDiscoveryRebuildEvidenceStore:
+    arguments:
+      $dsn: '%env(default:app.discovery.default_rebuild_evidence_pdo_dsn:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_DSN)%'
+      $user: '%env(default:app.discovery.default_rebuild_evidence_pdo_user:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_USER)%'
+      $password: '%env(default:app.discovery.default_rebuild_evidence_pdo_password:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_PASSWORD)%'
+      $tableName: '%env(default:app.discovery.default_rebuild_evidence_pdo_table:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_TABLE)%'
+
+  App\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore:
+    arguments:
+      $backend: '%env(default:app.discovery.default_rebuild_evidence_backend:APP_DISCOVERY_REBUILD_EVIDENCE_BACKEND)%'
+      $pdoDsn: '%env(default:app.discovery.default_rebuild_evidence_pdo_dsn:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_DSN)%'
 
   App\Service\Discovery\RateLimit\DiscoveryRateLimitStoreInterface: '@App\Service\Discovery\RateLimit\ConfigurableDiscoveryRateLimitStore'
 
