@@ -8,6 +8,7 @@ final class DiscoveryRebuildSummary
 {
     /**
      * @param array<string, int> $indexedCountsByResource
+     * @param array<string, string> $stagedIndexes
      */
     public function __construct(
         public string $evidenceId,
@@ -22,6 +23,8 @@ final class DiscoveryRebuildSummary
         public int $indexedDocumentCount,
         public int $skippedDocumentCount,
         public array $indexedCountsByResource = [],
+        public array $stagedIndexes = [],
+        public bool $aliasSwapApplied = false,
     ) {
     }
 
@@ -43,6 +46,8 @@ final class DiscoveryRebuildSummary
             'indexedDocumentCount' => $this->indexedDocumentCount,
             'skippedDocumentCount' => $this->skippedDocumentCount,
             'indexedCountsByResource' => $this->indexedCountsByResource,
+            'stagedIndexes' => $this->stagedIndexes,
+            'aliasSwapApplied' => $this->aliasSwapApplied,
         ];
     }
 }

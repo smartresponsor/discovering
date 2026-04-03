@@ -89,8 +89,10 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.rebuild.summary', $payload['meta']['schemaFamily']);
         self::assertSame('global', $payload['data']['resource']);
-        self::assertSame('in_place', $payload['data']['deploymentMode']);
-        self::assertFalse($payload['data']['zeroDowntimeReady']);
+        self::assertSame('staged_alias_swap', $payload['data']['deploymentMode']);
+        self::assertTrue($payload['data']['zeroDowntimeReady']);
+        self::assertTrue($payload['data']['aliasSwapApplied']);
+        self::assertArrayHasKey('global', $payload['data']['stagedIndexes']);
         self::assertStringStartsWith('reb-', $payload['data']['evidenceId']);
     }
 
@@ -109,6 +111,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertTrue($payload['ok']);
         self::assertSame('discovery.rebuild.summary.list', $payload['meta']['schemaFamily']);
         self::assertNotEmpty($payload['data']);
+        self::assertSame('staged_alias_swap', $payload['data'][0]['deploymentMode']);
+        self::assertTrue($payload['data'][0]['aliasSwapApplied']);
         self::assertStringStartsWith('reb-', $payload['data'][0]['evidenceId']);
     }
 

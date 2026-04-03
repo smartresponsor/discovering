@@ -40,6 +40,7 @@ final class DiscoveryRebuildEvidenceJsonSerializer
             }
 
             $indexedCountsByResource = $row['indexedCountsByResource'] ?? [];
+            $stagedIndexes = $row['stagedIndexes'] ?? [];
             $summaries[] = new DiscoveryRebuildSummary(
                 evidenceId: (string) ($row['evidenceId'] ?? ''),
                 resource: (string) ($row['resource'] ?? 'global'),
@@ -53,6 +54,8 @@ final class DiscoveryRebuildEvidenceJsonSerializer
                 indexedDocumentCount: (int) ($row['indexedDocumentCount'] ?? 0),
                 skippedDocumentCount: (int) ($row['skippedDocumentCount'] ?? 0),
                 indexedCountsByResource: is_array($indexedCountsByResource) ? array_map('intval', $indexedCountsByResource) : [],
+                stagedIndexes: is_array($stagedIndexes) ? array_map('strval', $stagedIndexes) : [],
+                aliasSwapApplied: (bool) ($row['aliasSwapApplied'] ?? false),
             );
         }
 

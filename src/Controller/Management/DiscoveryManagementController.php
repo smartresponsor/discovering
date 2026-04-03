@@ -11,6 +11,7 @@ use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
 final class DiscoveryManagementController extends AbstractController
@@ -24,16 +25,28 @@ final class DiscoveryManagementController extends AbstractController
     }
 
     #[Route('/management/discovery/rebuild', name: 'app_management_discovery_rebuild', methods: ['POST'])]
-    public function rebuild(): JsonResponse
+    public function rebuild(Request $request): JsonResponse
     {
-        $summary = $this->discoveryIndexer->rebuild(new ReindexRequest(resource: 'global', rebuildMode: 'full'));
+        $requestedDeploymentMode = trim((string) $request->request->get('deploymentMode', $request->query->get('deploymentMode', 'auto')));
+        if ($requestedDeploymentMode === '') {
+            $requestedDeploymentMode = 'auto';
+        }
+
+        $summary = $this->discoveryIndexer->rebuild(new ReindexRequest(
+            resource: 'global',
+            rebuildMode: 'full',
+            deploymentMode: $requestedDeploymentMode,
+        ));
         $this->rebuildEvidenceStore->append($summary);
         $this->operationLogger->recordHttp('discovery.management.rebuild', context: [
             'evidenceId' => $summary->evidenceId,
             'indexedDocumentCount' => $summary->indexedDocumentCount,
             'candidateDocumentCount' => $summary->candidateDocumentCount,
             'deploymentMode' => $summary->deploymentMode,
+            'requestedDeploymentMode' => $requestedDeploymentMode,
             'zeroDowntimeReady' => $summary->zeroDowntimeReady,
+            'aliasSwapApplied' => $summary->aliasSwapApplied,
+            'stagedIndexes' => $summary->stagedIndexes,
         ]);
 
         return $this->jsonResponseFactory->success($summary->toArray(), [

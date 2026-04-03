@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Adapter;
 
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 use PDO;
 
-final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface
+final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
 {
     private PDO $pdo;
 
@@ -21,11 +22,12 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface
 
         $this->pdo = new PDO('sqlite:' . $databasePath);
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->createAliasTable();
     }
 
     public function upsert(string $resource, string $id, array $document): void
     {
-        $index = $this->normalizeIndexName($resource);
+        $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
         $this->createIndex($index);
         $this->remove($index, $id);
 
@@ -51,7 +53,7 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface
 
     public function remove(string $resource, string $id): void
     {
-        $index = $this->normalizeIndexName($resource);
+        $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
         $this->createIndex($index);
         $statement = $this->pdo->prepare(sprintf('DELETE FROM %s WHERE id = :id', $index));
         $statement->execute(['id' => $id]);
@@ -59,7 +61,7 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface
 
     public function search(string $resource, string $query, int $limit = 20, int $offset = 0): array
     {
-        $index = $this->normalizeIndexName($resource);
+        $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
         $this->createIndex($index);
 
         if ($query === '') {
@@ -83,17 +85,53 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface
 
     public function createIndex(string $resource): void
     {
-        $index = $this->normalizeIndexName($resource);
+        $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
         $this->pdo->exec(sprintf('CREATE VIRTUAL TABLE IF NOT EXISTS %s USING fts5(id UNINDEXED, title, resource, reference, status, content)', $index));
     }
 
     public function swapAlias(string $from, string $to): void
     {
+        $alias = $this->normalizeIndexName($from);
+        $target = $this->normalizeIndexName($to);
+        $this->createIndex($target);
+        $statement = $this->pdo->prepare('INSERT INTO discovery_index_aliases (alias, target) VALUES (:alias, :target) ON CONFLICT(alias) DO UPDATE SET target = excluded.target');
+        $statement->execute([
+            'alias' => $alias,
+            'target' => $target,
+        ]);
     }
 
     public function getBackendName(): string
     {
         return 'sqlite-fts5';
+    }
+
+    public function supportsStagedRebuild(): bool
+    {
+        return true;
+    }
+
+    private function createAliasTable(): void
+    {
+        $this->pdo->exec('CREATE TABLE IF NOT EXISTS discovery_index_aliases (alias TEXT PRIMARY KEY, target TEXT NOT NULL)');
+    }
+
+    private function resolveActiveIndex(string $resource): string
+    {
+        $resolved = $this->normalizeIndexName($resource);
+
+        for ($i = 0; $i < 8; ++$i) {
+            $statement = $this->pdo->prepare('SELECT target FROM discovery_index_aliases WHERE alias = :alias LIMIT 1');
+            $statement->execute(['alias' => $resolved]);
+            $target = $statement->fetchColumn();
+            if (!is_string($target) || $target === '' || $target === $resolved) {
+                return $resolved;
+            }
+
+            $resolved = $this->normalizeIndexName($target);
+        }
+
+        return $resolved;
     }
 
     private function normalizeIndexName(string $resource): string

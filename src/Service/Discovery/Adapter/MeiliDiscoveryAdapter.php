@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Adapter;
 
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 
-final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface
+final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
 {
     public function __construct(private readonly ?string $base = null, private readonly ?string $key = null)
     {
@@ -41,6 +42,11 @@ final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface
     public function getBackendName(): string
     {
         return 'meilisearch';
+    }
+
+    public function supportsStagedRebuild(): bool
+    {
+        return false;
     }
 
     /** @return array<string, mixed> */
