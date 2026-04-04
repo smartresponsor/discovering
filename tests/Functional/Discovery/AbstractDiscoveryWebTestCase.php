@@ -109,6 +109,61 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
         $client->request($method, $uri, $parameters, [], $this->managementTokenServer());
     }
 
+    protected function managementPageContent(string $uri = '/management/discovery'): string
+    {
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', $uri);
+
+        self::assertResponseIsSuccessful();
+
+        return (string) $client->getResponse()->getContent();
+    }
+
+    /** @return array<string, mixed> */
+    protected function managementExportPayload(
+        string $uri,
+        ?string $schemaFamily = null,
+        string|int|null $schemaVersion = null,
+        bool $deprecatedAlias = false,
+    ): array {
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', $uri);
+
+        self::assertResponseIsSuccessful();
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertTrue($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, $uri, $schemaFamily, $schemaVersion, $deprecatedAlias);
+
+        return $payload;
+    }
+
+    /** @param array<string, mixed> $parameters
+     *  @return array<string, mixed>
+     */
+    protected function managementMutationPayload(
+        string $uri,
+        array $parameters = [],
+        ?string $schemaFamily = null,
+        string|int|null $schemaVersion = null,
+        bool $deprecatedAlias = false,
+    ): array {
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'POST', $uri, $parameters);
+
+        self::assertResponseIsSuccessful();
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertTrue($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, $uri, $schemaFamily, $schemaVersion, $deprecatedAlias);
+
+        return $payload;
+    }
+
     /** @param array<string, mixed> $parameters */
     protected function requestApiWrite(KernelBrowser $client, string $method, string $uri, array $parameters = []): void
     {
@@ -162,13 +217,14 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
      */
     protected function executeRollbackPlanPayload(array $planPayload): array
     {
-        $client = $this->createManagementClient();
-        $this->requestManagement($client, 'POST', '/management/discovery/rollback/execute', [
-            'current' => $planPayload['data']['currentEvidenceId'] ?? '',
-            'target' => $planPayload['data']['previousEvidenceId'] ?? '',
-        ]);
-
-        return $this->jsonResponsePayload($client);
+        return $this->managementMutationPayload(
+            '/management/discovery/rollback/execute',
+            [
+                'current' => $planPayload['data']['currentEvidenceId'] ?? '',
+                'target' => $planPayload['data']['previousEvidenceId'] ?? '',
+            ],
+            'discovery.rollback.execution',
+        );
     }
 
     private function resetConfiguredDiscoveryStorage(): void

@@ -44,6 +44,7 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 28. `0c9e4e5` — harden functional discovery test harness
 29. `a78139c` — consolidate functional discovery HTTP assertions
 30. `9fee68c` — harden discovery management functional scenarios
+31. `adaf4d3` — consolidate discovery management export and mutation test helpers
 
 ## Direct unfinished items
 
@@ -116,3 +117,6 @@ Update: discovery JSON response metadata now distinguishes shared envelope heade
 
 
 Update: management and API functional discovery tests now share central scenario helpers for tokenized requests, rebuild sequences, rollback plan export, and rollback execution payloads instead of repeating inline setup across tests.
+
+
+Update: management functional tests now share central export/mutation/page helpers, so tokenized management requests and JSON-envelope assertions no longer need to be repeated inline across overview, rebuild, rollback, platform, and state-topology scenarios.

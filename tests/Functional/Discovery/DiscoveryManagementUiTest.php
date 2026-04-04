@@ -36,16 +36,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementOverviewExportReturnsCoverageSummary(): void
     {
-        $client = $this->createManagementClient();
-        $this->requestManagement($client, 'GET', '/management/discovery/export');
-
-        self::assertResponseIsSuccessful();
-        $this->assertDiscoveryResponseHeaders($client);
-
-        $payload = $this->jsonResponsePayload($client);
-
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/export');
+        $payload = $this->managementExportPayload('/management/discovery/export');
         self::assertSame('sqlite-fts5', $payload['data']['backendName']);
         self::assertGreaterThanOrEqual(1, $payload['data']['totalDocuments']);
         self::assertArrayHasKey('briefing', $payload['data']['countsByResourceType']);
@@ -58,31 +49,14 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $client = $this->createDiscoveryClient();
         $this->requestPublicDiscoveryQuery($client);
 
-        $managementClient = $this->createManagementClient();
-        $this->requestManagement($managementClient, 'GET', '/management/discovery/operations/export');
-
-        self::assertResponseIsSuccessful();
-        $this->assertDiscoveryResponseHeaders($managementClient);
-
-        $payload = $this->jsonResponsePayload($managementClient);
-
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/operations/export');
+        $payload = $this->managementExportPayload('/management/discovery/operations/export');
         self::assertNotEmpty($payload['data']);
         self::assertContains('discovery.api.query', array_column($payload['data'], 'operation'));
     }
 
     public function testManagementRebuildReturnsEvidenceSummary(): void
     {
-        $client = $this->createManagementClient();
-        $this->requestManagement($client, 'POST', '/management/discovery/rebuild');
-
-        self::assertResponseIsSuccessful();
-
-        $payload = $this->jsonResponsePayload($client);
-
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rebuild', 'discovery.rebuild.summary');
+        $payload = $this->managementMutationPayload('/management/discovery/rebuild', schemaFamily: 'discovery.rebuild.summary');
         self::assertSame('global', $payload['data']['resource']);
         self::assertSame('staged_alias_swap', $payload['data']['deploymentMode']);
         self::assertTrue($payload['data']['zeroDowntimeReady']);
@@ -95,15 +69,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
     {
         $this->performManagementRebuilds(1);
 
-        $exportClient = $this->createManagementClient();
-        $this->requestManagement($exportClient, 'GET', '/management/discovery/rebuilds/export');
-
-        self::assertResponseIsSuccessful();
-
-        $payload = $this->jsonResponsePayload($exportClient);
-
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rebuilds/export', 'discovery.rebuild.summary.list');
+        $payload = $this->managementExportPayload('/management/discovery/rebuilds/export', 'discovery.rebuild.summary.list');
         self::assertNotEmpty($payload['data']);
         self::assertSame('staged_alias_swap', $payload['data'][0]['deploymentMode']);
         self::assertTrue($payload['data'][0]['aliasSwapApplied']);
@@ -112,15 +78,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementStateTopologyExportReturnsDistributedReadinessPosture(): void
     {
-        $client = $this->createManagementClient();
-        $this->requestManagement($client, 'GET', '/management/discovery/state-topology/export');
-
-        self::assertResponseIsSuccessful();
-
-        $payload = $this->jsonResponsePayload($client);
-
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/state-topology/export', 'discovery.state.topology');
+        $payload = $this->managementExportPayload('/management/discovery/state-topology/export', 'discovery.state.topology');
         self::assertFalse($payload['data']['distributedReady']);
         self::assertSame('local_file', $payload['data']['stores'][0]['storageMode']);
         self::assertArrayHasKey('notes', $payload['data']);
@@ -128,15 +86,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementPlatformProbesExportReturnsReachabilitySummary(): void
     {
-        $client = $this->createManagementClient();
-        $this->requestManagement($client, 'GET', '/management/discovery/platform/probes/export');
-
-        self::assertResponseIsSuccessful();
-
-        $payload = $this->jsonResponsePayload($client);
-
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/platform/probes/export', 'discovery.platform.probes');
+        $payload = $this->managementExportPayload('/management/discovery/platform/probes/export', 'discovery.platform.probes');
         self::assertSame(0, $payload['data']['performedProbeCount']);
         self::assertSame(6, $payload['data']['skippedProbeCount']);
         self::assertSame('not_configured', $payload['data']['overallStatus']);
@@ -146,15 +96,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementPlatformExportReturnsPlatformDiagnostics(): void
     {
-        $client = $this->createManagementClient();
-        $this->requestManagement($client, 'GET', '/management/discovery/platform/export');
-
-        self::assertResponseIsSuccessful();
-
-        $payload = $this->jsonResponsePayload($client);
-
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/platform/export', 'discovery.platform.diagnostics');
+        $payload = $this->managementExportPayload('/management/discovery/platform/export', 'discovery.platform.diagnostics');
         self::assertSame('sqlite-fts5', $payload['data']['backendName']);
         self::assertSame('sqlite', $payload['data']['indexStoreBackend']);
         self::assertTrue($payload['data']['stagedRebuildSupported']);
@@ -171,15 +113,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
     {
         $this->performManagementRebuilds(2);
 
-        $exportClient = $this->createManagementClient();
-        $this->requestManagement($exportClient, 'GET', '/management/discovery/rollback/export');
-
-        self::assertResponseIsSuccessful();
-
-        $payload = $this->jsonResponsePayload($exportClient);
-
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rollback/export', 'discovery.rollback.plan');
+        $payload = $this->managementExportPayload('/management/discovery/rollback/export', 'discovery.rollback.plan');
         self::assertSame('plan_ready', $payload['data']['status']);
         self::assertTrue($payload['data']['rollbackReady']);
         self::assertNotEmpty($payload['data']['currentEvidenceId']);
@@ -193,8 +127,6 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         $planPayload = $this->prepareRollbackScenarioPayload();
 
         $payload = $this->executeRollbackPlanPayload($planPayload);
-        self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rollback/execute', 'discovery.rollback.execution');
         self::assertTrue($payload['data']['executed']);
         self::assertSame('rollback_executed', $payload['data']['status']);
         self::assertSame('global', $payload['data']['alias']);
@@ -203,12 +135,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementOverviewPageRenders(): void
     {
-        $client = $this->createManagementClient();
-        $this->requestManagement($client, 'GET', '/management/discovery');
-
-        self::assertResponseIsSuccessful();
-
-        $content = (string) $client->getResponse()->getContent();
+        $content = $this->managementPageContent();
 
         self::assertStringContainsString('Discovery Management', $content);
         self::assertStringContainsString('Recent operations', $content);
