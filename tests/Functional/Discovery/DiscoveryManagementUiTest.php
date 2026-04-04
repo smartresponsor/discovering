@@ -36,8 +36,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementOverviewExportReturnsCoverageSummary(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('GET', '/management/discovery/export', [], [], $this->managementTokenServer());
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', '/management/discovery/export');
 
         self::assertResponseIsSuccessful();
         $this->assertDiscoveryResponseHeaders($client);
@@ -56,13 +56,10 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
     public function testManagementOperationsExportReturnsRecordedEvents(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/api/v1/discovery', [
-            'query' => 'governance',
-            'resource' => 'briefing',
-        ]);
+        $this->requestPublicDiscoveryQuery($client);
 
-        $managementClient = $this->createDiscoveryClient($this->managementTokenServer());
-        $managementClient->request('GET', '/management/discovery/operations/export', [], [], $this->managementTokenServer());
+        $managementClient = $this->createManagementClient();
+        $this->requestManagement($managementClient, 'GET', '/management/discovery/operations/export');
 
         self::assertResponseIsSuccessful();
         $this->assertDiscoveryResponseHeaders($managementClient);
@@ -77,8 +74,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementRebuildReturnsEvidenceSummary(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'POST', '/management/discovery/rebuild');
 
         self::assertResponseIsSuccessful();
 
@@ -96,11 +93,10 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementRebuildExportReturnsRecordedEvidence(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+        $this->performManagementRebuilds(1);
 
-        $exportClient = $this->createDiscoveryClient($this->managementTokenServer());
-        $exportClient->request('GET', '/management/discovery/rebuilds/export', [], [], $this->managementTokenServer());
+        $exportClient = $this->createManagementClient();
+        $this->requestManagement($exportClient, 'GET', '/management/discovery/rebuilds/export');
 
         self::assertResponseIsSuccessful();
 
@@ -116,8 +112,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementStateTopologyExportReturnsDistributedReadinessPosture(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('GET', '/management/discovery/state-topology/export', [], [], $this->managementTokenServer());
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', '/management/discovery/state-topology/export');
 
         self::assertResponseIsSuccessful();
 
@@ -132,8 +128,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementPlatformProbesExportReturnsReachabilitySummary(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('GET', '/management/discovery/platform/probes/export', [], [], $this->managementTokenServer());
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', '/management/discovery/platform/probes/export');
 
         self::assertResponseIsSuccessful();
 
@@ -150,8 +146,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementPlatformExportReturnsPlatformDiagnostics(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('GET', '/management/discovery/platform/export', [], [], $this->managementTokenServer());
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', '/management/discovery/platform/export');
 
         self::assertResponseIsSuccessful();
 
@@ -173,12 +169,10 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementRollbackExportReturnsRollbackPlan(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
-        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+        $this->performManagementRebuilds(2);
 
-        $exportClient = $this->createDiscoveryClient($this->managementTokenServer());
-        $exportClient->request('GET', '/management/discovery/rollback/export', [], [], $this->managementTokenServer());
+        $exportClient = $this->createManagementClient();
+        $this->requestManagement($exportClient, 'GET', '/management/discovery/rollback/export');
 
         self::assertResponseIsSuccessful();
 
@@ -196,23 +190,9 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementRollbackExecutePromotesRollbackTarget(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
-        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+        $planPayload = $this->prepareRollbackScenarioPayload();
 
-        $exportClient = $this->createDiscoveryClient($this->managementTokenServer());
-        $exportClient->request('GET', '/management/discovery/rollback/export', [], [], $this->managementTokenServer());
-        $planPayload = $this->jsonResponsePayload($exportClient);
-
-        $executeClient = $this->createDiscoveryClient($this->managementTokenServer());
-        $executeClient->request('POST', '/management/discovery/rollback/execute', [
-            'current' => $planPayload['data']['currentEvidenceId'],
-            'target' => $planPayload['data']['previousEvidenceId'],
-        ], [], $this->managementTokenServer());
-
-        self::assertResponseIsSuccessful();
-
-        $payload = $this->jsonResponsePayload($executeClient);
+        $payload = $this->executeRollbackPlanPayload($planPayload);
         self::assertTrue($payload['ok']);
         $this->assertDiscoveryJsonEnvelope($payload, '/management/discovery/rollback/execute', 'discovery.rollback.execution');
         self::assertTrue($payload['data']['executed']);
@@ -223,8 +203,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementOverviewPageRenders(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('GET', '/management/discovery', [], [], $this->managementTokenServer());
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', '/management/discovery');
 
         self::assertResponseIsSuccessful();
 

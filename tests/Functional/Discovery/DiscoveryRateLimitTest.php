@@ -29,17 +29,10 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
     public function testApiWriteReturns429AfterConfiguredBurst(): void
     {
-        $client = $this->createDiscoveryClient($this->apiWriteTokenServer());
+        $client = $this->createApiWriteClient();
 
         for ($attempt = 0; $attempt < 3; ++$attempt) {
-            $client->request(
-                'POST',
-                '/api/v1/discovery/click',
-                [],
-                [],
-                $this->apiWriteTokenServer() + ['CONTENT_TYPE' => 'application/json'],
-                $this->jsonRequestBody($this->discoveryClickPayload()),
-            );
+            $this->requestApiWrite($client, 'POST', '/api/v1/discovery/click', $this->discoveryClickPayload());
         }
 
         self::assertResponseStatusCodeSame(429);
@@ -53,10 +46,10 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementMutationReturns429AfterConfiguredBurst(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
+        $client = $this->createManagementClient();
 
         for ($attempt = 0; $attempt < 3; ++$attempt) {
-            $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer());
+            $this->requestManagement($client, 'POST', '/management/discovery/rebuild');
         }
 
         self::assertResponseStatusCodeSame(429);

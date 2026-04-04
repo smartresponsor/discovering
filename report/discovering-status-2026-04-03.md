@@ -42,7 +42,8 @@ It summarizes completed waves, direct unfinished items, and the next recommended
 26. `b6ca96f` — add discovery health interpretation surfaces
 27. `117eafb` — finish discovery temp test cleanup on shared filesystem helpers
 28. `0c9e4e5` — harden functional discovery test harness
-29. consolidate functional discovery HTTP assertions
+29. `a78139c` — consolidate functional discovery HTTP assertions
+30. `9fee68c` — harden discovery management functional scenarios
 
 ## Direct unfinished items
 
@@ -83,6 +84,7 @@ The current codebase is now ready for a proving wave centered on installation, r
 - file- and SQLite-heavy behavioral/unit tests now share a dedicated temporary filesystem support layer instead of ad hoc `sys_get_temp_dir()` + manual cleanup patterns
 - briefing/playbook directory-backed repository and management unit tests now use shared project/resource fixture helpers with automatic teardown instead of hand-written `mkdir`/`unlink`/`rmdir` sequences
 - functional discovery web tests now reset configured mutable state paths from test DI parameters and share common JSON/body helpers instead of hard-coded filenames and repeated inline payload decoding
+- management/API functional discovery scenarios now share central request/rebuild/rollback helpers instead of duplicating tokenized request wiring and multi-step rollback setup inline in each test
 - JSON response schema metadata now preserves payload-specific `schemaFamily`/`schemaVersion` overrides in response `meta`, while response headers remain fixed to the shared envelope contract
 
 ## Recommended next execution order
@@ -111,3 +113,6 @@ Update: temp filesystem support now exposes dedicated sqlite/json path helpers, 
 
 
 Update: discovery JSON response metadata now distinguishes shared envelope headers from payload-specific `meta.schemaFamily`/`meta.schemaVersion`, so management exports can advertise their own contracts without losing the common outer envelope.
+
+
+Update: management and API functional discovery tests now share central scenario helpers for tokenized requests, rebuild sequences, rollback plan export, and rollback execution payloads instead of repeating inline setup across tests.

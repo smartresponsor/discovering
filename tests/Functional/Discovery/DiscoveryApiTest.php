@@ -48,14 +48,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
     public function testApiClickRequiresWriteToken(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request(
-            'POST',
-            '/api/v1/discovery/click',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            $this->jsonRequestBody($this->discoveryClickPayload()),
-        );
+        $client->request('POST', '/api/v1/discovery/click', [], [], ['CONTENT_TYPE' => 'application/json'], $this->jsonRequestBody($this->discoveryClickPayload()));
 
         self::assertResponseStatusCodeSame(401);
         $this->assertDiscoveryResponseHeaders($client);
@@ -70,15 +63,8 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
 
     public function testVersionedApiClickRecordsFeedbackCount(): void
     {
-        $client = $this->createDiscoveryClient($this->apiWriteTokenServer());
-        $client->request(
-            'POST',
-            '/api/v1/discovery/click',
-            [],
-            [],
-            $this->apiWriteTokenServer() + ['CONTENT_TYPE' => 'application/json'],
-            $this->jsonRequestBody($this->discoveryClickPayload()),
-        );
+        $client = $this->createApiWriteClient();
+        $this->requestApiWrite($client, 'POST', '/api/v1/discovery/click', $this->discoveryClickPayload());
 
         self::assertResponseIsSuccessful();
         $this->assertDiscoveryResponseHeaders($client);

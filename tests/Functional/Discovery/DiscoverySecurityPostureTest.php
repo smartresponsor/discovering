@@ -34,8 +34,8 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementOverviewCarriesResponseSecurityHeaders(): void
     {
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
-        $client->request('GET', '/management/discovery', [], [], $this->managementTokenServer());
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', '/management/discovery');
 
         self::assertResponseIsSuccessful();
 
@@ -48,14 +48,7 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
     public function testUnauthorizedApiWriteStillCarriesResponseSecurityHeaders(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request(
-            'POST',
-            '/api/v1/discovery/click',
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            $this->jsonRequestBody($this->discoveryClickPayload()),
-        );
+        $client->request('POST', '/api/v1/discovery/click', [], [], ['CONTENT_TYPE' => 'application/json'], $this->jsonRequestBody($this->discoveryClickPayload()));
 
         self::assertResponseStatusCodeSame(401);
 

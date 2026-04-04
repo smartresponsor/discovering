@@ -27,6 +27,7 @@ use const JSON_THROW_ON_ERROR;
 abstract class AbstractDiscoveryWebTestCase extends WebTestCase
 {
     use DiscoveryHttpAssertionTrait;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -47,6 +48,16 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
     protected function createDiscoveryClient(array $server = []): KernelBrowser
     {
         return static::createClient([], $server);
+    }
+
+    protected function createManagementClient(): KernelBrowser
+    {
+        return $this->createDiscoveryClient($this->managementTokenServer());
+    }
+
+    protected function createApiWriteClient(): KernelBrowser
+    {
+        return $this->createDiscoveryClient($this->apiWriteTokenServer());
     }
 
     /** @return array<string, string> */
@@ -90,6 +101,74 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
             'title' => 'Live source governance briefing',
             'reference' => 'briefing-live-source-governance',
         ];
+    }
+
+    /** @param array<string, mixed> $parameters */
+    protected function requestManagement(KernelBrowser $client, string $method, string $uri, array $parameters = []): void
+    {
+        $client->request($method, $uri, $parameters, [], $this->managementTokenServer());
+    }
+
+    /** @param array<string, mixed> $parameters */
+    protected function requestApiWrite(KernelBrowser $client, string $method, string $uri, array $parameters = []): void
+    {
+        $client->request(
+            $method,
+            $uri,
+            [],
+            [],
+            $this->apiWriteTokenServer() + ['CONTENT_TYPE' => 'application/json'],
+            $this->jsonRequestBody($parameters),
+        );
+    }
+
+    /** @param array<string, mixed> $parameters */
+    protected function requestPublicDiscoveryQuery(KernelBrowser $client, array $parameters = []): void
+    {
+        $client->request('GET', '/api/v1/discovery', $parameters + [
+            'query' => 'governance',
+            'resource' => 'briefing',
+        ]);
+    }
+
+    protected function performManagementRebuilds(int $count): void
+    {
+        $client = $this->createManagementClient();
+
+        for ($attempt = 0; $attempt < $count; ++$attempt) {
+            $this->requestManagement($client, 'POST', '/management/discovery/rebuild');
+        }
+    }
+
+    /** @return array<string, mixed> */
+    protected function exportRollbackPlanPayload(): array
+    {
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', '/management/discovery/rollback/export');
+
+        return $this->jsonResponsePayload($client);
+    }
+
+    /** @return array<string, mixed> */
+    protected function prepareRollbackScenarioPayload(): array
+    {
+        $this->performManagementRebuilds(2);
+
+        return $this->exportRollbackPlanPayload();
+    }
+
+    /** @param array<string, mixed> $planPayload
+     *  @return array<string, mixed>
+     */
+    protected function executeRollbackPlanPayload(array $planPayload): array
+    {
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'POST', '/management/discovery/rollback/execute', [
+            'current' => $planPayload['data']['currentEvidenceId'] ?? '',
+            'target' => $planPayload['data']['previousEvidenceId'] ?? '',
+        ]);
+
+        return $this->jsonResponsePayload($client);
     }
 
     private function resetConfiguredDiscoveryStorage(): void
