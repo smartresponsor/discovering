@@ -11,6 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+/**
+ * Applies lightweight header-token protection to mutable and management discovery endpoints.
+ */
 final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterface
 {
     public function __construct(
@@ -39,7 +42,11 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
                 return;
             }
 
-            $event->setResponse(new Response('Forbidden discovery management request.', Response::HTTP_FORBIDDEN));
+            $event->setResponse($this->jsonResponseFactory->error(
+                code: 'discovery_management_unauthorized',
+                message: 'Unauthorized discovery management request.',
+                status: Response::HTTP_UNAUTHORIZED,
+            ));
 
             return;
         }
@@ -75,6 +82,9 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
         }
 
         $providedToken = trim((string) $request->headers->get($headerName, ''));
+        if ($providedToken === '') {
+            return false;
+        }
 
         return hash_equals($expectedToken, $providedToken);
     }

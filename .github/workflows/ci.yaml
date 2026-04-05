@@ -3,6 +3,14 @@ name: discovering-ci
 on:
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: discovering-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -18,7 +26,7 @@ jobs:
           php-version: '8.4'
           coverage: none
           tools: composer:v2
-          extensions: json, pdo, pdo_sqlite
+          extensions: json, pdo, pdo_sqlite, dom, mbstring, xml, xmlwriter
 
       - name: Environment preflight
         run: php tools/runtime_preflight.php
@@ -30,10 +38,16 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Post-install runtime preflight
-        run: php tools/runtime_preflight.php --require-vendor
+        run: php tools/runtime_preflight.php --require-vendor --test-runtime
 
       - name: Console boot smoke
         run: php bin/console list --raw
+
+      - name: Docblock policy
+        run: composer verify:docblocks
+
+      - name: Security preflight
+        run: composer verify:security
 
       - name: Lint PHP sources
         run: composer lint:php

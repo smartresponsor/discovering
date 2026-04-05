@@ -53,8 +53,17 @@
       "@validate:composer",
       "@verify:runtime-preflight",
       "@verify:console",
+      "@verify:docblocks",
+      "@verify:security",
       "@lint:php",
       "@test:all"
-    ]
+    ],
+    "analyse": "php tools/qa_guard.php phpstan",
+    "lint:cs": "php tools/qa_guard.php cs-check",
+    "lint:cs:fix": "php tools/qa_guard.php cs-fix",
+    "verify:docblocks": "php tools/docblock_policy_check.php",
+    "verify:security": "php tools/security_preflight.php",
+    "docs:openapi:dump:public": "php tools/qa_guard.php openapi-public",
+    "docs:openapi:dump:management": "php tools/qa_guard.php openapi-management"
   }
 }

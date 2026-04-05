@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 $requireVendor = in_array('--require-vendor', $argv, true);
 $jsonOutput = in_array('--json', $argv, true);
+$testRuntime = in_array('--test-runtime', $argv, true);
 $projectRoot = dirname(__DIR__);
 
 $checks = [];
@@ -37,7 +38,7 @@ $addCheck(
     sprintf('Detected PHP %s; required >= 8.4.0.', $phpVersion)
 );
 
-foreach (['json', 'pdo', 'pdo_sqlite'] as $extension) {
+foreach (array_merge(['json', 'pdo', 'pdo_sqlite'], $testRuntime ? ['dom', 'mbstring', 'xml', 'xmlwriter'] : []) as $extension) {
     $addCheck(
         'ext_' . $extension,
         extension_loaded($extension),
@@ -81,6 +82,7 @@ if ($requireVendor) {
 $result = [
     'projectRoot' => $projectRoot,
     'requireVendor' => $requireVendor,
+    'testRuntime' => $testRuntime,
     'ok' => $failures === 0,
     'failures' => $failures,
     'checks' => $checks,
@@ -93,7 +95,8 @@ if ($jsonOutput) {
 
 fwrite(STDOUT, "Discovering runtime preflight\n");
 fwrite(STDOUT, sprintf("Project root: %s\n", $projectRoot));
-fwrite(STDOUT, sprintf("Vendor required: %s\n\n", $requireVendor ? 'yes' : 'no'));
+fwrite(STDOUT, sprintf("Vendor required: %s\n", $requireVendor ? 'yes' : 'no'));
+ fwrite(STDOUT, sprintf("Test runtime required: %s\n\n", $testRuntime ? 'yes' : 'no'));
 
 foreach ($checks as $check) {
     fwrite(STDOUT, sprintf("[%s] %s — %s\n", $check['ok'] ? 'OK' : 'FAIL', $check['name'], $check['detail']));
