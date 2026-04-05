@@ -1,0 +1,80 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Functional\Discovery;
+
+
+final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
+{
+    public function testVersionedApiDiscoveryReturnsSeededBriefingHit(): void
+    {
+        $client = $this->createDiscoveryClient();
+        $client->request('GET', '/api/v1/discovery', [
+            'query' => 'governance live source',
+            'resource' => 'briefing',
+            'mode' => 'governance',
+        ]);
+
+        self::assertResponseIsSuccessful();
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertTrue($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery');
+        self::assertSame('briefing', $payload['data']['query']['resource']);
+        self::assertGreaterThanOrEqual(1, $payload['data']['total']);
+        self::assertSame('briefing-live-source-governance', $payload['data']['hits'][0]['id']);
+        self::assertSame('Live source governance briefing', $payload['data']['hits'][0]['title']);
+    }
+
+    public function testLegacyApiAliasReturnsCanonicalMeta(): void
+    {
+        $client = $this->createDiscoveryClient();
+        $client->request('GET', '/api/discovery', [
+            'query' => 'governance live source',
+            'resource' => 'briefing',
+        ]);
+
+        self::assertResponseIsSuccessful();
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery', deprecatedAlias: true);
+    }
+
+    public function testApiClickRequiresWriteToken(): void
+    {
+        $client = $this->createDiscoveryClient();
+        $client->request('POST', '/api/v1/discovery/click', [], [], ['CONTENT_TYPE' => 'application/json'], $this->jsonRequestBody($this->discoveryClickPayload()));
+
+        self::assertResponseStatusCodeSame(401);
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertFalse($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click');
+        self::assertSame('discovery_api_write_unauthorized', $payload['error']['code']);
+        self::assertSame('Unauthorized discovery API write request.', $payload['error']['message']);
+    }
+
+    public function testVersionedApiClickRecordsFeedbackCount(): void
+    {
+        $client = $this->createApiWriteClient();
+        $this->requestApiWrite($client, 'POST', '/api/v1/discovery/click', $this->discoveryClickPayload());
+
+        self::assertResponseIsSuccessful();
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertTrue($payload['ok']);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click');
+        self::assertSame('briefing', $payload['data']['resource']);
+        self::assertSame('briefing-live-source-governance', $payload['data']['id']);
+        self::assertSame(1, $payload['data']['feedbackCount']);
+    }
+}

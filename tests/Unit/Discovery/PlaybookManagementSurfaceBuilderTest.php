@@ -8,17 +8,15 @@ use App\Service\Discovery\Playbook\PlaybookManagementSurfaceBuilder;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class PlaybookManagementSurfaceBuilderTest extends TestCase
+final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsManagementSurfaceFromLivePlaybookRecords(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-playbook-surface-' . uniqid('', true);
-        $storageDirectory = $projectDir . '/resources/discovery/playbooks';
+        $projectDir = $this->createTempProjectDirectory('discovering-playbook-surface-');
 
-        mkdir($storageDirectory, 0777, true);
-        file_put_contents($storageDirectory . '/zeta.json', json_encode([
+        $this->writeDiscoveryRegistryFile($projectDir, 'playbooks', 'zeta.json', [
             [
                 'resourceId' => 'playbook-zeta',
                 'title' => 'Zeta playbook',
@@ -26,8 +24,8 @@ final class PlaybookManagementSurfaceBuilderTest extends TestCase
                 'filters' => ['status' => 'active', 'visibility' => 'internal'],
                 'metadata' => ['tags' => ['zeta', 'ops']],
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        file_put_contents($storageDirectory . '/alpha.json', json_encode([
+        ]);
+        $this->writeDiscoveryRegistryFile($projectDir, 'playbooks', 'alpha.json', [
             [
                 'resourceId' => 'playbook-alpha',
                 'title' => 'Alpha playbook',
@@ -35,7 +33,7 @@ final class PlaybookManagementSurfaceBuilderTest extends TestCase
                 'filters' => ['status' => 'draft', 'visibility' => 'public'],
                 'metadata' => ['tags' => ['alpha']],
             ],
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        ]);
 
         $repository = new PlaybookFileDiscoverySourceRecordRepository(
             $projectDir,
@@ -56,12 +54,5 @@ final class PlaybookManagementSurfaceBuilderTest extends TestCase
         self::assertSame('alpha.json', $surface->fileEntries[0]->fileName);
         self::assertSame(1, $surface->fileEntries[0]->recordCount);
         self::assertSame('zeta.json', $surface->fileEntries[1]->fileName);
-
-        @unlink($storageDirectory . '/alpha.json');
-        @unlink($storageDirectory . '/zeta.json');
-        @rmdir($storageDirectory);
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
-        @rmdir($projectDir);
     }
 }

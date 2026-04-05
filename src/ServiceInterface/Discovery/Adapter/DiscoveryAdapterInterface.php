@@ -12,4 +12,5 @@ interface DiscoveryAdapterInterface
     public function search(string $resource, string $query, int $limit = 20, int $offset = 0): array;
     public function createIndex(string $resource): void;
     public function swapAlias(string $from, string $to): void;
+    public function getBackendName(): string;
 }

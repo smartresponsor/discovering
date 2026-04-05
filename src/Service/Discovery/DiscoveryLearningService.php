@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service\Discovery;
@@ -8,7 +9,7 @@ use App\Dto\Discovery\DiscoveryHit;
 final class DiscoveryLearningService
 {
     public function __construct(
-        private readonly DiscoveryFeedbackStore $feedbackStore,
+        private readonly DiscoveryFeedbackStoreInterface $feedbackStore,
     ) {
     }
 

@@ -8,13 +8,13 @@ use App\Dto\Discovery\DiscoverySourceRecord;
 use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends TestCase
+final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItProvidesSharedDirectoryBackedLifecycleBehavior(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-foundation-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-foundation-');
         $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends AbstractDirectoryBackedDiscoverySourceRecordRepository {
             public function getSourceName(): string
             {
@@ -85,7 +85,7 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
 
     public function testItFallsBackToLegacyFileWhenDirectoryIsMissing(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-foundation-legacy-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-foundation-legacy-');
         $legacyDirectory = $projectDir . '/resources/discovery';
         mkdir($legacyDirectory, 0777, true);
         file_put_contents($legacyDirectory . '/test_source_records.json', json_encode([

@@ -10,6 +10,7 @@ final class ReindexRequest
         public string $resource = 'global',
         public string $rebuildMode = 'full',
         public array $ids = [],
+        public string $deploymentMode = 'auto',
     ) {
     }
 }

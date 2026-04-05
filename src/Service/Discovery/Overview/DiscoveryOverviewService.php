@@ -29,8 +29,8 @@ final class DiscoveryOverviewService implements DiscoveryOverviewServiceInterfac
         $countsBySourceName = [];
 
         foreach ($documents as $document) {
-            $countsByResourceType[$document->resourceType] ??= 0;
-            ++$countsByResourceType[$document->resourceType];
+            $countsByResourceType[$document->resource] ??= 0;
+            ++$countsByResourceType[$document->resource];
         }
 
         foreach ($this->sourceProviders as $sourceProvider) {
