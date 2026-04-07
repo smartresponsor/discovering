@@ -9,13 +9,13 @@ use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryHighlightingService;
 use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\DiscoveryScoringService;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DiscoveryScoringServiceTest extends TestCase
+final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItRanksHitsAndAppliesFeedbackBoost(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-scoring-feedback-' . uniqid('', true) . '.sqlite';
+        $path = $this->createTempSqlitePath('discovering-scoring-feedback-');
         $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
         $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
         $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
@@ -50,6 +50,5 @@ final class DiscoveryScoringServiceTest extends TestCase
         self::assertGreaterThan(0.0, $rankedHits[0]->feedbackBoost);
         self::assertContains('feedback boost 4.75', $rankedHits[0]->matchReasons);
 
-        @unlink($path);
     }
 }

@@ -12,13 +12,13 @@ use App\Service\Discovery\DiscoveryModePresetService;
 use App\Service\Discovery\DiscoveryScoringService;
 use App\Service\Discovery\DiscoveryService;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DiscoveryServiceTest extends TestCase
+final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsRankedHitsWithFeedbackAwareBoosting(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-service-feedback-' . uniqid('', true) . '.sqlite';
+        $path = $this->createTempFilePath('discovering-service-feedback-', '.sqlite');
         $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');

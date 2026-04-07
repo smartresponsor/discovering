@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Discovery;
 
 use App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class SqliteFtsDiscoveryAdapterTest extends TestCase
+final class SqliteFtsDiscoveryAdapterTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItReturnsFtsScoreAndContentForNonEmptyQueries(): void
     {
-        $path = sys_get_temp_dir() . '/discovering-sqlite-' . uniqid('', true) . '.sqlite';
+        $path = $this->createTempSqlitePath('discovering-sqlite-');
         $adapter = new SqliteFtsDiscoveryAdapter($path);
 
         $adapter->upsert('global', 'briefing-1', [
@@ -29,6 +29,5 @@ final class SqliteFtsDiscoveryAdapterTest extends TestCase
         self::assertIsNumeric($results[0]['ftsScore']);
         self::assertSame('Search portability governance context', $results[0]['content']);
 
-        @unlink($path);
     }
 }

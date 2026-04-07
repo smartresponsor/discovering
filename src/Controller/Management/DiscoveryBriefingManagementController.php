@@ -7,6 +7,7 @@ namespace App\Controller\Management;
 use App\Service\Discovery\Briefing\BriefingManagementSurfaceActionResolver;
 use App\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
 use App\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
+use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,11 +17,13 @@ use Symfony\Component\Routing\Attribute\Route;
 final class DiscoveryBriefingManagementController extends AbstractDirectoryBackedFamilyManagementController
 {
     public function __construct(
+        DiscoveryJsonResponseFactory $jsonResponseFactory,
         private readonly BriefingManagementSurfaceBuilder $surfaceBuilder,
         private readonly BriefingManagementSurfaceActionResolver $actionResolver,
         private readonly BriefingOperatorEventTrailBuilder $eventTrailBuilder,
         private readonly BriefingFileDiscoverySourceRecordRepository $repository,
     ) {
+        parent::__construct($jsonResponseFactory);
     }
 
     #[Route('/management/discovery/briefing', name: 'app_management_discovery_briefing', methods: ['GET'])]

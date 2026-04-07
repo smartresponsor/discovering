@@ -9,13 +9,13 @@ use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySour
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
-use PHPUnit\Framework\TestCase;
+use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-final class DirectoryBackedFamilyOperatorEventTrailBuilderTest extends TestCase
+final class DirectoryBackedFamilyOperatorEventTrailBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsReusableOperatorTrail(): void
     {
-        $projectDir = sys_get_temp_dir() . '/discovering-family-trail-' . uniqid('', true);
+        $projectDir = $this->createTempDirectory('discovering-family-trail-');
         $storageDirectory = $projectDir . '/resources/discovery/family';
         mkdir($storageDirectory, 0777, true);
         file_put_contents($storageDirectory . '/alpha.json', json_encode([
