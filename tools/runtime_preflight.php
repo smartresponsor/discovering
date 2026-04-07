@@ -12,6 +12,7 @@ declare(strict_types=1);
  */
 
 $requireVendor = in_array('--require-vendor', $argv, true);
+$requireTestRuntime = in_array('--test-runtime', $argv, true);
 $jsonOutput = in_array('--json', $argv, true);
 $projectRoot = dirname(__DIR__);
 
@@ -43,6 +44,16 @@ foreach (['json', 'pdo', 'pdo_sqlite'] as $extension) {
         extension_loaded($extension),
         sprintf('Extension %s is %s.', $extension, extension_loaded($extension) ? 'loaded' : 'missing')
     );
+}
+
+if ($requireTestRuntime) {
+    foreach (['dom', 'mbstring', 'xml', 'xmlwriter'] as $extension) {
+        $addCheck(
+            'ext_' . $extension,
+            extension_loaded($extension),
+            sprintf('Extension %s is %s.', $extension, extension_loaded($extension) ? 'loaded' : 'missing')
+        );
+    }
 }
 
 $composerBinary = trim((string) shell_exec('command -v composer 2>/dev/null'));
@@ -81,6 +92,7 @@ if ($requireVendor) {
 $result = [
     'projectRoot' => $projectRoot,
     'requireVendor' => $requireVendor,
+    'requireTestRuntime' => $requireTestRuntime,
     'ok' => $failures === 0,
     'failures' => $failures,
     'checks' => $checks,
@@ -93,7 +105,8 @@ if ($jsonOutput) {
 
 fwrite(STDOUT, "Discovering runtime preflight\n");
 fwrite(STDOUT, sprintf("Project root: %s\n", $projectRoot));
-fwrite(STDOUT, sprintf("Vendor required: %s\n\n", $requireVendor ? 'yes' : 'no'));
+fwrite(STDOUT, sprintf("Vendor required: %s\n", $requireVendor ? 'yes' : 'no'));
+fwrite(STDOUT, sprintf("Test runtime required: %s\n\n", $requireTestRuntime ? 'yes' : 'no'));
 
 foreach ($checks as $check) {
     fwrite(STDOUT, sprintf("[%s] %s — %s\n", $check['ok'] ? 'OK' : 'FAIL', $check['name'], $check['detail']));

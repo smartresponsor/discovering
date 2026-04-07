@@ -35,16 +35,28 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
         $path = $request->getPathInfo();
 
         if ($this->isProtectedManagementPath($path)) {
-            if ($this->hasExpectedToken($request, 'X-Discovery-Management-Token', $this->managementToken)) {
+            if (!$this->hasExpectedToken($request, 'X-Discovery-Management-Token', $this->managementToken)) {
+                $event->setResponse($this->jsonResponseFactory->error(
+                    code: 'discovery_management_forbidden',
+                    message: 'Forbidden discovery management request.',
+                    status: Response::HTTP_FORBIDDEN,
+                ));
+
                 return;
             }
-
-            $event->setResponse(new Response('Forbidden discovery management request.', Response::HTTP_FORBIDDEN));
-
-            return;
         }
 
         if ($this->isProtectedApiWritePath($request, $path)) {
+            if (!$this->hasAcceptedMutationContentType($request)) {
+                $event->setResponse($this->jsonResponseFactory->error(
+                    code: 'discovery_api_write_unsupported_content_type',
+                    message: 'Unsupported discovery API write content type.',
+                    status: Response::HTTP_UNSUPPORTED_MEDIA_TYPE,
+                ));
+
+                return;
+            }
+
             if ($this->hasExpectedToken($request, 'X-Discovery-Api-Write-Token', $this->apiWriteToken)) {
                 return;
             }

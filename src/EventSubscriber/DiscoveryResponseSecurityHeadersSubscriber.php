@@ -33,6 +33,10 @@ final class DiscoveryResponseSecurityHeadersSubscriber implements EventSubscribe
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
         $response->headers->set('Content-Security-Policy', "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'");
         $response->headers->set('Cache-Control', 'no-store, private');
+        $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
+        $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
     }
 
     private function isDiscoveryPath(string $path): bool

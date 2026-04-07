@@ -65,3 +65,16 @@ See `docs/discovery/INSTALLABILITY_PROVING_V1.md` for the proving sequence and b
 - `composer ci` — runs the full local verification sequence
 
 See `docs/discovery/CI_RUNTIME_BASELINE.md` for the reproducible CI/runtime contract.
+
+## OpenAPI baseline
+- Nelmio wiring is prepared for dev/test environments through conditional bundle, config, and route loading.
+- Public and management API documentation entry points are described in `docs/discovery/OPENAPI_BASELINE.md`.
+
+## Security baseline
+- discovery request correlation
+- rate limiting
+- management token gate
+- API write-token gate
+- response security headers
+
+See `docs/discovery/SECURITY_BASELINE.md` for the current minimum hardening posture.
