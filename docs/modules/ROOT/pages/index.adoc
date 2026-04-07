@@ -1,0 +1,70 @@
+= Discovering
+
+Discovering is a Symfony-oriented application resource discovery component.
+This Antora surface is intentionally minimal and exists only so the repository can participate as a content producer in the wider documentation ecosystem.
+
+== Documentation role split
+
+This repository keeps documentation separated by role:
+
+* Antora narrative entry surface lives under `docs/modules/ROOT/pages/`.
+* Hand-written operational and narrative Markdown remains under `docs/discovery/` and root manifest files.
+* GitHub-facing repository materials remain at repository root, such as `README.md` and producer-facing manifest files.
+* Generated API artifacts belong under `docs/generated/openapi/` and should not be hand-maintained.
+
+No central site assembly, Antora playbook, UI customization, or publishing logic is included here.
+This repository is only an Antora content producer.
+
+== Existing repository documentation surfaces
+
+=== Narrative and operational Markdown
+
+The repository already contains hand-written Markdown documentation, including:
+
+* `docs/discovery/API_CONTRACT_V1.md`
+* `docs/discovery/INSTALLABILITY_PROVING_V1.md`
+* `docs/discovery/OPERATIONAL_RUNBOOK_V1.md`
+* `docs/discovery/PLATFORM_DIAGNOSTICS_V1.md`
+* `docs/discovery/PLATFORM_PROBES_V1.md`
+* `docs/discovery/SHARED_STATE_TOPOLOGY_V1.md`
+* `docs/discovery/ROLLBACK_CLARITY_V1.md`
+* `docs/discovery/ROLLBACK_EXECUTION_V1.md`
+* `docs/discovery/STAGED_REBUILD_V1.md`
+* `docs/discovery/RATE_LIMITING_V1.md`
+* `docs/discovery/SECURITY_BASELINE.md`
+* `docs/discovery/SECURITY_POSTURE_V1.md`
+* `docs/discovery/THREAT_MODEL_V1.md`
+* `docs/discovery/OPENAPI_BASELINE.md`
+
+=== Repository-facing root documents
+
+Useful repository-facing documents already present at root include:
+
+* `README.md`
+* `PRODUCT_MANIFEST.md`
+* `ARCHITECTURE_MANIFEST.md`
+* `BOUNDING_MANIFEST.md`
+
+There is currently no root `CHANGELOG.md` in this slice.
+
+=== API documentation surface
+
+Nelmio/OpenAPI integration-ready wiring already exists in:
+
+* `config/packages/nelmio_api_doc.php`
+* `config/routes/nelmio_api_doc.php`
+* `docs/discovery/OPENAPI_BASELINE.md`
+
+This means API documentation should be treated as a generated or runtime-derived surface and not duplicated manually inside Antora pages.
+
+=== Code reference surface
+
+No phpDocumentor or Doctum producer surface is present in this slice.
+If code-reference generation is added later, it should remain separate from hand-written Antora narrative pages and be linked from this producer surface instead of merged into it.
+
+== Entry points
+
+* xref:architecture.adoc[Architecture] for component boundaries, manifests, and topology.
+* xref:install.adoc[Install] for runtime and installability entry points.
+* xref:operations.adoc[Operations] for probes, diagnostics, rebuild, rollback, and security operation surfaces.
+* xref:api.adoc[API] for public and management API entry points and generated OpenAPI placement.

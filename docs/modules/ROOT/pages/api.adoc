@@ -1,0 +1,35 @@
+= API
+
+This page is the Antora entry point for the repository API surface.
+It intentionally avoids duplicating generated OpenAPI content.
+
+== Existing API sources
+
+* `docs/discovery/API_CONTRACT_V1.md`
+* `docs/discovery/OPENAPI_BASELINE.md`
+* `config/packages/nelmio_api_doc.php`
+* `config/routes/nelmio_api_doc.php`
+
+== API surface split
+
+The repository already distinguishes between:
+
+* public discovery API surface
+* management discovery API surface
+
+The current Nelmio wiring is integration-ready and defines separate documentation areas for both surfaces.
+
+== Generated OpenAPI artifacts
+
+Generated OpenAPI artifacts should live under `docs/generated/openapi/`.
+Those artifacts should be treated as generated outputs and not as hand-maintained narrative documentation.
+
+Recommended examples:
+
+* `docs/generated/openapi/public-discovery.json`
+* `docs/generated/openapi/management-discovery.json`
+
+== Code reference
+
+No phpDocumentor or Doctum code reference surface exists in the current slice.
+If a code-reference generator is introduced later, link to it from this page as a separate generated surface rather than mixing it into narrative API documentation.
