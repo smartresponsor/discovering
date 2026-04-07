@@ -154,4 +154,33 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringContainsString('Coverage by resource type', $content);
         self::assertStringContainsString('Coverage by source', $content);
     }
+    public function testManagementRebuildRejectsUnsupportedMutationContentType(): void
+    {
+        $client = $this->createManagementClient();
+        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer() + ['CONTENT_TYPE' => 'text/plain'], 'invalid');
+
+        self::assertResponseStatusCodeSame(415);
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertFalse($payload['ok']);
+        self::assertSame('discovery_mutation_unsupported_content_type', $payload['error']['code']);
+    }
+
+    public function testManagementRebuildRejectsOversizedMutationPayload(): void
+    {
+        $client = $this->createManagementClient();
+        $oversizedBody = str_repeat('x', 70000);
+        $client->request('POST', '/management/discovery/rebuild', [], [], $this->managementTokenServer() + ['CONTENT_TYPE' => 'application/json', 'CONTENT_LENGTH' => (string) strlen($oversizedBody)], $oversizedBody);
+
+        self::assertResponseStatusCodeSame(413);
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertFalse($payload['ok']);
+        self::assertSame('discovery_mutation_payload_too_large', $payload['error']['code']);
+    }
+
 }

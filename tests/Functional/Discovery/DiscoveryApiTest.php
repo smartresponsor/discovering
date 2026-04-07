@@ -81,4 +81,33 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         self::assertSame('briefing-live-source-governance', $payload['data']['id']);
         self::assertSame(1, $payload['data']['feedbackCount']);
     }
+    public function testApiClickRejectsUnsupportedMutationContentType(): void
+    {
+        $client = $this->createApiWriteClient();
+        $client->request('POST', '/api/v1/discovery/click', [], [], $this->apiWriteTokenServer() + ['CONTENT_TYPE' => 'text/plain'], 'invalid');
+
+        self::assertResponseStatusCodeSame(415);
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertFalse($payload['ok']);
+        self::assertSame('discovery_mutation_unsupported_content_type', $payload['error']['code']);
+    }
+
+    public function testApiClickRejectsOversizedMutationPayload(): void
+    {
+        $client = $this->createApiWriteClient();
+        $oversizedBody = str_repeat('x', 70000);
+        $client->request('POST', '/api/v1/discovery/click', [], [], $this->apiWriteTokenServer() + ['CONTENT_TYPE' => 'application/json', 'CONTENT_LENGTH' => (string) strlen($oversizedBody)], $oversizedBody);
+
+        self::assertResponseStatusCodeSame(413);
+        $this->assertDiscoveryResponseHeaders($client);
+
+        $payload = $this->jsonResponsePayload($client);
+
+        self::assertFalse($payload['ok']);
+        self::assertSame('discovery_mutation_payload_too_large', $payload['error']['code']);
+    }
+
 }

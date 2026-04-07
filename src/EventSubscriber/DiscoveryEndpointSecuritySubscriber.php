@@ -11,12 +11,24 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-
 /**
- * Applies discovery endpoint security behavior to the discovery HTTP or kernel event pipeline.
+ * Protects discovery management and mutation endpoints.
+ *
+ * The subscriber enforces operator and API write tokens, accepts only
+ * supported mutation content types, and rejects oversized mutation payloads
+ * before controller execution.
  */
 final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterface
 {
+    private const int MAX_MUTATION_PAYLOAD_BYTES = 65536;
+
+    /** @var list<string> */
+    private const array ACCEPTED_MUTATION_CONTENT_TYPES = [
+        'application/json',
+        'application/x-www-form-urlencoded',
+        'multipart/form-data',
+    ];
+
     public function __construct(
         private readonly string $managementToken,
         private readonly string $apiWriteToken,
@@ -30,7 +42,7 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
     }
 
     /**
-     * Applies the on kernel request event handling step for this subscriber.
+     * Applies request-time protection and mutation validation before dispatch.
      */
     public function onKernelRequest(RequestEvent $event): void
     {
@@ -41,33 +53,42 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        if ($this->isProtectedManagementPath($path)) {
-            if (!$this->hasExpectedToken($request, 'X-Discovery-Management-Token', $this->managementToken)) {
-                $event->setResponse($this->jsonResponseFactory->error(
-                    code: 'discovery_management_forbidden',
-                    message: 'Forbidden discovery management request.',
-                    status: Response::HTTP_FORBIDDEN,
-                ));
+        if ($this->isProtectedManagementPath($path) && !$this->hasExpectedToken($request, 'X-Discovery-Management-Token', $this->managementToken)) {
+            $event->setResponse($this->jsonResponseFactory->error(
+                code: 'discovery_management_forbidden',
+                message: 'Forbidden discovery management request.',
+                status: Response::HTTP_FORBIDDEN,
+            ));
 
-                return;
-            }
+            return;
         }
 
-        if ($this->isProtectedApiWritePath($request, $path)) {
+        if ($this->isProtectedMutationPath($request, $path)) {
             if (!$this->hasAcceptedMutationContentType($request)) {
                 $event->setResponse($this->jsonResponseFactory->error(
-                    code: 'discovery_api_write_unsupported_content_type',
-                    message: 'Unsupported discovery API write content type.',
+                    code: 'discovery_mutation_unsupported_content_type',
+                    message: 'Unsupported discovery mutation content type.',
                     status: Response::HTTP_UNSUPPORTED_MEDIA_TYPE,
                 ));
 
                 return;
             }
 
-            if ($this->hasExpectedToken($request, 'X-Discovery-Api-Write-Token', $this->apiWriteToken)) {
+            if ($this->mutationPayloadBytes($request) > self::MAX_MUTATION_PAYLOAD_BYTES) {
+                $event->setResponse($this->jsonResponseFactory->error(
+                    code: 'discovery_mutation_payload_too_large',
+                    message: 'Discovery mutation payload exceeds the allowed size.',
+                    status: Response::HTTP_REQUEST_ENTITY_TOO_LARGE,
+                    details: [
+                        'maxBytes' => self::MAX_MUTATION_PAYLOAD_BYTES,
+                    ],
+                ));
+
                 return;
             }
+        }
 
+        if ($this->isProtectedApiWritePath($request, $path) && !$this->hasExpectedToken($request, 'X-Discovery-Api-Write-Token', $this->apiWriteToken)) {
             $event->setResponse($this->jsonResponseFactory->error(
                 code: 'discovery_api_write_unauthorized',
                 message: 'Unauthorized discovery API write request.',
@@ -81,10 +102,25 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
         return str_starts_with($path, '/management/discovery');
     }
 
+    private function isProtectedManagementMutationPath(Request $request, string $path): bool
+    {
+        if (!$request->isMethod(Request::METHOD_POST)) {
+            return false;
+        }
+
+        return $this->isProtectedManagementPath($path);
+    }
+
     private function isProtectedApiWritePath(Request $request, string $path): bool
     {
         return $request->isMethod(Request::METHOD_POST)
             && ($path === '/api/discovery/click' || $path === '/api/v1/discovery/click');
+    }
+
+    private function isProtectedMutationPath(Request $request, string $path): bool
+    {
+        return $this->isProtectedApiWritePath($request, $path)
+            || $this->isProtectedManagementMutationPath($request, $path);
     }
 
     private function hasExpectedToken(Request $request, string $headerName, string $expectedToken): bool
@@ -96,5 +132,31 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
         $providedToken = trim((string) $request->headers->get($headerName, ''));
 
         return hash_equals($expectedToken, $providedToken);
+    }
+
+    private function hasAcceptedMutationContentType(Request $request): bool
+    {
+        $contentType = strtolower(trim((string) $request->headers->get('Content-Type', '')));
+        if ($contentType === '') {
+            return false;
+        }
+
+        foreach (self::ACCEPTED_MUTATION_CONTENT_TYPES as $acceptedType) {
+            if ($contentType === $acceptedType || str_starts_with($contentType, $acceptedType . ';')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function mutationPayloadBytes(Request $request): int
+    {
+        $contentLength = $request->headers->get('Content-Length');
+        if (is_string($contentLength) && ctype_digit($contentLength)) {
+            return (int) $contentLength;
+        }
+
+        return strlen((string) $request->getContent());
     }
 }

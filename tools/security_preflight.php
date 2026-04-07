@@ -10,6 +10,9 @@ $checks = [
     'request_correlation_subscriber' => $projectRoot . '/src/EventSubscriber/DiscoveryRequestCorrelationSubscriber.php',
     'openapi_config' => $projectRoot . '/config/packages/nelmio_api_doc.php',
     'openapi_routes' => $projectRoot . '/config/routes/nelmio_api_doc.php',
+    'rc_readiness_doc' => $projectRoot . '/docs/discovery/RC_READINESS.md',
+    'support_matrix_doc' => $projectRoot . '/docs/discovery/SUPPORT_MATRIX.md',
+    'known_limitations_doc' => $projectRoot . '/docs/discovery/KNOWN_LIMITATIONS.md',
 ];
 
 $failures = [];
