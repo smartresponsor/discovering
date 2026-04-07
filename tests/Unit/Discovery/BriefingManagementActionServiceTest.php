@@ -10,6 +10,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the briefing management action service test case for the Discovering component.
+ */
 final class BriefingManagementActionServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testAuditRegistryReportsFilesAndRecords(): void

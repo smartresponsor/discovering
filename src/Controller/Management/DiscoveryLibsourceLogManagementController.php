@@ -14,6 +14,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
+/**
+ * Handles management HTTP endpoints for the discovery libsource log management surface.
+ */
 final class DiscoveryLibsourceLogManagementController extends AbstractController
 {
     public function __construct(
@@ -22,6 +26,9 @@ final class DiscoveryLibsourceLogManagementController extends AbstractController
     ) {
     }
 
+    /**
+     * Handles the index endpoint for the discovery libsource log management HTTP surface.
+     */
     #[Route('/management/discovery/libsource/log', name: 'app_management_discovery_libsource_log', methods: ['GET'])]
     public function index(Request $request): Response
     {
@@ -32,6 +39,9 @@ final class DiscoveryLibsourceLogManagementController extends AbstractController
         ]);
     }
 
+    /**
+     * Handles the export endpoint for the discovery libsource log management HTTP surface.
+     */
     #[Route('/management/discovery/libsource/log/export', name: 'app_management_discovery_libsource_log_export', methods: ['GET'])]
     public function export(Request $request): JsonResponse
     {

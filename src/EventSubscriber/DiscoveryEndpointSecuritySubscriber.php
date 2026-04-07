@@ -11,6 +11,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+
+/**
+ * Applies discovery endpoint security behavior to the discovery HTTP or kernel event pipeline.
+ */
 final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterface
 {
     public function __construct(
@@ -25,6 +29,9 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
         return [KernelEvents::REQUEST => ['onKernelRequest', 64]];
     }
 
+    /**
+     * Applies the on kernel request event handling step for this subscriber.
+     */
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {

@@ -19,6 +19,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
+/**
+ * Handles management HTTP endpoints for the discovery overview management surface.
+ */
 final class DiscoveryOverviewManagementController extends AbstractController
 {
     public function __construct(
@@ -34,6 +38,9 @@ final class DiscoveryOverviewManagementController extends AbstractController
     ) {
     }
 
+    /**
+     * Handles the index endpoint for the discovery overview management HTTP surface.
+     */
     #[Route('/management/discovery', name: 'app_management_discovery_overview', methods: ['GET'])]
     public function index(): Response
     {
@@ -53,6 +60,9 @@ final class DiscoveryOverviewManagementController extends AbstractController
         ]);
     }
 
+    /**
+     * Handles the export endpoint for the discovery overview management HTTP surface.
+     */
     #[Route('/management/discovery/export', name: 'app_management_discovery_overview_export', methods: ['GET'])]
     public function export(): JsonResponse
     {
@@ -84,6 +94,9 @@ final class DiscoveryOverviewManagementController extends AbstractController
 
 
 
+    /**
+     * Handles the executeRollback endpoint for the discovery overview management HTTP surface.
+     */
     #[Route('/management/discovery/rollback/execute', name: 'app_management_discovery_rollback_execute', methods: ['POST'])]
     public function executeRollback(Request $request): JsonResponse
     {
@@ -120,6 +133,9 @@ final class DiscoveryOverviewManagementController extends AbstractController
         ]);
     }
 
+    /**
+     * Handles the exportRollbackPlan endpoint for the discovery overview management HTTP surface.
+     */
     #[Route('/management/discovery/rollback/export', name: 'app_management_discovery_rollback_export', methods: ['GET'])]
     public function exportRollbackPlan(): JsonResponse
     {
@@ -132,6 +148,9 @@ final class DiscoveryOverviewManagementController extends AbstractController
     }
 
 
+    /**
+     * Handles the exportPlatformDiagnostics endpoint for the discovery overview management HTTP surface.
+     */
     #[Route('/management/discovery/platform/export', name: 'app_management_discovery_platform_export', methods: ['GET'])]
     public function exportPlatformDiagnostics(): JsonResponse
     {
@@ -144,6 +163,9 @@ final class DiscoveryOverviewManagementController extends AbstractController
     }
 
 
+    /**
+     * Handles the exportPlatformProbes endpoint for the discovery overview management HTTP surface.
+     */
     #[Route('/management/discovery/platform/probes/export', name: 'app_management_discovery_platform_probes_export', methods: ['GET'])]
     public function exportPlatformProbes(): JsonResponse
     {
@@ -155,6 +177,9 @@ final class DiscoveryOverviewManagementController extends AbstractController
         ]);
     }
 
+    /**
+     * Handles the exportOperations endpoint for the discovery overview management HTTP surface.
+     */
     #[Route('/management/discovery/operations/export', name: 'app_management_discovery_operations_export', methods: ['GET'])]
     public function exportOperations(): JsonResponse
     {
@@ -173,6 +198,9 @@ final class DiscoveryOverviewManagementController extends AbstractController
         ));
     }
 
+    /**
+     * Handles the exportStateTopology endpoint for the discovery overview management HTTP surface.
+     */
     #[Route('/management/discovery/state-topology/export', name: 'app_management_discovery_state_topology_export', methods: ['GET'])]
     public function exportStateTopology(): JsonResponse
     {

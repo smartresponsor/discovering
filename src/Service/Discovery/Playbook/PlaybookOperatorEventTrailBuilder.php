@@ -9,6 +9,10 @@ use App\Dto\Discovery\PlaybookOperatorEvent;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
 
+
+/**
+ * Builds the playbook operator event trail output used by discovery management or diagnostics flows.
+ */
 final class PlaybookOperatorEventTrailBuilder
 {
     private readonly DirectoryBackedFamilyOperatorEventTrailBuilder $delegate;

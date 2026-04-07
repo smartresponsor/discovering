@@ -8,6 +8,10 @@ use App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 use App\ValueObject\Discovery\DiscoveryDocument;
 
+
+/**
+ * Provides the discovery document provider capability within the discovery component.
+ */
 final class DiscoveryDocumentProvider implements DiscoveryDocumentProviderInterface
 {
     /**

@@ -7,6 +7,10 @@ namespace App\Service\Discovery\Diagnostics;
 use App\Dto\Discovery\DiscoveryBackendProbeResult;
 use App\Dto\Discovery\DiscoveryBackendReachabilityReport;
 
+
+/**
+ * Builds the discovery backend reachability output used by discovery management or diagnostics flows.
+ */
 final class DiscoveryBackendReachabilityBuilder
 {
     public function __construct(
@@ -37,6 +41,9 @@ final class DiscoveryBackendReachabilityBuilder
     ) {
     }
 
+    /**
+     * Builds the build result for this discovery workflow.
+     */
     public function build(): DiscoveryBackendReachabilityReport
     {
         $probes = [

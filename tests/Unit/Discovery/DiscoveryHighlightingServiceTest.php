@@ -6,6 +6,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\DiscoveryHighlightingService;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery highlighting service test case for the Discovering component.
+ */
 final class DiscoveryHighlightingServiceTest extends TestCase
 {
     public function testItHighlightsMatchedTokensSafely(): void

@@ -6,6 +6,10 @@ namespace App\Service\Discovery;
 use App\Dto\Discovery\DiscoveryHit;
 use App\Dto\Discovery\DiscoveryQuery;
 
+
+/**
+ * Provides the discovery scoring capability within the discovery component.
+ */
 final class DiscoveryScoringService
 {
     public function __construct(

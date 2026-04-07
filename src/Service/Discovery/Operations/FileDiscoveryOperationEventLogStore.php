@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Operations;
 
 use App\Dto\Discovery\DiscoveryOperationEvent;
 
+
+/**
+ * Provides the file discovery operation event log store capability within the discovery component.
+ */
 final class FileDiscoveryOperationEventLogStore implements DiscoveryOperationEventLogStoreInterface
 {
     public function __construct(
@@ -14,6 +18,9 @@ final class FileDiscoveryOperationEventLogStore implements DiscoveryOperationEve
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(DiscoveryOperationEvent $event): void
     {
         $events = $this->all();
@@ -21,6 +28,9 @@ final class FileDiscoveryOperationEventLogStore implements DiscoveryOperationEve
         $this->persist($events);
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         if (!is_file($this->path)) {
@@ -35,6 +45,9 @@ final class FileDiscoveryOperationEventLogStore implements DiscoveryOperationEve
         return $this->serializer->decodeMany($contents);
     }
 
+    /**
+     * Performs the latest operation for this discovery service.
+     */
     public function latest(int $limit = 25): array
     {
         if ($limit <= 0) {
@@ -49,6 +62,9 @@ final class FileDiscoveryOperationEventLogStore implements DiscoveryOperationEve
         return array_values(array_slice($events, -$limit));
     }
 
+    /**
+     * Performs the clear operation for this discovery service.
+     */
     public function clear(): void
     {
         $this->persist([]);

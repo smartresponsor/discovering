@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Libsource\Log;
 
 use App\Dto\Discovery\LibsourceOperatorEvent;
 
+
+/**
+ * Handles libsource operator event json serializer concerns for discovery state, source, or API payloads.
+ */
 final class LibsourceOperatorEventJsonSerializer
 {
     /**

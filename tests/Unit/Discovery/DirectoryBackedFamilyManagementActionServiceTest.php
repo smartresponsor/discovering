@@ -10,6 +10,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the directory backed family management action service test case for the Discovering component.
+ */
 final class DirectoryBackedFamilyManagementActionServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItAuditsSeedsAndMigratesUsingSharedFamilyActionLogic(): void

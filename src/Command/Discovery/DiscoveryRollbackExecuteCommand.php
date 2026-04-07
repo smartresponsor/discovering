@@ -13,6 +13,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Provides a CLI entry point for the discovery rollback execute workflow.
+ */
 #[AsCommand(name: 'discovering:rollback:execute', description: 'Executes the current discovery rollback alias swap when the plan is ready.')]
 final class DiscoveryRollbackExecuteCommand extends Command
 {
@@ -23,6 +26,9 @@ final class DiscoveryRollbackExecuteCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Configures the Symfony console command metadata, arguments, and help text.
+     */
     protected function configure(): void
     {
         $this
@@ -30,6 +36,9 @@ final class DiscoveryRollbackExecuteCommand extends Command
             ->addOption('target', null, InputOption::VALUE_REQUIRED, 'Expected target evidence id before rollback execution.');
     }
 
+    /**
+     * Executes the discovery rollback execute command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);

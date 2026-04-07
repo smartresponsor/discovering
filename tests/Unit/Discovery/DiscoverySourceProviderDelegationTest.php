@@ -20,6 +20,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the discovery source provider delegation test case for the Discovering component.
+ */
 final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesystemTestCase
 {
     public function testProjectProviderDelegatesToRepository(): void

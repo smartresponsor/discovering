@@ -8,6 +8,10 @@ use App\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
 use App\Service\Discovery\Diagnostics\DiscoveryProbeTransportInterface;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery backend reachability builder test case for the Discovering component.
+ */
 final class DiscoveryBackendReachabilityBuilderTest extends TestCase
 {
     public function testBuildMarksLocalOnlyModeAsNotConfigured(): void

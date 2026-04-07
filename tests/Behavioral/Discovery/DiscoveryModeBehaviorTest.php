@@ -15,6 +15,10 @@ use App\Service\Discovery\DiscoveryService;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the discovery mode behavior test case for the Discovering component.
+ */
 final class DiscoveryModeBehaviorTest extends DiscoveryTempFilesystemTestCase
 {
     public function testGovernanceModePrefersActiveBriefingOverActivePlaybookAndExcludesDrafts(): void

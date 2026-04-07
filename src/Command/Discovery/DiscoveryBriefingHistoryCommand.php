@@ -10,6 +10,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery briefing history workflow.
+ */
 #[AsCommand(name: 'app:discovery:briefing:history')]
 final class DiscoveryBriefingHistoryCommand extends Command
 {
@@ -19,6 +22,9 @@ final class DiscoveryBriefingHistoryCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Executes the discovery briefing history command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $events = $this->eventTrailBuilder->build();

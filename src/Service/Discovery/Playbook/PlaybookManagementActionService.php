@@ -9,6 +9,10 @@ use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRep
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 
+
+/**
+ * Provides the playbook management action capability within the discovery component.
+ */
 final class PlaybookManagementActionService implements DirectoryBackedFamilyManagementActionServiceInterface
 {
     private readonly DirectoryBackedFamilyManagementActionService $delegate;
@@ -38,16 +42,25 @@ final class PlaybookManagementActionService implements DirectoryBackedFamilyMana
         );
     }
 
+    /**
+     * Performs the audit registry operation for this discovery service.
+     */
     public function auditRegistry(): PlaybookManagementActionResult
     {
         return PlaybookManagementActionResult::fromGeneric($this->delegate->auditRegistry());
     }
 
+    /**
+     * Performs the ensure sample registry operation for this discovery service.
+     */
     public function ensureSampleRegistry(): PlaybookManagementActionResult
     {
         return PlaybookManagementActionResult::fromGeneric($this->delegate->ensureSampleRegistry());
     }
 
+    /**
+     * Performs the migrate legacy storage operation for this discovery service.
+     */
     public function migrateLegacyStorage(): PlaybookManagementActionResult
     {
         return PlaybookManagementActionResult::fromGeneric($this->delegate->migrateLegacyStorage());

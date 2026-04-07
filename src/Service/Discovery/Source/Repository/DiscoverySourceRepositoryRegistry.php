@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\Source\Repository;
 
+
+/**
+ * Resolves and serves discovery source repository entries for the discovery component.
+ */
 final class DiscoverySourceRepositoryRegistry
 {
     /**
@@ -22,6 +26,9 @@ final class DiscoverySourceRepositoryRegistry
         return is_array($this->repositories) ? $this->repositories : iterator_to_array($this->repositories, false);
     }
 
+    /**
+     * Returns the by source name value exposed by this service.
+     */
     public function getBySourceName(string $sourceName): DiscoverySourceRecordRepositoryInterface
     {
         foreach ($this->all() as $repository) {

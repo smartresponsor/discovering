@@ -6,11 +6,14 @@ namespace App\Service\Discovery\RateLimit;
 
 /**
  * Lightweight fixed-window file-backed store.
- *
+ * 
  * State shape:
  * {
- *   "scope|actor": {"count": 1, "resetAt": 1712160000}
+ * "scope|actor": {"count": 1, "resetAt": 1712160000}
  * }
+ */
+/**
+ * Provides the file discovery rate limit store capability within the discovery component.
  */
 final class FileDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterface
 {

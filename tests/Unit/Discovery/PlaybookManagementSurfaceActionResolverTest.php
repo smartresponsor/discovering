@@ -12,6 +12,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
+
+/**
+ * Exercises the playbook management surface action resolver test case for the Discovering component.
+ */
 final class PlaybookManagementSurfaceActionResolverTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItResolvesAuditRegistryAction(): void

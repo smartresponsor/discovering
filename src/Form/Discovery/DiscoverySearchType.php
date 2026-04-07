@@ -13,8 +13,15 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+
+/**
+ * Builds the Symfony form type for the discovery search input surface.
+ */
 final class DiscoverySearchType extends AbstractType
 {
+    /**
+     * Builds and configures the Symfony form definition for this discovery input surface.
+     */
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $status = $builder->getData() instanceof DiscoveryQuery
@@ -77,6 +84,9 @@ final class DiscoverySearchType extends AbstractType
             ]);
     }
 
+    /**
+     * Builds and configures the Symfony form definition for this discovery input surface.
+     */
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults(['data_class' => DiscoveryQuery::class, 'method' => 'GET', 'csrf_protection' => false]);

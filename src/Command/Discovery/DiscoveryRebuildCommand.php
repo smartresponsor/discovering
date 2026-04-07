@@ -16,6 +16,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Provides a CLI entry point for the discovery rebuild workflow.
+ */
 #[AsCommand(name: 'discovering:rebuild', description: 'Rebuilds discovery indexes.')]
 final class DiscoveryRebuildCommand extends Command
 {
@@ -27,12 +30,18 @@ final class DiscoveryRebuildCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Configures the Symfony console command metadata, arguments, and help text.
+     */
     protected function configure(): void
     {
         $this->addArgument('resource', InputArgument::OPTIONAL, 'Resource to rebuild.', 'global');
         $this->addOption('deployment-mode', null, InputOption::VALUE_REQUIRED, 'Deployment mode (auto, in_place, staged_alias_swap).', 'auto');
     }
 
+    /**
+     * Executes the discovery rebuild command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);

@@ -7,6 +7,10 @@ namespace App\Tests\Contract\Discovery;
 use App\Service\Discovery\Http\DiscoveryApiContract;
 use App\Tests\Functional\Discovery\AbstractDiscoveryWebTestCase;
 
+
+/**
+ * Exercises the discovery management export contract test case for the Discovering component.
+ */
 final class DiscoveryManagementExportContractTest extends AbstractDiscoveryWebTestCase
 {
     use DiscoveryApiContractAssertions;

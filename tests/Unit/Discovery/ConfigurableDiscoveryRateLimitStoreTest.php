@@ -9,6 +9,10 @@ use App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
 use App\Service\Discovery\RateLimit\PdoDiscoveryRateLimitStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the configurable discovery rate limit store test case for the Discovering component.
+ */
 final class ConfigurableDiscoveryRateLimitStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testSelectsFileBackendWhenConfigured(): void

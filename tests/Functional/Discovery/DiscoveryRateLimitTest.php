@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Discovery;
 
+
+/**
+ * Exercises the discovery rate limit test case for the Discovering component.
+ */
 final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 {
     public function testVersionedApiQueryReturns429AfterConfiguredBurst(): void

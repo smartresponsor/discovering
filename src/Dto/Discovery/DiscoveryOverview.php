@@ -6,6 +6,10 @@ namespace App\Dto\Discovery;
 
 use App\ValueObject\Discovery\DiscoveryDocument;
 
+
+/**
+ * Represents the discovery overview contract used by discovery application, management, or state coordination flows.
+ */
 final class DiscoveryOverview
 {
     /**

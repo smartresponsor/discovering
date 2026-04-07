@@ -9,6 +9,10 @@ use App\Dto\Discovery\LibsourceEventLogSurface;
 use App\Dto\Discovery\LibsourceOperatorEvent;
 use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
+
+/**
+ * Builds the libsource event log surface output used by discovery management or diagnostics flows.
+ */
 final class LibsourceEventLogSurfaceBuilder
 {
     /**
@@ -26,6 +30,9 @@ final class LibsourceEventLogSurfaceBuilder
     ) {
     }
 
+    /**
+     * Builds the build result for this discovery workflow.
+     */
     public function build(?LibsourceEventLogQuery $query = null): LibsourceEventLogSurface
     {
         $query ??= new LibsourceEventLogQuery();

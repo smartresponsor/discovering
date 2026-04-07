@@ -11,6 +11,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery platform diagnose workflow.
+ */
 #[AsCommand(name: 'app:discovery:platform:diagnose')]
 final class DiscoveryPlatformDiagnoseCommand extends Command
 {
@@ -21,6 +24,9 @@ final class DiscoveryPlatformDiagnoseCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Executes the discovery platform diagnose command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $diagnostics = $this->diagnosticsBuilder->build();

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
+
+/**
+ * Represents the briefing management action result contract used by discovery application, management, or state coordination flows.
+ */
 final class BriefingManagementActionResult extends DirectoryBackedFamilyManagementActionResult
 {
     public static function fromGeneric(DirectoryBackedFamilyManagementActionResult $result): self

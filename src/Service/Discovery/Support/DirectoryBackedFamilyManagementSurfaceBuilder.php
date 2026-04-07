@@ -9,8 +9,15 @@ use App\Dto\Discovery\DirectoryBackedFamilyManagementFileEntry;
 use App\Dto\Discovery\DirectoryBackedFamilyManagementSurface;
 use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
 
+
+/**
+ * Builds the directory backed family management surface output used by discovery management or diagnostics flows.
+ */
 final class DirectoryBackedFamilyManagementSurfaceBuilder
 {
+    /**
+     * Builds the build result for this discovery workflow.
+     */
     public function build(AbstractDirectoryBackedDiscoverySourceRecordRepository $repository): DirectoryBackedFamilyManagementSurface
     {
         $records = $repository->all();

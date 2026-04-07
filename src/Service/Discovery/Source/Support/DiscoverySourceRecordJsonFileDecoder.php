@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Source\Support;
 
 use App\Dto\Discovery\DiscoverySourceRecord;
 
+
+/**
+ * Handles discovery source record json file decoder concerns for discovery state, source, or API payloads.
+ */
 final class DiscoverySourceRecordJsonFileDecoder
 {
     /**

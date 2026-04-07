@@ -6,6 +6,10 @@ namespace App\Service\Discovery;
 
 use PDO;
 
+
+/**
+ * Provides the discovery feedback store capability within the discovery component.
+ */
 final class DiscoveryFeedbackStore implements DiscoveryFeedbackStoreInterface
 {
     private ?PDO $pdo = null;
@@ -15,6 +19,9 @@ final class DiscoveryFeedbackStore implements DiscoveryFeedbackStoreInterface
     ) {
     }
 
+    /**
+     * Records the click signal for discovery state and analytics flows.
+     */
     public function recordClick(string $resource, string $hitId, string $title = '', string $reference = ''): int
     {
         $statement = $this->pdo()->prepare('INSERT INTO discovery_feedback (resource, hit_id, title, reference, click_count, last_clicked_at) VALUES (:resource, :hit_id, :title, :reference, 1, :last_clicked_at) ON CONFLICT(resource, hit_id) DO UPDATE SET title = excluded.title, reference = excluded.reference, click_count = discovery_feedback.click_count + 1, last_clicked_at = excluded.last_clicked_at');
@@ -29,6 +36,9 @@ final class DiscoveryFeedbackStore implements DiscoveryFeedbackStoreInterface
         return $this->getClickCount($resource, $hitId);
     }
 
+    /**
+     * Returns the click count value exposed by this service.
+     */
     public function getClickCount(string $resource, string $hitId): int
     {
         $statement = $this->pdo()->prepare('SELECT click_count FROM discovery_feedback WHERE resource = :resource AND hit_id = :hit_id');

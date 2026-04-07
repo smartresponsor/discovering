@@ -10,6 +10,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the playbook management surface builder test case for the Discovering component.
+ */
 final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsManagementSurfaceFromLivePlaybookRecords(): void

@@ -10,6 +10,10 @@ use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 
+
+/**
+ * Builds the discovery platform diagnostics output used by discovery management or diagnostics flows.
+ */
 final class DiscoveryPlatformDiagnosticsBuilder
 {
     public function __construct(
@@ -19,6 +23,9 @@ final class DiscoveryPlatformDiagnosticsBuilder
     ) {
     }
 
+    /**
+     * Builds the build result for this discovery workflow.
+     */
     public function build(): DiscoveryPlatformDiagnostics
     {
         $topology = $this->stateTopologyBuilder->build();

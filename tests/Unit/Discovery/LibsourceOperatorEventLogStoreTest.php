@@ -8,6 +8,10 @@ use App\Dto\Discovery\LibsourceOperatorEvent;
 use App\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the libsource operator event log store test case for the Discovering component.
+ */
 final class LibsourceOperatorEventLogStoreTest extends TestCase
 {
     public function testEphemeralStoreAppendsAndClearsEvents(): void

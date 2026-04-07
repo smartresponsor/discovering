@@ -9,6 +9,10 @@ use App\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore;
 use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the file libsource operator event log store test case for the Discovering component.
+ */
 final class FileLibsourceOperatorEventLogStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItPersistsAndClearsEventsInJsonFile(): void

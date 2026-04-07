@@ -10,6 +10,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
+
+/**
+ * Handles management HTTP endpoints for the abstract directory backed family management surface.
+ */
 abstract class AbstractDirectoryBackedFamilyManagementController extends AbstractController
 {
     public function __construct(private readonly DiscoveryJsonResponseFactory $jsonResponseFactory)
@@ -32,6 +36,9 @@ abstract class AbstractDirectoryBackedFamilyManagementController extends Abstrac
         ]);
     }
 
+    /**
+     * Handles the exportDirectoryBackedFamilySource endpoint for the abstract directory backed family management HTTP surface.
+     */
     protected function exportDirectoryBackedFamilySource(
         AbstractDirectoryBackedDiscoverySourceRecordRepository $repository,
     ): JsonResponse {

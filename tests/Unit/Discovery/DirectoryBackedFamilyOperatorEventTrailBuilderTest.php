@@ -11,6 +11,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the directory backed family operator event trail builder test case for the Discovering component.
+ */
 final class DirectoryBackedFamilyOperatorEventTrailBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsReusableOperatorTrail(): void

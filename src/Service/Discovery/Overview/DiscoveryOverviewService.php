@@ -10,6 +10,10 @@ use App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
 use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
+
+/**
+ * Provides the discovery overview capability within the discovery component.
+ */
 final class DiscoveryOverviewService implements DiscoveryOverviewServiceInterface
 {
     /**
@@ -22,6 +26,9 @@ final class DiscoveryOverviewService implements DiscoveryOverviewServiceInterfac
     ) {
     }
 
+    /**
+     * Builds the overview result for this discovery workflow.
+     */
     public function buildOverview(): DiscoveryOverview
     {
         $documents = $this->documentProvider->provide();

@@ -7,6 +7,10 @@ namespace App\Tests\Contract\Discovery;
 use App\Service\Discovery\Http\DiscoveryApiContract;
 use PHPUnit\Framework\Assert;
 
+
+/**
+ * Exercises the discovery api contract assertions test case for the Discovering component.
+ */
 trait DiscoveryApiContractAssertions
 {
     /**

@@ -8,6 +8,10 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+
+/**
+ * Applies discovery response security headers behavior to the discovery HTTP or kernel event pipeline.
+ */
 final class DiscoveryResponseSecurityHeadersSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents(): array
@@ -15,6 +19,9 @@ final class DiscoveryResponseSecurityHeadersSubscriber implements EventSubscribe
         return [KernelEvents::RESPONSE => 'onKernelResponse'];
     }
 
+    /**
+     * Applies the on kernel response event handling step for this subscriber.
+     */
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (!$event->isMainRequest()) {

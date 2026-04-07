@@ -16,6 +16,10 @@ use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordReposit
 use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the libsource diagnostic surface builder test case for the Discovering component.
+ */
 final class LibsourceDiagnosticSurfaceBuilderTest extends TestCase
 {
     public function testItBuildsRepositoryAwareDiagnosticEntries(): void

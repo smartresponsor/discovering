@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Rebuild;
 
 use App\Dto\Discovery\DiscoveryRebuildSummary;
 
+
+/**
+ * Provides the file discovery rebuild evidence store capability within the discovery component.
+ */
 final class FileDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidenceStoreInterface
 {
     public function __construct(
@@ -14,6 +18,9 @@ final class FileDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidenc
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(DiscoveryRebuildSummary $summary): void
     {
         $items = $this->readAll();
@@ -27,6 +34,9 @@ final class FileDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidenc
         file_put_contents($this->path, $this->serializer->encode($items), LOCK_EX);
     }
 
+    /**
+     * Performs the latest operation for this discovery service.
+     */
     public function latest(int $limit = 20): array
     {
         return array_slice(array_reverse($this->readAll()), 0, $limit);

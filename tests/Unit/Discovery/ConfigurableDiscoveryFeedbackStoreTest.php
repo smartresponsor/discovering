@@ -9,6 +9,10 @@ use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\PdoDiscoveryFeedbackStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the configurable discovery feedback store test case for the Discovering component.
+ */
 final class ConfigurableDiscoveryFeedbackStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItFallsBackToSqlitePathStoreWhenPdoBackendHasNoDsn(): void

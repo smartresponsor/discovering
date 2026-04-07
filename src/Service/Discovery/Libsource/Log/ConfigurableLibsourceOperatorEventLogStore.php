@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Libsource\Log;
 
 use App\Dto\Discovery\LibsourceOperatorEvent;
 
+
+/**
+ * Provides the configurable libsource operator event log store capability within the discovery component.
+ */
 final class ConfigurableLibsourceOperatorEventLogStore implements LibsourceOperatorEventLogStoreInterface
 {
     public function __construct(
@@ -16,16 +20,25 @@ final class ConfigurableLibsourceOperatorEventLogStore implements LibsourceOpera
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(LibsourceOperatorEvent $event): void
     {
         $this->delegate()->append($event);
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         return $this->delegate()->all();
     }
 
+    /**
+     * Performs the clear operation for this discovery service.
+     */
     public function clear(): void
     {
         $this->delegate()->clear();

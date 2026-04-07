@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\RateLimit;
 
+
+/**
+ * Defines the contract for the discovery rate limit store capability within the discovery component.
+ */
 interface DiscoveryRateLimitStoreInterface
 {
     /**

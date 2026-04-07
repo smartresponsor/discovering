@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\RateLimit;
 
+
+/**
+ * Provides the configurable discovery rate limit store capability within the discovery component.
+ */
 final class ConfigurableDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterface
 {
     public function __construct(
@@ -13,6 +17,9 @@ final class ConfigurableDiscoveryRateLimitStore implements DiscoveryRateLimitSto
     ) {
     }
 
+    /**
+     * Performs the increment operation for this discovery service.
+     */
     public function increment(string $scope, string $actorKey, int $windowSeconds): array
     {
         return $this->delegate()->increment($scope, $actorKey, $windowSeconds);

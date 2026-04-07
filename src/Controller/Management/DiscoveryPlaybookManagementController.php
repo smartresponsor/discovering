@@ -14,6 +14,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
+/**
+ * Handles management HTTP endpoints for the discovery playbook management surface.
+ */
 final class DiscoveryPlaybookManagementController extends AbstractDirectoryBackedFamilyManagementController
 {
     public function __construct(
@@ -26,6 +30,9 @@ final class DiscoveryPlaybookManagementController extends AbstractDirectoryBacke
         parent::__construct($jsonResponseFactory);
     }
 
+    /**
+     * Handles the index endpoint for the discovery playbook management HTTP surface.
+     */
     #[Route('/management/discovery/playbook', name: 'app_management_discovery_playbook', methods: ['GET'])]
     public function index(Request $request): Response
     {
@@ -39,6 +46,9 @@ final class DiscoveryPlaybookManagementController extends AbstractDirectoryBacke
         );
     }
 
+    /**
+     * Handles the export endpoint for the discovery playbook management HTTP surface.
+     */
     #[Route('/management/discovery/playbook/export', name: 'app_management_discovery_playbook_export', methods: ['GET'])]
     public function export(): JsonResponse
     {

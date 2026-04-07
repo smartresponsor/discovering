@@ -20,6 +20,10 @@ use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordReposito
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
+
+/**
+ * Exercises the libsource management surface action resolver test case for the Discovering component.
+ */
 final class LibsourceManagementSurfaceActionResolverTest extends TestCase
 {
     private function createResolver(EphemeralLibsourceOperatorEventLogStore $store): LibsourceManagementSurfaceActionResolver

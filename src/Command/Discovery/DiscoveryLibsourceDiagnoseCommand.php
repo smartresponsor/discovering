@@ -10,6 +10,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery libsource diagnose workflow.
+ */
 #[AsCommand(name: 'app:discovery:libsource:diagnose')]
 final class DiscoveryLibsourceDiagnoseCommand extends Command
 {
@@ -19,6 +22,9 @@ final class DiscoveryLibsourceDiagnoseCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Executes the discovery libsource diagnose command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $surface = $this->surfaceBuilder->build();

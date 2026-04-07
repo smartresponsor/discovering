@@ -7,6 +7,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\RateLimit\PdoDiscoveryRateLimitStore;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the pdo discovery rate limit store test case for the Discovering component.
+ */
 final class PdoDiscoveryRateLimitStoreTest extends TestCase
 {
     public function testRejectsMissingDsnBeforeAttemptingCoordination(): void

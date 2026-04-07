@@ -9,6 +9,10 @@ use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+
+/**
+ * Provides the discovery operation logger capability within the discovery component.
+ */
 final class DiscoveryOperationLogger
 {
     public const string REQUEST_ID_ATTRIBUTE = '_discovery_request_id';

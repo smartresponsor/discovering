@@ -9,6 +9,10 @@ use App\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
 use App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the file discovery operation event log store test case for the Discovering component.
+ */
 final class FileDiscoveryOperationEventLogStoreTest extends DiscoveryTempFilesystemTestCase
 {
     private string $path;

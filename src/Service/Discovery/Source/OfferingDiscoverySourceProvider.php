@@ -7,6 +7,10 @@ namespace App\Service\Discovery\Source;
 use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
+
+/**
+ * Provides the offering discovery source provider capability within the discovery component.
+ */
 final class OfferingDiscoverySourceProvider implements DiscoverySourceProviderInterface
 {
     public function __construct(
@@ -14,16 +18,25 @@ final class OfferingDiscoverySourceProvider implements DiscoverySourceProviderIn
     ) {
     }
 
+    /**
+     * Returns the source name value exposed by this service.
+     */
     public function getSourceName(): string
     {
         return $this->repository->getSourceName();
     }
 
+    /**
+     * Returns the resource type value exposed by this service.
+     */
     public function getResourceType(): string
     {
         return $this->repository->getResourceType();
     }
 
+    /**
+     * Performs the provide operation for this discovery service.
+     */
     public function provide(): array
     {
         return $this->repository->all();

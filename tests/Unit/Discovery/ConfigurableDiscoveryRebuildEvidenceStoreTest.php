@@ -11,6 +11,10 @@ use App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
 use App\Service\Discovery\Rebuild\PdoDiscoveryRebuildEvidenceStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the configurable discovery rebuild evidence store test case for the Discovering component.
+ */
 final class ConfigurableDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testSelectsFileBackendWhenConfigured(): void

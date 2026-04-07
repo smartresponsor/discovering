@@ -11,6 +11,10 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+
+/**
+ * Exercises the discovery json response factory test case for the Discovering component.
+ */
 final class DiscoveryJsonResponseFactoryTest extends TestCase
 {
     public function testSuccessBuildsVersionedEnvelopeForLegacyAlias(): void

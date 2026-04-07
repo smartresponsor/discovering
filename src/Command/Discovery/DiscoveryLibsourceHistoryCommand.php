@@ -11,6 +11,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery libsource history workflow.
+ */
 #[AsCommand(name: 'app:discovery:libsource:history')]
 final class DiscoveryLibsourceHistoryCommand extends Command
 {
@@ -21,6 +24,9 @@ final class DiscoveryLibsourceHistoryCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Executes the discovery libsource history command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $events = $this->eventTrailBuilder->build();

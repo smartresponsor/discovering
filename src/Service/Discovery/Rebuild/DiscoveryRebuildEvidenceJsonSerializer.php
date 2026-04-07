@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Rebuild;
 
 use App\Dto\Discovery\DiscoveryRebuildSummary;
 
+
+/**
+ * Handles discovery rebuild evidence json serializer concerns for discovery state, source, or API payloads.
+ */
 final class DiscoveryRebuildEvidenceJsonSerializer
 {
     /**

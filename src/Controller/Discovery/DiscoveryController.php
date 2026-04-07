@@ -17,6 +17,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
+/**
+ * Handles public discovery HTTP endpoints for the discovery surface.
+ */
 final class DiscoveryController extends AbstractController
 {
     public function __construct(
@@ -27,6 +31,9 @@ final class DiscoveryController extends AbstractController
     ) {
     }
 
+    /**
+     * Handles the index endpoint for the discovery HTTP surface.
+     */
     #[Route('/discovery', name: 'app_discovery_index', methods: ['GET', 'POST'])]
     public function index(Request $request): Response
     {
@@ -49,6 +56,9 @@ final class DiscoveryController extends AbstractController
         ]);
     }
 
+    /**
+     * Handles the feedback endpoint for the discovery HTTP surface.
+     */
     #[Route('/discovery/feedback', name: 'app_discovery_feedback', methods: ['POST'])]
     public function feedback(Request $request): RedirectResponse
     {
@@ -73,6 +83,9 @@ final class DiscoveryController extends AbstractController
     }
 
     #[Route('/api/discovery', name: 'app_discovery_api', methods: ['GET'])]
+    /**
+     * Handles the api endpoint for the discovery HTTP surface.
+     */
     #[Route('/api/v1/discovery', name: 'app_discovery_api_v1', methods: ['GET'])]
     public function api(Request $request): JsonResponse
     {
@@ -89,6 +102,9 @@ final class DiscoveryController extends AbstractController
     }
 
     #[Route('/api/discovery/click', name: 'app_discovery_api_click', methods: ['POST'])]
+    /**
+     * Handles the click endpoint for the discovery HTTP surface.
+     */
     #[Route('/api/v1/discovery/click', name: 'app_discovery_api_click_v1', methods: ['POST'])]
     public function click(Request $request): JsonResponse
     {

@@ -9,6 +9,10 @@ use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
+
+/**
+ * Exercises the discovery http assertion test helper for the Discovering component.
+ */
 trait DiscoveryHttpAssertionTrait
 {
     protected function assertDiscoveryJsonEnvelope(

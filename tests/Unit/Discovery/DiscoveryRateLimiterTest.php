@@ -9,6 +9,10 @@ use App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
+
+/**
+ * Exercises the discovery rate limiter test case for the Discovering component.
+ */
 final class DiscoveryRateLimiterTest extends DiscoveryTempFilesystemTestCase
 {
     private string $path;

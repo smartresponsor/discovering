@@ -9,6 +9,10 @@ use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 
+
+/**
+ * Provides the discovery rollback executor capability within the discovery component.
+ */
 final class DiscoveryRollbackExecutor
 {
     public function __construct(
@@ -17,6 +21,9 @@ final class DiscoveryRollbackExecutor
     ) {
     }
 
+    /**
+     * Performs the execute operation for this discovery service.
+     */
     public function execute(?string $expectedCurrentEvidenceId = null, ?string $expectedTargetEvidenceId = null): DiscoveryRollbackExecutionResult
     {
         $plan = $this->rollbackPlanBuilder->build();

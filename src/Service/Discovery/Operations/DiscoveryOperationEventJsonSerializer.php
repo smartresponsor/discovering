@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Operations;
 
 use App\Dto\Discovery\DiscoveryOperationEvent;
 
+
+/**
+ * Handles discovery operation event json serializer concerns for discovery state, source, or API payloads.
+ */
 final class DiscoveryOperationEventJsonSerializer
 {
     /**

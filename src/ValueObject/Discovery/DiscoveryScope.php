@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\ValueObject\Discovery;
 
+
+/**
+ * Represents the discovery scope value within the discovery domain and runtime contracts.
+ */
 final class DiscoveryScope
 {
     public function __construct(

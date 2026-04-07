@@ -6,8 +6,15 @@ namespace App\Service\Discovery;
 use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
 
+
+/**
+ * Provides the discovery mode preset capability within the discovery component.
+ */
 final class DiscoveryModePresetService
 {
+    /**
+     * Performs the apply operation for this discovery service.
+     */
     public function apply(DiscoveryQuery $query): DiscoveryQuery
     {
         $presetWeights = $this->presetWeights($query->mode);

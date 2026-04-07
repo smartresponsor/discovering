@@ -11,6 +11,10 @@ use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\DiscoveryScoringService;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the discovery scoring service test case for the Discovering component.
+ */
 final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItRanksHitsAndAppliesFeedbackBoost(): void

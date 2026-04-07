@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Functional\Discovery;
 
 
+
+/**
+ * Exercises the discovery management ui test case for the Discovering component.
+ */
 final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 {
     public function testDiscoveryPageRendersWithSeededResult(): void

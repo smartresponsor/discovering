@@ -8,6 +8,10 @@ use App\Dto\Discovery\BriefingManagementActionResult;
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceActionResolver;
 use Symfony\Component\HttpFoundation\Request;
 
+
+/**
+ * Provides the briefing management surface action resolver capability within the discovery component.
+ */
 final class BriefingManagementSurfaceActionResolver
 {
     private readonly DirectoryBackedFamilyManagementSurfaceActionResolver $delegate;
@@ -18,6 +22,9 @@ final class BriefingManagementSurfaceActionResolver
         $this->delegate = new DirectoryBackedFamilyManagementSurfaceActionResolver($actionService);
     }
 
+    /**
+     * Performs the resolve operation for this discovery service.
+     */
     public function resolve(Request $request): ?BriefingManagementActionResult
     {
         $result = $this->delegate->resolve($request);

@@ -12,6 +12,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Provides a CLI entry point for the discovery rollback plan workflow.
+ */
 #[AsCommand(name: 'discovering:rollback:plan', description: 'Builds the current discovery rollback plan from rebuild evidence.')]
 final class DiscoveryRollbackPlanCommand extends Command
 {
@@ -22,6 +25,9 @@ final class DiscoveryRollbackPlanCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Executes the discovery rollback plan command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);

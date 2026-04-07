@@ -9,6 +9,10 @@ use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
 use App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the file discovery rebuild evidence store test case for the Discovering component.
+ */
 final class FileDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItPersistsAndReturnsLatestRebuildEvidence(): void

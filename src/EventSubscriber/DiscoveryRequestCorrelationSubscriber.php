@@ -11,6 +11,10 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+
+/**
+ * Applies discovery request correlation behavior to the discovery HTTP or kernel event pipeline.
+ */
 final class DiscoveryRequestCorrelationSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents(): array
@@ -21,6 +25,9 @@ final class DiscoveryRequestCorrelationSubscriber implements EventSubscriberInte
         ];
     }
 
+    /**
+     * Applies the on kernel request event handling step for this subscriber.
+     */
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
@@ -40,6 +47,9 @@ final class DiscoveryRequestCorrelationSubscriber implements EventSubscriberInte
         $request->attributes->set(DiscoveryOperationLogger::REQUEST_ID_ATTRIBUTE, $requestId);
     }
 
+    /**
+     * Applies the on kernel response event handling step for this subscriber.
+     */
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (!$event->isMainRequest()) {

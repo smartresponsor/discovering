@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Discovery;
 
+
+/**
+ * Exercises the discovery security posture test case for the Discovering component.
+ */
 final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
 {
     public function testPublicDiscoveryPageCarriesResponseSecurityHeaders(): void

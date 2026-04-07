@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Functional\Discovery;
 
 
+
+/**
+ * Exercises the discovery api test case for the Discovering component.
+ */
 final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
 {
     public function testVersionedApiDiscoveryReturnsSeededBriefingHit(): void

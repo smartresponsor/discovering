@@ -9,6 +9,10 @@ use App\Dto\Discovery\DiscoveryResult;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
 
+
+/**
+ * Provides the discovery capability within the discovery component.
+ */
 final class DiscoveryService implements DiscoveryServiceInterface
 {
     public function __construct(
@@ -18,6 +22,9 @@ final class DiscoveryService implements DiscoveryServiceInterface
     ) {
     }
 
+    /**
+     * Executes the discovery query workflow and returns the normalized result model.
+     */
     public function discover(DiscoveryQuery $query): DiscoveryResult
     {
         $effectiveQuery = $this->modePresetService->apply($query);

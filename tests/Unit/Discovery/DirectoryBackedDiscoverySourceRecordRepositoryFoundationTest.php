@@ -10,6 +10,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the directory backed discovery source record repository foundation test case for the Discovering component.
+ */
 final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItProvidesSharedDirectoryBackedLifecycleBehavior(): void

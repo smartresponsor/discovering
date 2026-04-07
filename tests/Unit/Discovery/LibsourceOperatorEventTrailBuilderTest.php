@@ -19,6 +19,10 @@ use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordReposit
 use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the libsource operator event trail builder test case for the Discovering component.
+ */
 final class LibsourceOperatorEventTrailBuilderTest extends TestCase
 {
     public function testItIncludesSurfaceLoadStoredEventsAndCoverageEvents(): void

@@ -9,6 +9,10 @@ use App\Service\Discovery\Adapter\MeiliDiscoveryAdapter;
 use App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the configurable discovery adapter test case for the Discovering component.
+ */
 final class ConfigurableDiscoveryAdapterTest extends TestCase
 {
     public function testFallsBackToSqliteWhenMeiliBackendIsNotConfigured(): void

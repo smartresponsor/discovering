@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
+
+/**
+ * Represents the playbook management surface contract used by discovery application, management, or state coordination flows.
+ */
 final class PlaybookManagementSurface extends DirectoryBackedFamilyManagementSurface
 {
     public static function fromGeneric(DirectoryBackedFamilyManagementSurface $surface): self

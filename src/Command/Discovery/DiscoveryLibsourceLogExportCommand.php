@@ -13,6 +13,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery libsource log export workflow.
+ */
 #[AsCommand(name: 'app:discovery:libsource:log:export')]
 final class DiscoveryLibsourceLogExportCommand extends Command
 {
@@ -22,6 +25,9 @@ final class DiscoveryLibsourceLogExportCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Configures the Symfony console command metadata, arguments, and help text.
+     */
     protected function configure(): void
     {
         $this->addOption('preset', null, InputOption::VALUE_REQUIRED);
@@ -31,6 +37,9 @@ final class DiscoveryLibsourceLogExportCommand extends Command
         $this->addOption('per-page', null, InputOption::VALUE_REQUIRED, default: '10');
     }
 
+    /**
+     * Executes the discovery libsource log export command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $surface = $this->surfaceBuilder->build(new LibsourceEventLogQuery(

@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Libsource\Log;
 
 use App\Dto\Discovery\LibsourceOperatorEvent;
 
+
+/**
+ * Provides the file libsource operator event log store capability within the discovery component.
+ */
 final class FileLibsourceOperatorEventLogStore implements LibsourceOperatorEventLogStoreInterface
 {
     public function __construct(
@@ -14,6 +18,9 @@ final class FileLibsourceOperatorEventLogStore implements LibsourceOperatorEvent
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(LibsourceOperatorEvent $event): void
     {
         $events = $this->all();
@@ -21,6 +28,9 @@ final class FileLibsourceOperatorEventLogStore implements LibsourceOperatorEvent
         $this->persist($events);
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         if (!is_file($this->path)) {
@@ -36,6 +46,9 @@ final class FileLibsourceOperatorEventLogStore implements LibsourceOperatorEvent
         return $this->serializer->decodeMany($contents);
     }
 
+    /**
+     * Performs the clear operation for this discovery service.
+     */
     public function clear(): void
     {
         $this->persist([]);

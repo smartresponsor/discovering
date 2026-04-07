@@ -7,6 +7,10 @@ namespace App\Service\Discovery\Rebuild;
 use App\Dto\Discovery\DiscoveryRebuildSummary;
 use App\Dto\Discovery\DiscoveryRollbackPlan;
 
+
+/**
+ * Builds the discovery rollback plan output used by discovery management or diagnostics flows.
+ */
 final class DiscoveryRollbackPlanBuilder
 {
     public function __construct(
@@ -14,6 +18,9 @@ final class DiscoveryRollbackPlanBuilder
     ) {
     }
 
+    /**
+     * Builds the build result for this discovery workflow.
+     */
     public function build(): DiscoveryRollbackPlan
     {
         $evidence = $this->rebuildEvidenceStore->latest(10);

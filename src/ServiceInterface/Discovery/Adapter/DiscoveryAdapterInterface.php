@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\ServiceInterface\Discovery\Adapter;
 
+
+/**
+ * Defines the contract for the discovery adapter capability within the discovery component.
+ */
 interface DiscoveryAdapterInterface
 {
     /** @param array<string, mixed> $document */

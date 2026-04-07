@@ -9,6 +9,10 @@ use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRep
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 
+
+/**
+ * Provides the briefing management action capability within the discovery component.
+ */
 final class BriefingManagementActionService implements DirectoryBackedFamilyManagementActionServiceInterface
 {
     private readonly DirectoryBackedFamilyManagementActionService $delegate;
@@ -38,16 +42,25 @@ final class BriefingManagementActionService implements DirectoryBackedFamilyMana
         );
     }
 
+    /**
+     * Performs the audit registry operation for this discovery service.
+     */
     public function auditRegistry(): BriefingManagementActionResult
     {
         return BriefingManagementActionResult::fromGeneric($this->delegate->auditRegistry());
     }
 
+    /**
+     * Performs the ensure sample registry operation for this discovery service.
+     */
     public function ensureSampleRegistry(): BriefingManagementActionResult
     {
         return BriefingManagementActionResult::fromGeneric($this->delegate->ensureSampleRegistry());
     }
 
+    /**
+     * Performs the migrate legacy storage operation for this discovery service.
+     */
     public function migrateLegacyStorage(): BriefingManagementActionResult
     {
         return BriefingManagementActionResult::fromGeneric($this->delegate->migrateLegacyStorage());

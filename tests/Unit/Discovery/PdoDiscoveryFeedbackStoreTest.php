@@ -7,6 +7,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\PdoDiscoveryFeedbackStore;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the pdo discovery feedback store test case for the Discovering component.
+ */
 final class PdoDiscoveryFeedbackStoreTest extends TestCase
 {
     public function testItPersistsAndIncrementsFeedbackCountsInPdoStore(): void

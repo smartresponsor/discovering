@@ -7,6 +7,10 @@ namespace App\Service\Discovery\RateLimit;
 use App\Dto\Discovery\DiscoveryRateLimitDecision;
 use Symfony\Component\HttpFoundation\Request;
 
+
+/**
+ * Provides the discovery rate limiter capability within the discovery component.
+ */
 final class DiscoveryRateLimiter
 {
     public function __construct(
@@ -20,6 +24,9 @@ final class DiscoveryRateLimiter
     ) {
     }
 
+    /**
+     * Performs the consume for request operation for this discovery service.
+     */
     public function consumeForRequest(Request $request): ?DiscoveryRateLimitDecision
     {
         $scope = $this->resolveScope($request);

@@ -9,6 +9,10 @@ use App\Dto\Discovery\LibsourceManagementActionResult;
 use App\Dto\Discovery\LibsourceOperatorEvent;
 use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
+
+/**
+ * Provides the libsource management action capability within the discovery component.
+ */
 final class LibsourceManagementActionService
 {
     public function __construct(
@@ -17,6 +21,9 @@ final class LibsourceManagementActionService
     ) {
     }
 
+    /**
+     * Performs the audit alignment operation for this discovery service.
+     */
     public function auditAlignment(): LibsourceManagementActionResult
     {
         $surface = $this->diagnosticSurfaceBuilder->build();
@@ -45,6 +52,9 @@ final class LibsourceManagementActionService
         return $result;
     }
 
+    /**
+     * Performs the rebuild coverage snapshot operation for this discovery service.
+     */
     public function rebuildCoverageSnapshot(): LibsourceManagementActionResult
     {
         $surface = $this->diagnosticSurfaceBuilder->build();
@@ -70,6 +80,9 @@ final class LibsourceManagementActionService
         return $result;
     }
 
+    /**
+     * Performs the inspect operation for this discovery service.
+     */
     public function inspect(string $sourceName): LibsourceManagementActionResult
     {
         foreach ($this->diagnosticSurfaceBuilder->build()->entries as $entry) {
@@ -116,6 +129,9 @@ final class LibsourceManagementActionService
         return $result;
     }
 
+    /**
+     * Performs the clear event log operation for this discovery service.
+     */
     public function clearEventLog(): LibsourceManagementActionResult
     {
         $clearedCount = count($this->eventLogStore->all());

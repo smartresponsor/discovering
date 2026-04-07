@@ -12,6 +12,10 @@ use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery rollback executor test case for the Discovering component.
+ */
 final class DiscoveryRollbackExecutorTest extends TestCase
 {
     public function testExecutePromotesRollbackTargetWhenPlanIsReady(): void

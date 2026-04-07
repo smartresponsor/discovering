@@ -7,6 +7,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the sqlite fts discovery alias swap test case for the Discovering component.
+ */
 final class SqliteFtsDiscoveryAliasSwapTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItServesSearchesFromSwappedAliasTarget(): void

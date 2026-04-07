@@ -7,8 +7,15 @@ namespace App\Service\Discovery\Document;
 use App\Dto\Discovery\DiscoverySourceRecord;
 use App\ValueObject\Discovery\DiscoveryDocument;
 
+
+/**
+ * Provides the discovery document factory capability within the discovery component.
+ */
 final class DiscoveryDocumentFactory
 {
+    /**
+     * Performs the create from source record operation for this discovery service.
+     */
     public function createFromSourceRecord(DiscoverySourceRecord $record): DiscoveryDocument
     {
         $status = $record->filters['status'] ?? '';

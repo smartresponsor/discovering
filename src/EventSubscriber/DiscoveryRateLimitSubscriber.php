@@ -14,6 +14,10 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
+
+/**
+ * Applies discovery rate limit behavior to the discovery HTTP or kernel event pipeline.
+ */
 final class DiscoveryRateLimitSubscriber implements EventSubscriberInterface
 {
     private const string REQUEST_ATTRIBUTE = '_discovery_rate_limit_decision';
@@ -33,6 +37,9 @@ final class DiscoveryRateLimitSubscriber implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * Applies the on kernel request event handling step for this subscriber.
+     */
     public function onKernelRequest(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {
@@ -76,6 +83,9 @@ final class DiscoveryRateLimitSubscriber implements EventSubscriberInterface
         ));
     }
 
+    /**
+     * Applies the on kernel response event handling step for this subscriber.
+     */
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (!$event->isMainRequest()) {

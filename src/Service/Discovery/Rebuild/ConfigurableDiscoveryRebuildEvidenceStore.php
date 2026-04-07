@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Rebuild;
 
 use App\Dto\Discovery\DiscoveryRebuildSummary;
 
+
+/**
+ * Provides the configurable discovery rebuild evidence store capability within the discovery component.
+ */
 final class ConfigurableDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidenceStoreInterface
 {
     public function __construct(
@@ -16,11 +20,17 @@ final class ConfigurableDiscoveryRebuildEvidenceStore implements DiscoveryRebuil
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(DiscoveryRebuildSummary $summary): void
     {
         $this->delegate()->append($summary);
     }
 
+    /**
+     * Performs the latest operation for this discovery service.
+     */
     public function latest(int $limit = 20): array
     {
         return $this->delegate()->latest($limit);

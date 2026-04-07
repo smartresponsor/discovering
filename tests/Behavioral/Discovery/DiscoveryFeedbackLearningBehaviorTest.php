@@ -14,6 +14,10 @@ use App\Service\Discovery\DiscoveryService;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the discovery feedback learning behavior test case for the Discovering component.
+ */
 final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesystemTestCase
 {
     public function testRecordedClicksCanPromoteTrustedOperationalHitAbovePureFtsLeader(): void

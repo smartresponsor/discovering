@@ -14,6 +14,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
+/**
+ * Handles management HTTP endpoints for the discovery briefing management surface.
+ */
 final class DiscoveryBriefingManagementController extends AbstractDirectoryBackedFamilyManagementController
 {
     public function __construct(
@@ -26,6 +30,9 @@ final class DiscoveryBriefingManagementController extends AbstractDirectoryBacke
         parent::__construct($jsonResponseFactory);
     }
 
+    /**
+     * Handles the index endpoint for the discovery briefing management HTTP surface.
+     */
     #[Route('/management/discovery/briefing', name: 'app_management_discovery_briefing', methods: ['GET'])]
     public function index(Request $request): Response
     {
@@ -39,6 +46,9 @@ final class DiscoveryBriefingManagementController extends AbstractDirectoryBacke
         );
     }
 
+    /**
+     * Handles the export endpoint for the discovery briefing management HTTP surface.
+     */
     #[Route('/management/discovery/briefing/export', name: 'app_management_discovery_briefing_export', methods: ['GET'])]
     public function export(): JsonResponse
     {

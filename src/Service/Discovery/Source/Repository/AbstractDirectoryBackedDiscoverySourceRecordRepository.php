@@ -8,6 +8,10 @@ use App\Dto\Discovery\DiscoverySourceRecord;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 
+
+/**
+ * Provides abstract directory backed discovery source record access for discovery source and management workflows.
+ */
 abstract class AbstractDirectoryBackedDiscoverySourceRecordRepository implements DiscoverySourceRecordRepositoryInterface
 {
     public function __construct(
@@ -17,6 +21,9 @@ abstract class AbstractDirectoryBackedDiscoverySourceRecordRepository implements
     ) {
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         $records = [];
@@ -56,6 +63,9 @@ abstract class AbstractDirectoryBackedDiscoverySourceRecordRepository implements
         return $this->decoder->decodeFile($path, $this->getResourceType());
     }
 
+    /**
+     * Performs the export json operation for this discovery service.
+     */
     public function exportJson(): string
     {
         return $this->encoder->encodeRecords($this->all());
@@ -76,6 +86,9 @@ abstract class AbstractDirectoryBackedDiscoverySourceRecordRepository implements
         file_put_contents($storagePath, $this->encoder->encodeRecords($records));
     }
 
+    /**
+     * Performs the import file operation for this discovery service.
+     */
     public function importFile(string $path, ?string $targetPath = null): int
     {
         $records = $this->decoder->decodeFile($path, $this->getResourceType());
@@ -84,6 +97,9 @@ abstract class AbstractDirectoryBackedDiscoverySourceRecordRepository implements
         return count($records);
     }
 
+    /**
+     * Returns the project dir value exposed by this service.
+     */
     protected function getProjectDir(): string
     {
         return $this->projectDir;

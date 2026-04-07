@@ -10,6 +10,10 @@ use App\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
 use App\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the libsource event log surface builder test case for the Discovering component.
+ */
 final class LibsourceEventLogSurfaceBuilderTest extends TestCase
 {
     public function testItBuildsNewestFirstSurfaceFromStoredEvents(): void

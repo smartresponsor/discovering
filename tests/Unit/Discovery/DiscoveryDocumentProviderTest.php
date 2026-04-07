@@ -10,6 +10,10 @@ use App\Service\Discovery\Document\DiscoveryDocumentProvider;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery document provider test case for the Discovering component.
+ */
 final class DiscoveryDocumentProviderTest extends TestCase
 {
     public function testItAggregatesAndSortsDocumentsFromAllSourceProviders(): void

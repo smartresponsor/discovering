@@ -6,6 +6,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Dto\Discovery\DiscoveryQuery;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery query test case for the Discovering component.
+ */
 final class DiscoveryQueryTest extends TestCase
 {
     public function testFromArrayAppliesDefaults(): void

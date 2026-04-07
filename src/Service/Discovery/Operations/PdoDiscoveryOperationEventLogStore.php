@@ -8,6 +8,10 @@ use App\Dto\Discovery\DiscoveryOperationEvent;
 use PDO;
 use PDOException;
 
+
+/**
+ * Provides the pdo discovery operation event log store capability within the discovery component.
+ */
 final class PdoDiscoveryOperationEventLogStore implements DiscoveryOperationEventLogStoreInterface
 {
     private ?PDO $pdo = null;
@@ -21,6 +25,9 @@ final class PdoDiscoveryOperationEventLogStore implements DiscoveryOperationEven
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(DiscoveryOperationEvent $event): void
     {
         $pdo = $this->pdo();
@@ -42,6 +49,9 @@ final class PdoDiscoveryOperationEventLogStore implements DiscoveryOperationEven
         ]);
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         $pdo = $this->pdo();
@@ -64,6 +74,9 @@ final class PdoDiscoveryOperationEventLogStore implements DiscoveryOperationEven
         return array_map(fn (array $row): DiscoveryOperationEvent => $this->hydrate($row), $rows);
     }
 
+    /**
+     * Performs the latest operation for this discovery service.
+     */
     public function latest(int $limit = 25): array
     {
         if ($limit <= 0) {
@@ -88,6 +101,9 @@ final class PdoDiscoveryOperationEventLogStore implements DiscoveryOperationEven
         return array_map(fn (array $row): DiscoveryOperationEvent => $this->hydrate($row), $rows);
     }
 
+    /**
+     * Performs the clear operation for this discovery service.
+     */
     public function clear(): void
     {
         $pdo = $this->pdo();

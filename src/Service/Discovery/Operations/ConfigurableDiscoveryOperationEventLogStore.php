@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Operations;
 
 use App\Dto\Discovery\DiscoveryOperationEvent;
 
+
+/**
+ * Provides the configurable discovery operation event log store capability within the discovery component.
+ */
 final class ConfigurableDiscoveryOperationEventLogStore implements DiscoveryOperationEventLogStoreInterface
 {
     public function __construct(
@@ -16,21 +20,33 @@ final class ConfigurableDiscoveryOperationEventLogStore implements DiscoveryOper
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(DiscoveryOperationEvent $event): void
     {
         $this->delegate()->append($event);
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         return $this->delegate()->all();
     }
 
+    /**
+     * Performs the latest operation for this discovery service.
+     */
     public function latest(int $limit = 25): array
     {
         return $this->delegate()->latest($limit);
     }
 
+    /**
+     * Performs the clear operation for this discovery service.
+     */
     public function clear(): void
     {
         $this->delegate()->clear();

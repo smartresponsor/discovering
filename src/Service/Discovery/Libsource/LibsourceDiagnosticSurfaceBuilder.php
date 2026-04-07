@@ -9,6 +9,10 @@ use App\Dto\Discovery\LibsourceDiagnosticSurface;
 use App\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
+
+/**
+ * Builds the libsource diagnostic surface output used by discovery management or diagnostics flows.
+ */
 final class LibsourceDiagnosticSurfaceBuilder
 {
     /**
@@ -20,6 +24,9 @@ final class LibsourceDiagnosticSurfaceBuilder
     ) {
     }
 
+    /**
+     * Builds the build result for this discovery workflow.
+     */
     public function build(): LibsourceDiagnosticSurface
     {
         $entries = [];

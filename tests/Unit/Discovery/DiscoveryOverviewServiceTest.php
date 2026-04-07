@@ -18,6 +18,10 @@ use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordReposito
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery overview service test case for the Discovering component.
+ */
 final class DiscoveryOverviewServiceTest extends TestCase
 {
     public function testItBuildsCountsBySourceName(): void

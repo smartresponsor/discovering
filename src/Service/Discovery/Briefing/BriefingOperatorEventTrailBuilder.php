@@ -9,6 +9,10 @@ use App\Dto\Discovery\BriefingOperatorEvent;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
 
+
+/**
+ * Builds the briefing operator event trail output used by discovery management or diagnostics flows.
+ */
 final class BriefingOperatorEventTrailBuilder
 {
     private readonly DirectoryBackedFamilyOperatorEventTrailBuilder $delegate;

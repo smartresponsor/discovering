@@ -7,6 +7,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery state topology builder test case for the Discovering component.
+ */
 final class DiscoveryStateTopologyBuilderTest extends TestCase
 {
     public function testBuildMarksLocalVarDiscoveryPathsAsLocalAndNotDistributedReady(): void

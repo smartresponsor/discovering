@@ -13,6 +13,10 @@ use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterfa
 use App\ValueObject\Discovery\DiscoveryDocument;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery indexer test case for the Discovering component.
+ */
 final class DiscoveryIndexerTest extends TestCase
 {
     public function testItRebuildsGlobalAndResourceIndexesFromDocumentProvider(): void

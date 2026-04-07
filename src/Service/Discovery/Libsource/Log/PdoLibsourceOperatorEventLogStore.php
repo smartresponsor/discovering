@@ -8,6 +8,10 @@ use App\Dto\Discovery\LibsourceOperatorEvent;
 use PDO;
 use PDOException;
 
+
+/**
+ * Provides the pdo libsource operator event log store capability within the discovery component.
+ */
 final class PdoLibsourceOperatorEventLogStore implements LibsourceOperatorEventLogStoreInterface
 {
     private ?PDO $pdo = null;
@@ -21,6 +25,9 @@ final class PdoLibsourceOperatorEventLogStore implements LibsourceOperatorEventL
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(LibsourceOperatorEvent $event): void
     {
         $pdo = $this->pdo();
@@ -40,6 +47,9 @@ final class PdoLibsourceOperatorEventLogStore implements LibsourceOperatorEventL
         ]);
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         $pdo = $this->pdo();
@@ -62,6 +72,9 @@ final class PdoLibsourceOperatorEventLogStore implements LibsourceOperatorEventL
         return array_map(fn (array $row): LibsourceOperatorEvent => $this->hydrate($row), $rows);
     }
 
+    /**
+     * Performs the clear operation for this discovery service.
+     */
     public function clear(): void
     {
         $pdo = $this->pdo();

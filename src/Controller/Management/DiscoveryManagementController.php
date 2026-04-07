@@ -14,6 +14,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
+
+/**
+ * Handles management HTTP endpoints for the discovery management surface.
+ */
 final class DiscoveryManagementController extends AbstractController
 {
     public function __construct(
@@ -24,6 +28,9 @@ final class DiscoveryManagementController extends AbstractController
     ) {
     }
 
+    /**
+     * Handles the rebuild endpoint for the discovery management HTTP surface.
+     */
     #[Route('/management/discovery/rebuild', name: 'app_management_discovery_rebuild', methods: ['POST'])]
     public function rebuild(Request $request): JsonResponse
     {
@@ -55,6 +62,9 @@ final class DiscoveryManagementController extends AbstractController
         ]);
     }
 
+    /**
+     * Handles the exportRebuilds endpoint for the discovery management HTTP surface.
+     */
     #[Route('/management/discovery/rebuilds/export', name: 'app_management_discovery_rebuilds_export', methods: ['GET'])]
     public function exportRebuilds(): JsonResponse
     {

@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
+
+/**
+ * Represents the discovery platform diagnostics contract used by discovery application, management, or state coordination flows.
+ */
 final class DiscoveryPlatformDiagnostics
 {
     /**

@@ -6,18 +6,31 @@ namespace App\Service\Discovery\Source\Repository;
 
 use App\Dto\Discovery\DiscoverySourceRecord;
 
+
+/**
+ * Provides project discovery source record access for discovery source and management workflows.
+ */
 final class ProjectDiscoverySourceRecordRepository implements DiscoverySourceRecordRepositoryInterface
 {
+    /**
+     * Returns the source name value exposed by this service.
+     */
     public function getSourceName(): string
     {
         return 'project-source-provider';
     }
 
+    /**
+     * Returns the resource type value exposed by this service.
+     */
     public function getResourceType(): string
     {
         return 'project';
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         return [

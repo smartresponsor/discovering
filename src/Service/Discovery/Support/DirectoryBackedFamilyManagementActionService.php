@@ -8,17 +8,21 @@ use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
 use App\Dto\Discovery\DiscoverySourceRecord;
 use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
 
+
+/**
+ * Provides the directory backed family management action capability within the discovery component.
+ */
 final class DirectoryBackedFamilyManagementActionService implements DirectoryBackedFamilyManagementActionServiceInterface
 {
     /**
      * @param list<array{
-     *     fileName: string,
-     *     resourceId: string,
-     *     title: string,
-     *     body: string,
-     *     tags: list<string>,
-     *     status?: string,
-     *     visibility?: string
+     * fileName: string,
+     * resourceId: string,
+     * title: string,
+     * body: string,
+     * tags: list<string>,
+     * status?: string,
+     * visibility?: string
      * }> $sampleSeedDefinitions
      */
     public function __construct(
@@ -28,6 +32,9 @@ final class DirectoryBackedFamilyManagementActionService implements DirectoryBac
     ) {
     }
 
+    /**
+     * Performs the audit registry operation for this discovery service.
+     */
     public function auditRegistry(): DirectoryBackedFamilyManagementActionResult
     {
         $files = $this->repository->listStorageFiles();
@@ -49,6 +56,9 @@ final class DirectoryBackedFamilyManagementActionService implements DirectoryBac
         );
     }
 
+    /**
+     * Performs the ensure sample registry operation for this discovery service.
+     */
     public function ensureSampleRegistry(): DirectoryBackedFamilyManagementActionResult
     {
         $existingFiles = $this->repository->listStorageFiles();
@@ -101,6 +111,9 @@ final class DirectoryBackedFamilyManagementActionService implements DirectoryBac
         );
     }
 
+    /**
+     * Performs the migrate legacy storage operation for this discovery service.
+     */
     public function migrateLegacyStorage(): DirectoryBackedFamilyManagementActionResult
     {
         $legacyPath = $this->repository->getLegacyStoragePath();

@@ -10,6 +10,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery libsource log clear workflow.
+ */
 #[AsCommand(name: 'app:discovery:libsource:log:clear')]
 final class DiscoveryLibsourceLogClearCommand extends Command
 {
@@ -19,6 +22,9 @@ final class DiscoveryLibsourceLogClearCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Executes the discovery libsource log clear command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $result = $this->actionService->clearEventLog();

@@ -18,6 +18,10 @@ use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordReposit
 use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the libsource management action service test case for the Discovering component.
+ */
 final class LibsourceManagementActionServiceTest extends TestCase
 {
     private function createService(EphemeralLibsourceOperatorEventLogStore $store): LibsourceManagementActionService

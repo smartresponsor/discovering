@@ -8,6 +8,10 @@ use App\Dto\Discovery\DiscoveryRebuildSummary;
 use PDO;
 use PDOException;
 
+
+/**
+ * Provides the pdo discovery rebuild evidence store capability within the discovery component.
+ */
 final class PdoDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidenceStoreInterface
 {
     private ?PDO $pdo = null;
@@ -21,6 +25,9 @@ final class PdoDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidence
     ) {
     }
 
+    /**
+     * Performs the append operation for this discovery service.
+     */
     public function append(DiscoveryRebuildSummary $summary): void
     {
         $pdo = $this->pdo();
@@ -39,6 +46,9 @@ final class PdoDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidence
         ]);
     }
 
+    /**
+     * Performs the latest operation for this discovery service.
+     */
     public function latest(int $limit = 20): array
     {
         if ($limit <= 0) {

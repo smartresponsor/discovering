@@ -9,10 +9,13 @@ use PDOException;
 
 /**
  * Database-backed fixed-window rate limit store.
- *
+ * 
  * This store is intended for stronger shared coordination than local JSON files.
  * It uses optimistic retries so a shared RDBMS can coordinate counters across
  * multiple application replicas.
+ */
+/**
+ * Provides the pdo discovery rate limit store capability within the discovery component.
  */
 final class PdoDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterface
 {
@@ -27,6 +30,9 @@ final class PdoDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterfa
     ) {
     }
 
+    /**
+     * Performs the increment operation for this discovery service.
+     */
     public function increment(string $scope, string $actorKey, int $windowSeconds): array
     {
         if (trim($this->dsn) === '') {

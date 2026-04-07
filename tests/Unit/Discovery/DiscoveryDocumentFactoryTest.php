@@ -8,6 +8,10 @@ use App\Dto\Discovery\DiscoverySourceRecord;
 use App\Service\Discovery\Document\DiscoveryDocumentFactory;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery document factory test case for the Discovering component.
+ */
 final class DiscoveryDocumentFactoryTest extends TestCase
 {
     public function testItBuildsDocumentFromSourceRecordWithReferenceFallback(): void

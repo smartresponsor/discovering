@@ -8,6 +8,10 @@ use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
 use App\Dto\Discovery\DirectoryBackedFamilyOperatorEvent;
 use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
 
+
+/**
+ * Builds the directory backed family operator event trail output used by discovery management or diagnostics flows.
+ */
 final class DirectoryBackedFamilyOperatorEventTrailBuilder
 {
     public function __construct(

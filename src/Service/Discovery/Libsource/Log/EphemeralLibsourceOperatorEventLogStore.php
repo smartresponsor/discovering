@@ -6,6 +6,10 @@ namespace App\Service\Discovery\Libsource\Log;
 
 use App\Dto\Discovery\LibsourceOperatorEvent;
 
+
+/**
+ * Provides the ephemeral libsource operator event log store capability within the discovery component.
+ */
 final class EphemeralLibsourceOperatorEventLogStore implements LibsourceOperatorEventLogStoreInterface
 {
     /**
@@ -18,11 +22,17 @@ final class EphemeralLibsourceOperatorEventLogStore implements LibsourceOperator
         $this->events[] = $event;
     }
 
+    /**
+     * Performs the all operation for this discovery service.
+     */
     public function all(): array
     {
         return $this->events;
     }
 
+    /**
+     * Performs the clear operation for this discovery service.
+     */
     public function clear(): void
     {
         $this->events = [];

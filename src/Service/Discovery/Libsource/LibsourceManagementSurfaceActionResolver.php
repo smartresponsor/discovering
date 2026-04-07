@@ -7,6 +7,10 @@ namespace App\Service\Discovery\Libsource;
 use App\Dto\Discovery\LibsourceManagementActionResult;
 use Symfony\Component\HttpFoundation\Request;
 
+
+/**
+ * Provides the libsource management surface action resolver capability within the discovery component.
+ */
 final class LibsourceManagementSurfaceActionResolver
 {
     public function __construct(
@@ -14,6 +18,9 @@ final class LibsourceManagementSurfaceActionResolver
     ) {
     }
 
+    /**
+     * Performs the resolve operation for this discovery service.
+     */
     public function resolve(Request $request): ?LibsourceManagementActionResult
     {
         $action = $request->query->get('action');

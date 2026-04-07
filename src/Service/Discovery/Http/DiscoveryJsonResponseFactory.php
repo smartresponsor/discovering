@@ -9,6 +9,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+
+/**
+ * Provides the discovery json response factory capability within the discovery component.
+ */
 final class DiscoveryJsonResponseFactory
 {
     public const string API_VERSION = DiscoveryApiContract::API_VERSION;

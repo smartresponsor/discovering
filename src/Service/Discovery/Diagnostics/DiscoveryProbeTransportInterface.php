@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\Diagnostics;
 
+
+/**
+ * Defines the contract for the discovery probe transport capability within the discovery component.
+ */
 interface DiscoveryProbeTransportInterface
 {
     /**

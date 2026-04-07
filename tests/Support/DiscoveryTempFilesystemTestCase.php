@@ -6,6 +6,10 @@ namespace App\Tests\Support;
 
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery temp filesystem test case test helper for the Discovering component.
+ */
 abstract class DiscoveryTempFilesystemTestCase extends TestCase
 {
     private ?string $discoveryTempRoot = null;

@@ -10,6 +10,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the directory backed family management surface builder test case for the Discovering component.
+ */
 final class DirectoryBackedFamilyManagementSurfaceBuilderTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsReusableManagementSurfaceFromDirectoryBackedRepository(): void

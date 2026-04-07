@@ -9,6 +9,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the briefing file discovery source record repository test case for the Discovering component.
+ */
 final class BriefingFileDiscoverySourceRecordRepositoryTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItAggregatesBriefingRecordsFromDirectoryFiles(): void

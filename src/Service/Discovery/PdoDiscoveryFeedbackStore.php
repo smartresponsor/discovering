@@ -9,9 +9,12 @@ use PDOException;
 
 /**
  * Shared feedback store backed by a PDO coordination table.
- *
+ * 
  * This allows useful-click learning signals to coordinate across replicas when
  * a shared RDBMS is configured instead of a local SQLite file.
+ */
+/**
+ * Provides the pdo discovery feedback store capability within the discovery component.
  */
 final class PdoDiscoveryFeedbackStore implements DiscoveryFeedbackStoreInterface
 {
@@ -26,6 +29,9 @@ final class PdoDiscoveryFeedbackStore implements DiscoveryFeedbackStoreInterface
     ) {
     }
 
+    /**
+     * Records the click signal for discovery state and analytics flows.
+     */
     public function recordClick(string $resource, string $hitId, string $title = '', string $reference = ''): int
     {
         if (trim($this->dsn) === '') {
@@ -109,6 +115,9 @@ final class PdoDiscoveryFeedbackStore implements DiscoveryFeedbackStoreInterface
         throw new \RuntimeException('Discovery PDO feedback store exhausted retry attempts while updating the coordination table.');
     }
 
+    /**
+     * Returns the click count value exposed by this service.
+     */
     public function getClickCount(string $resource, string $hitId): int
     {
         if (trim($this->dsn) === '') {

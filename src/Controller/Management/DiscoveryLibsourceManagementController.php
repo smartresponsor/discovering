@@ -15,6 +15,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+
+/**
+ * Handles management HTTP endpoints for the discovery libsource management surface.
+ */
 final class DiscoveryLibsourceManagementController extends AbstractController
 {
     public function __construct(
@@ -26,6 +30,9 @@ final class DiscoveryLibsourceManagementController extends AbstractController
     ) {
     }
 
+    /**
+     * Handles the index endpoint for the discovery libsource management HTTP surface.
+     */
     #[Route('/management/discovery/libsource', name: 'app_management_discovery_libsource', methods: ['GET'])]
     public function index(Request $request): Response
     {
@@ -38,6 +45,9 @@ final class DiscoveryLibsourceManagementController extends AbstractController
         ]);
     }
 
+    /**
+     * Handles the inspect endpoint for the discovery libsource management HTTP surface.
+     */
     #[Route('/management/discovery/libsource/inspect/{sourceName}', name: 'app_management_discovery_libsource_inspect', methods: ['GET'])]
     public function inspect(string $sourceName): JsonResponse
     {

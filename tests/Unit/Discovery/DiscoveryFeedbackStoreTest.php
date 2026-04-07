@@ -6,6 +6,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the discovery feedback store test case for the Discovering component.
+ */
 final class DiscoveryFeedbackStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItPersistsAndIncrementsFeedbackCounts(): void

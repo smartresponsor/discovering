@@ -13,6 +13,10 @@ use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 use App\ValueObject\Discovery\DiscoveryDocument;
 
+
+/**
+ * Coordinates discovery indexer operations for the discovery index lifecycle.
+ */
 final class DiscoveryIndexer implements DiscoveryIndexerInterface
 {
     public function __construct(
@@ -22,6 +26,9 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
     ) {
     }
 
+    /**
+     * Performs the rebuild operation for this discovery service.
+     */
     public function rebuild(ReindexRequest $request): DiscoveryRebuildSummary
     {
         $startedAt = gmdate(DATE_ATOM);
@@ -94,6 +101,9 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
         );
     }
 
+    /**
+     * Performs the upsert operation for this discovery service.
+     */
     public function upsert(DiscoveryDocument $document): void
     {
         $payload = $document->toArray();
@@ -104,6 +114,9 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
         }
     }
 
+    /**
+     * Performs the remove operation for this discovery service.
+     */
     public function remove(string $resource, string $id): void
     {
         $this->adapter->remove($resource, $id);

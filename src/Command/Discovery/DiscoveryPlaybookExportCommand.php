@@ -11,6 +11,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery playbook export workflow.
+ */
 #[AsCommand(name: 'app:discovery:playbook:export')]
 final class DiscoveryPlaybookExportCommand extends Command
 {
@@ -20,11 +23,17 @@ final class DiscoveryPlaybookExportCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Configures the Symfony console command metadata, arguments, and help text.
+     */
     protected function configure(): void
     {
         $this->addArgument('outputPath', InputArgument::OPTIONAL);
     }
 
+    /**
+     * Executes the discovery playbook export command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $json = $this->repository->exportJson();

@@ -6,6 +6,10 @@ namespace App\ServiceInterface\Discovery\Document;
 
 use App\ValueObject\Discovery\DiscoveryDocument;
 
+
+/**
+ * Defines the contract for the discovery document provider capability within the discovery component.
+ */
 interface DiscoveryDocumentProviderInterface
 {
     /**

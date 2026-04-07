@@ -13,6 +13,10 @@ use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery platform diagnostics builder test case for the Discovering component.
+ */
 final class DiscoveryPlatformDiagnosticsBuilderTest extends TestCase
 {
     public function testBuildReflectsSingleNodeSqlitePosture(): void

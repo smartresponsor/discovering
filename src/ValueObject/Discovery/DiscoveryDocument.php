@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\ValueObject\Discovery;
 
+
+/**
+ * Represents the discovery document value within the discovery domain and runtime contracts.
+ */
 final class DiscoveryDocument
 {
     /** @param array<string, scalar|null> $fields */

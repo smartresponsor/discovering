@@ -27,3 +27,15 @@ Recommended repository-local destination:
 - `docs/generated/openapi/`
 
 Narrative documentation should continue to live in `docs/discovery/`, with GitHub-facing repository material remaining in root-level Markdown files.
+
+
+## Swagger UI endpoints
+
+When `nelmio/api-doc-bundle` is installed in the active environment, the repository exposes:
+
+- `/api/doc/public-discovery`
+- `/api/doc/public-discovery.json`
+- `/api/doc/management-discovery`
+- `/api/doc/management-discovery.json`
+
+These routes are integration-ready and intentionally scoped to the producer repository. Site assembly remains the responsibility of the external documentation aggregator.

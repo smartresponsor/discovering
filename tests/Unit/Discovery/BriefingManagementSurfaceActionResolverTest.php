@@ -12,6 +12,10 @@ use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
+
+/**
+ * Exercises the briefing management surface action resolver test case for the Discovering component.
+ */
 final class BriefingManagementSurfaceActionResolverTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItResolvesAuditRegistryAction(): void

@@ -10,6 +10,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery playbook history workflow.
+ */
 #[AsCommand(name: 'app:discovery:playbook:history')]
 final class DiscoveryPlaybookHistoryCommand extends Command
 {
@@ -19,6 +22,9 @@ final class DiscoveryPlaybookHistoryCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Executes the discovery playbook history command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $events = $this->eventTrailBuilder->build();

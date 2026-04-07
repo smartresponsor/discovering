@@ -10,6 +10,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Provides a CLI entry point for the discovery platform probe workflow.
+ */
 #[AsCommand(name: 'app:discovery:platform:probe')]
 final class DiscoveryPlatformProbeCommand extends Command
 {
@@ -19,6 +22,9 @@ final class DiscoveryPlatformProbeCommand extends Command
         parent::__construct();
     }
 
+    /**
+     * Executes the discovery platform probe command workflow.
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $report = $this->probeBuilder->build();

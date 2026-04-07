@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery;
 
+
+/**
+ * Provides the discovery highlighting capability within the discovery component.
+ */
 final class DiscoveryHighlightingService
 {
     /**

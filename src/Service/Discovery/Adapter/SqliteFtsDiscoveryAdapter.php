@@ -7,6 +7,10 @@ use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 use PDO;
 
+
+/**
+ * Implements the sqlite fts discovery adapter used by the discovery runtime.
+ */
 final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
 {
     private ?PDO $pdo = null;
@@ -16,6 +20,9 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
     ) {
     }
 
+    /**
+     * Performs the upsert operation for this discovery service.
+     */
     public function upsert(string $resource, string $id, array $document): void
     {
         $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
@@ -42,6 +49,9 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
         ]);
     }
 
+    /**
+     * Performs the remove operation for this discovery service.
+     */
     public function remove(string $resource, string $id): void
     {
         $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
@@ -50,6 +60,9 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
         $statement->execute(['id' => $id]);
     }
 
+    /**
+     * Executes the search workflow against the active discovery source or backend.
+     */
     public function search(string $resource, string $query, int $limit = 20, int $offset = 0): array
     {
         $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
@@ -74,12 +87,18 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
         return $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
+    /**
+     * Performs the create index operation for this discovery service.
+     */
     public function createIndex(string $resource): void
     {
         $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
         $this->pdo()->exec(sprintf('CREATE VIRTUAL TABLE IF NOT EXISTS %s USING fts5(id UNINDEXED, title, resource, reference, status, content)', $index));
     }
 
+    /**
+     * Performs the swap alias operation for this discovery service.
+     */
     public function swapAlias(string $from, string $to): void
     {
         $alias = $this->normalizeIndexName($from);
@@ -92,11 +111,17 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
         ]);
     }
 
+    /**
+     * Returns the backend name value exposed by this service.
+     */
     public function getBackendName(): string
     {
         return 'sqlite-fts5';
     }
 
+    /**
+     * Performs the supports staged rebuild operation for this discovery service.
+     */
     public function supportsStagedRebuild(): bool
     {
         return true;

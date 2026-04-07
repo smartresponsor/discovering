@@ -8,6 +8,10 @@ use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryLearningService;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the discovery learning service test case for the Discovering component.
+ */
 final class DiscoveryLearningServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItCalculatesFeedbackBoostFromPersistedClicks(): void

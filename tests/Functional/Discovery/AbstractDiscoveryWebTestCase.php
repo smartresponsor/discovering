@@ -24,6 +24,10 @@ use function unlink;
 
 use const JSON_THROW_ON_ERROR;
 
+
+/**
+ * Exercises the abstract discovery web test case test case for the Discovering component.
+ */
 abstract class AbstractDiscoveryWebTestCase extends WebTestCase
 {
     use DiscoveryHttpAssertionTrait;

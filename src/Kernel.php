@@ -9,6 +9,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
+
+/**
+ * Bootstraps the Discovering Symfony application kernel and its runtime environment.
+ */
 final class Kernel extends BaseKernel
 {
     use MicroKernelTrait;

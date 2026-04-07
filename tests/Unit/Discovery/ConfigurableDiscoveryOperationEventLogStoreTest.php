@@ -11,6 +11,10 @@ use App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
 use App\Service\Discovery\Operations\PdoDiscoveryOperationEventLogStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the configurable discovery operation event log store test case for the Discovering component.
+ */
 final class ConfigurableDiscoveryOperationEventLogStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testSelectsFileBackendWhenConfigured(): void

@@ -7,6 +7,10 @@ namespace App\Service\Discovery\Diagnostics;
 use PDO;
 use Throwable;
 
+
+/**
+ * Provides the network discovery probe transport capability within the discovery component.
+ */
 final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInterface
 {
     public function __construct(
@@ -14,6 +18,9 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
     ) {
     }
 
+    /**
+     * Performs the probe http operation for this discovery service.
+     */
     public function probeHttp(string $baseUrl, ?string $apiKey = null): array
     {
         $base = rtrim(trim($baseUrl), '/');
@@ -46,6 +53,9 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
         ];
     }
 
+    /**
+     * Performs the probe pdo operation for this discovery service.
+     */
     public function probePdo(string $dsn, ?string $user = null, ?string $password = null): array
     {
         if (trim($dsn) === '') {

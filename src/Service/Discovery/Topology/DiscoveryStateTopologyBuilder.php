@@ -7,6 +7,10 @@ namespace App\Service\Discovery\Topology;
 use App\Dto\Discovery\DiscoveryStateStoreDescriptor;
 use App\Dto\Discovery\DiscoveryStateTopology;
 
+
+/**
+ * Builds the discovery state topology output used by discovery management or diagnostics flows.
+ */
 final class DiscoveryStateTopologyBuilder
 {
     public function __construct(
@@ -38,6 +42,9 @@ final class DiscoveryStateTopologyBuilder
     ) {
     }
 
+    /**
+     * Builds the build result for this discovery workflow.
+     */
     public function build(): DiscoveryStateTopology
     {
         $localStateRoot = $this->normalizePath($this->projectDir . '/var/discovery');

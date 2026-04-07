@@ -11,6 +11,10 @@ use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
 use App\Service\Discovery\Libsource\Log\PdoLibsourceOperatorEventLogStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
+
+/**
+ * Exercises the configurable libsource operator event log store test case for the Discovering component.
+ */
 final class ConfigurableLibsourceOperatorEventLogStoreTest extends DiscoveryTempFilesystemTestCase
 {
     public function testSelectsFileBackendWhenConfigured(): void

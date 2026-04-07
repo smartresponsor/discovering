@@ -8,6 +8,10 @@ use App\Dto\Discovery\LibsourceManagementActionResult;
 use App\Dto\Discovery\LibsourceOperatorEvent;
 use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
+
+/**
+ * Builds the libsource operator event trail output used by discovery management or diagnostics flows.
+ */
 final class LibsourceOperatorEventTrailBuilder
 {
     public function __construct(

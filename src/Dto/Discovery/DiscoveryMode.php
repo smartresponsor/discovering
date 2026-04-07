@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
+
+/**
+ * Represents the discovery mode contract used by discovery application, management, or state coordination flows.
+ */
 final class DiscoveryMode
 {
     public const RELEVANCE = 'relevance';

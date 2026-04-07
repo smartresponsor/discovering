@@ -9,6 +9,10 @@ use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
 use PHPUnit\Framework\TestCase;
 
+
+/**
+ * Exercises the discovery rollback plan builder test case for the Discovering component.
+ */
 final class DiscoveryRollbackPlanBuilderTest extends TestCase
 {
     public function testBuildReturnsNoEvidenceStatusWhenHistoryIsEmpty(): void
