@@ -56,7 +56,12 @@ if ($requireTestRuntime) {
     }
 }
 
-$composerBinary = trim((string) shell_exec('command -v composer 2>/dev/null'));
+$composerBinary = '';
+if (PHP_OS_FAMILY === 'Windows') {
+    $composerBinary = trim((string) shell_exec('where composer 2>NUL'));
+} else {
+    $composerBinary = trim((string) shell_exec('command -v composer 2>/dev/null'));
+}
 $addCheck(
     'composer_binary',
     $composerBinary !== '',

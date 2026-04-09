@@ -38,7 +38,7 @@
     },
     "scripts": {
         "test": "phpunit",
-        "lint:php": "find src tests -name '*.php' -print0 | xargs -0 -n1 php -l",
+        "lint:php": "php tools/lint_php.php",
         "validate:composer": "composer validate --strict",
         "verify:runtime-preflight": "php tools/runtime_preflight.php --require-vendor",
         "verify:console": "php bin/console list --raw",
