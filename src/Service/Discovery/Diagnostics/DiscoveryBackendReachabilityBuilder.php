@@ -59,6 +59,7 @@ final class DiscoveryBackendReachabilityBuilder
         $reachableProbeCount = 0;
         $failingProbeCount = 0;
         $skippedProbeCount = 0;
+        $failingProbeNames = [];
         $notes = [];
 
         foreach ($probes as $probe) {
@@ -74,13 +75,23 @@ final class DiscoveryBackendReachabilityBuilder
             }
 
             ++$failingProbeCount;
+            $failingProbeNames[] = $probe->name;
         }
 
         if ($performedProbeCount === 0) {
-            $notes[] = 'No shared-service or shared-database probe targets are active in the current discovery mode.';
+            $overallStatus = 'not_configured';
+            $recommendedAction = 'No shared backends are configured yet. Keep operating in local-only mode until at least one shared backend is configured.';
+            $notes[] = 'No shared backend probes were performed because every configured store remains in local-only mode.';
         } elseif ($failingProbeCount === 0) {
+            $overallStatus = 'healthy';
+            $recommendedAction = 'All configured shared backends responded successfully.';
             $notes[] = 'All performed backend reachability probes completed successfully.';
         } else {
+            $overallStatus = 'degraded';
+            $recommendedAction = sprintf(
+                'Review the failing backend reachability probes before relying on shared operation: %s.',
+                implode(', ', $failingProbeNames),
+            );
             $notes[] = sprintf('%d backend reachability probe(s) failed.', $failingProbeCount);
         }
 
@@ -90,7 +101,10 @@ final class DiscoveryBackendReachabilityBuilder
             reachableProbeCount: $reachableProbeCount,
             failingProbeCount: $failingProbeCount,
             skippedProbeCount: $skippedProbeCount,
+            overallStatus: $overallStatus,
+            recommendedAction: $recommendedAction,
             probes: $probes,
+            failingProbeNames: $failingProbeNames,
             notes: $notes,
         );
     }

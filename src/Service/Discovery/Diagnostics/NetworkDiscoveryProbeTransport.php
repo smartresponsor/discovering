@@ -109,8 +109,12 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
         ]);
 
         @file_get_contents($url, false, $context);
-        $responseHeaders = $http_response_header ?? [];
-        $statusLine = is_array($responseHeaders) && $responseHeaders !== [] ? (string) $responseHeaders[0] : '';
+        $responseHeaders = [];
+        if (isset($http_response_header) && is_array($http_response_header)) {
+            $responseHeaders = $http_response_header;
+        }
+
+        $statusLine = $responseHeaders !== [] ? (string) $responseHeaders[0] : '';
         if (preg_match('/\s(\d{3})\s/', $statusLine, $matches) === 1) {
             return ['statusCode' => (int) $matches[1]];
         }

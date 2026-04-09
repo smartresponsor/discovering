@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Tests\Unit\Discovery;
@@ -66,6 +67,11 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
 
             public function swapAlias(string $from, string $to): void
             {
+            }
+
+            public function getBackendName(): string
+            {
+                return 'in-memory';
             }
         };
 
