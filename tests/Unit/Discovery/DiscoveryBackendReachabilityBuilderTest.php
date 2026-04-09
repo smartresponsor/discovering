@@ -18,7 +18,7 @@ final class DiscoveryBackendReachabilityBuilderTest extends TestCase
     {
         $builder = new DiscoveryBackendReachabilityBuilder(
             transport: new class() implements DiscoveryProbeTransportInterface {
-                public function probeHttp(string $url, array $headers = []): array
+                public function probeHttp(string $baseUrl, ?string $apiKey = null): array
                 {
                     return ['reachable' => true, 'details' => ['HTTP 200']];
                 }
@@ -69,7 +69,7 @@ final class DiscoveryBackendReachabilityBuilderTest extends TestCase
     {
         $builder = new DiscoveryBackendReachabilityBuilder(
             transport: new class() implements DiscoveryProbeTransportInterface {
-                public function probeHttp(string $url, array $headers = []): array
+                public function probeHttp(string $baseUrl, ?string $apiKey = null): array
                 {
                     return ['reachable' => true, 'details' => ['HTTP 200']];
                 }
