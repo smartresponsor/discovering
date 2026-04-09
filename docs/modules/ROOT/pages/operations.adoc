@@ -1,0 +1,28 @@
+= Operations
+
+This page provides the Antora entry point for operational documentation.
+
+== Primary operational sources
+
+* `docs/discovery/OPERATIONAL_RUNBOOK_V1.md`
+* `docs/discovery/PLATFORM_DIAGNOSTICS_V1.md`
+* `docs/discovery/PLATFORM_PROBES_V1.md`
+* `docs/discovery/RATE_LIMITING_V1.md`
+* `docs/discovery/ROLLBACK_EXECUTION_V1.md`
+* `docs/discovery/SECURITY_BASELINE.md`
+* `docs/discovery/SECURITY_POSTURE_V1.md`
+* `docs/discovery/THREAT_MODEL_V1.md`
+
+== Operational scope
+
+The repository already contains meaningful operational material for:
+
+* runtime verification
+* diagnostics and backend probes
+* staged rebuild and rollback
+* evidence and state topology
+* rate limiting
+* security baseline and threat-model posture
+
+This Antora page is intentionally a wrapper and discovery point.
+It should remain lightweight while the detailed operational material stays in the Markdown source set.

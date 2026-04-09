@@ -1,0 +1,31 @@
+= Architecture
+
+This page is a thin Antora entry point for the repository's architecture material.
+It does not duplicate the full Markdown corpus.
+
+== Primary architecture sources in this repository
+
+* `ARCHITECTURE_MANIFEST.md`
+* `BOUNDING_MANIFEST.md`
+* `PRODUCT_MANIFEST.md`
+* `docs/discovery/SHARED_STATE_TOPOLOGY_V1.md`
+* `docs/discovery/STAGED_REBUILD_V1.md`
+* `docs/discovery/REBUILD_EVIDENCE_V1.md`
+* `docs/discovery/ROLLBACK_CLARITY_V1.md`
+
+== Current architectural shape
+
+Discovering is organized as a Symfony-oriented component with the following major contours:
+
+* discovery runtime and retrieval orchestration
+* indexing and staged rebuild support
+* source-family providers and repositories
+* operator and management surfaces
+* shared state, rate limiting, logging, and evidence stores
+
+The repository intentionally keeps `App\` as the only application namespace and does not introduce `/src/Domain/` or ports-and-adapters drift.
+
+== Documentation integration guidance
+
+The Antora layer should act as a stable narrative index for the external documentation aggregator.
+Detailed design notes and evolving implementation records remain in the repository Markdown sources listed above.

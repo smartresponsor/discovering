@@ -1,0 +1,10 @@
+name: discovering
+title: Discovering
+version: ~
+nav:
+  - modules/ROOT/nav.adoc
+start_page: ROOT:index.adoc
+asciidoc:
+  attributes:
+    page-component-title: Discovering
+    page-nav-title: Discovering
