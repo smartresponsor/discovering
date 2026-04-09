@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Discovery;
 
+use App\Service\Discovery\Http\DiscoveryRequestSurfacePolicy;
 use App\Service\Discovery\RateLimit\DiscoveryRateLimiter;
 use App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
@@ -26,6 +27,7 @@ final class DiscoveryRateLimiterTest extends DiscoveryTempFilesystemTestCase
     public function testQueryScopeExceedsConfiguredLimit(): void
     {
         $limiter = new DiscoveryRateLimiter(
+            new DiscoveryRequestSurfacePolicy(),
             new FileDiscoveryRateLimitStore($this->path),
             queryLimit: 2,
             queryWindowSeconds: 60,
@@ -55,6 +57,7 @@ final class DiscoveryRateLimiterTest extends DiscoveryTempFilesystemTestCase
     public function testManagementMutationScopeUsesDedicatedBucket(): void
     {
         $limiter = new DiscoveryRateLimiter(
+            new DiscoveryRequestSurfacePolicy(),
             new FileDiscoveryRateLimitStore($this->path),
             queryLimit: 5,
             queryWindowSeconds: 60,

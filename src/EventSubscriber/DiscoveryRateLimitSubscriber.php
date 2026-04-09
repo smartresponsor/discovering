@@ -6,6 +6,7 @@ namespace App\EventSubscriber;
 
 use App\Dto\Discovery\DiscoveryRateLimitDecision;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Service\Discovery\Http\DiscoveryRequestSurfacePolicy;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use App\Service\Discovery\RateLimit\DiscoveryRateLimiter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -24,6 +25,7 @@ final class DiscoveryRateLimitSubscriber implements EventSubscriberInterface
 
     public function __construct(
         private readonly DiscoveryRateLimiter $rateLimiter,
+        private readonly DiscoveryRequestSurfacePolicy $surfacePolicy,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
         private readonly DiscoveryOperationLogger $operationLogger,
     ) {
@@ -60,7 +62,7 @@ final class DiscoveryRateLimitSubscriber implements EventSubscriberInterface
 
         $this->operationLogger->recordHttp('discovery.rate_limit.denied', status: 'rate_limited', context: $decision->toArray());
 
-        if ($this->wantsJsonResponse($request->getPathInfo())) {
+        if ($this->surfacePolicy->wantsJsonResponse($request->getPathInfo())) {
             $event->setResponse($this->jsonResponseFactory->error(
                 code: 'discovery_rate_limited',
                 message: 'Discovery request rate limited.',
@@ -106,13 +108,5 @@ final class DiscoveryRateLimitSubscriber implements EventSubscriberInterface
         if ($decision->exceeded) {
             $response->headers->set('Retry-After', (string) $decision->retryAfterSeconds);
         }
-    }
-
-    private function wantsJsonResponse(string $path): bool
-    {
-        return str_starts_with($path, '/api/')
-            || $path === '/management/discovery/rebuild'
-            || str_ends_with($path, '/export')
-            || str_contains($path, '/inspect/');
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\RateLimit;
 
 use App\Dto\Discovery\DiscoveryRateLimitDecision;
+use App\Service\Discovery\Http\DiscoveryRequestSurfacePolicy;
 use Symfony\Component\HttpFoundation\Request;
 
 
@@ -14,6 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 final class DiscoveryRateLimiter
 {
     public function __construct(
+        private readonly DiscoveryRequestSurfacePolicy $surfacePolicy,
         private readonly DiscoveryRateLimitStoreInterface $store,
         private readonly int $queryLimit,
         private readonly int $queryWindowSeconds,
@@ -29,7 +31,7 @@ final class DiscoveryRateLimiter
      */
     public function consumeForRequest(Request $request): ?DiscoveryRateLimitDecision
     {
-        $scope = $this->resolveScope($request);
+        $scope = $this->surfacePolicy->resolveScope($request);
         if ($scope === null) {
             return null;
         }
@@ -53,56 +55,6 @@ final class DiscoveryRateLimiter
             retryAfterSeconds: $retryAfterSeconds,
             exceeded: $bucketState['count'] > $limit,
         );
-    }
-
-    private function resolveScope(Request $request): ?string
-    {
-        $path = $request->getPathInfo();
-
-        if ($this->isWritePath($request, $path)) {
-            return 'write';
-        }
-
-        if ($this->isManagementMutationPath($request, $path)) {
-            return 'management_mutation';
-        }
-
-        if ($this->isQueryPath($request, $path)) {
-            return 'query';
-        }
-
-        return null;
-    }
-
-    private function isQueryPath(Request $request, string $path): bool
-    {
-        if ($request->isMethod(Request::METHOD_GET) && ($path === '/api/discovery' || $path === '/api/v1/discovery')) {
-            return true;
-        }
-
-        return ($request->isMethod(Request::METHOD_GET) || $request->isMethod(Request::METHOD_POST))
-            && $path === '/discovery';
-    }
-
-    private function isWritePath(Request $request, string $path): bool
-    {
-        return $request->isMethod(Request::METHOD_POST)
-            && ($path === '/discovery/feedback' || $path === '/api/discovery/click' || $path === '/api/v1/discovery/click');
-    }
-
-    private function isManagementMutationPath(Request $request, string $path): bool
-    {
-        if (!str_starts_with($path, '/management/discovery')) {
-            return false;
-        }
-
-        if ($request->isMethod(Request::METHOD_POST)) {
-            return true;
-        }
-
-        $action = $request->query->get('action');
-
-        return is_string($action) && trim($action) !== '';
     }
 
     private function actorKey(Request $request, string $scope): string
