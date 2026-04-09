@@ -1,0 +1,23 @@
+= Install
+
+This page provides the Antora entry point for installability and runtime setup.
+Detailed procedural content remains in the repository Markdown sources.
+
+== Primary install and runtime sources
+
+* `README.md`
+* `docs/discovery/INSTALLABILITY_PROVING_V1.md`
+* `docs/discovery/CI_RUNTIME_BASELINE.md`
+* `composer.json`
+
+== Installability notes
+
+The repository is a Symfony-oriented PHP component and expects its runtime and QA posture to be driven through Composer, Symfony console entry points, and the repository verification scripts.
+
+The Antora producer surface intentionally avoids re-stating every command sequence from Markdown.
+Instead, it points the central documentation ecosystem at the existing hand-written installability sources.
+
+== Producer guidance
+
+If install steps evolve, update the Markdown source of truth first.
+Keep this Antora page as a stable entry page and not as a second, divergent installation manual.
