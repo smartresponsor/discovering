@@ -1,0 +1,61 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Contract\Discovery;
+
+use App\Tests\Functional\Discovery\DiscoveryHttpAssertionTrait;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+/**
+ * Provides the light discovery contract web test bootstrap for the Discovering component.
+ */
+abstract class AbstractDiscoveryContractWebTestCase extends WebTestCase
+{
+    use DiscoveryHttpAssertionTrait;
+
+    protected function tearDown(): void
+    {
+        self::ensureKernelShutdown();
+
+        while (restore_error_handler()) {
+        }
+
+        while (restore_exception_handler()) {
+        }
+
+        parent::tearDown();
+    }
+
+    /** @param array<string, string> $server */
+    protected function createDiscoveryClient(array $server = []): KernelBrowser
+    {
+        self::ensureKernelShutdown();
+
+        return static::createClient([], $server);
+    }
+
+    /** @return array<string, string> */
+    protected function managementTokenServer(): array
+    {
+        return [
+            'HTTP_X_DISCOVERY_MANAGEMENT_TOKEN' => $this->envValue('APP_DISCOVERY_MANAGEMENT_TOKEN'),
+        ];
+    }
+
+    /** @return array<string, string> */
+    protected function apiWriteTokenServer(): array
+    {
+        return [
+            'HTTP_X_DISCOVERY_API_WRITE_TOKEN' => $this->envValue('APP_DISCOVERY_API_WRITE_TOKEN'),
+        ];
+    }
+
+    private function envValue(string $key): string
+    {
+        $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+
+        return is_string($value) ? $value : '';
+    }
+}
