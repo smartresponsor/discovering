@@ -24,8 +24,5 @@
         <testsuite name="Behavioral">
             <directory>tests/Behavioral</directory>
         </testsuite>
-        <testsuite name="Discovering Test Suite">
-            <directory>tests</directory>
-        </testsuite>
     </testsuites>
 </phpunit>

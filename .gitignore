@@ -1,6 +1,51 @@
-/.env.local
-/.env.*.local
+# Composer
 /vendor/
-/var/
-/.phpunit.result.cache
+/report/
+/seed/generated/
+/var/local-billing/
+
+# Logs and caches
+/var/logs/
+/var/cache/
+/var/sessions/
+/build/
+/coverage/
+/allure-results/
+/allure-report/
+/test-results/
+/.deptrac.cache
+
+# PHPUnit
+.phpunit.result.cache
+/.phpunit.cache/
+
+# IDE and editors
+/.idea/
+/.vscode/
+*.iml
+*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker overrides
+/.docker/
+/docker-compose.override.yml
+/.env
+/.env.local
+/.env.test.local
 /config/reference.php
+
+# Node
+node_modules/
+**/node_modules/
+
+# AI
+/Domain/Ai/agent-trigger/worker/.dev.vars
+/Domain/Ai/agent-trigger/worker/.dev.vars.*
+!/Domain/Ai/agent-trigger/worker/.dev.vars.example
+
+docs/site/
+var/
+

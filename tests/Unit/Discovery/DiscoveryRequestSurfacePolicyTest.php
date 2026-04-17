@@ -8,10 +8,6 @@ use App\Service\Discovery\Http\DiscoveryRequestSurfacePolicy;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b0ac77d540366c141d14e49a6fb3353ed869440
 /**
  * Exercises the discovery request surface policy test case for the Discovering component.
  */

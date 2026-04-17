@@ -7,7 +7,6 @@ namespace App\Tests\Contract\Discovery;
 use App\Service\Discovery\Http\DiscoveryApiContract;
 use App\Tests\Functional\Discovery\AbstractDiscoveryWebTestCase;
 
-
 /**
  * Exercises the discovery management export contract test case for the Discovering component.
  */
@@ -32,13 +31,12 @@ final class DiscoveryManagementExportContractTest extends AbstractDiscoveryWebTe
 
     public function testOperationsExportRespectsEnvelopeContract(): void
     {
-        $queryClient = $this->createDiscoveryClient();
-        $queryClient->request('GET', '/api/v1/discovery', [
+        $client = $this->createDiscoveryClient();
+        $client->request('GET', '/api/v1/discovery', [
             'query' => 'governance',
             'resource' => 'briefing',
         ]);
 
-        $client = $this->createDiscoveryClient($this->managementTokenServer());
         $client->request('GET', '/management/discovery/operations/export', [], [], $this->managementTokenServer());
 
         self::assertResponseIsSuccessful();
@@ -65,5 +63,4 @@ final class DiscoveryManagementExportContractTest extends AbstractDiscoveryWebTe
         self::assertArrayHasKey('recommendedAction', $payload['data']);
         self::assertArrayHasKey('probes', $payload['data']);
     }
-
 }

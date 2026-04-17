@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Diagnostics;
 
 use PDO;
-use Throwable;
-
 
 /**
  * Provides the network discovery probe transport capability within the discovery component.
@@ -24,7 +22,7 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
     public function probeHttp(string $baseUrl, ?string $apiKey = null): array
     {
         $base = rtrim(trim($baseUrl), '/');
-        if ($base === '') {
+        if ('' === $base) {
             return [
                 'reachable' => false,
                 'details' => ['HTTP probe requires a non-empty base URL.'],
@@ -34,7 +32,7 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
         $details = [];
 
         foreach (['/health', '/version'] as $path) {
-            $result = $this->request($base . $path, $apiKey);
+            $result = $this->request($base.$path, $apiKey);
             $details[] = sprintf('%s => HTTP %d', $path, $result['statusCode']);
 
             if ($result['statusCode'] >= 200 && $result['statusCode'] < 300) {
@@ -58,7 +56,7 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
      */
     public function probePdo(string $dsn, ?string $user = null, ?string $password = null): array
     {
-        if (trim($dsn) === '') {
+        if ('' === trim($dsn)) {
             return [
                 'reachable' => false,
                 'details' => ['PDO probe requires a non-empty DSN.'],
@@ -66,19 +64,19 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
         }
 
         try {
-            $pdo = new PDO($dsn, $user, $password, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_TIMEOUT => 2,
+            $pdo = new \PDO($dsn, $user, $password, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                \PDO::ATTR_TIMEOUT => 2,
             ]);
             $statement = $pdo->query('SELECT 1');
-            $value = $statement === false ? null : $statement->fetchColumn();
+            $value = false === $statement ? null : $statement->fetchColumn();
 
             return [
                 'reachable' => true,
-                'details' => [sprintf('PDO probe returned %s.', $value === false || $value === null ? 'no scalar value' : (string) $value)],
+                'details' => [sprintf('PDO probe returned %s.', false === $value || null === $value ? 'no scalar value' : (string) $value)],
             ];
-        } catch (Throwable $throwable) {
+        } catch (\Throwable $throwable) {
             return [
                 'reachable' => false,
                 'details' => [sprintf('%s: %s', $throwable::class, $throwable->getMessage())],
@@ -95,8 +93,8 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
             'Accept: application/json',
         ];
 
-        if ($apiKey !== null && trim($apiKey) !== '') {
-            $headers[] = 'Authorization: Bearer ' . trim($apiKey);
+        if (null !== $apiKey && '' !== trim($apiKey)) {
+            $headers[] = 'Authorization: Bearer '.trim($apiKey);
         }
 
         $context = stream_context_create([
@@ -109,13 +107,11 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
         ]);
 
         @file_get_contents($url, false, $context);
-        $responseHeaders = [];
-        if (isset($http_response_header) && is_array($http_response_header)) {
-            $responseHeaders = $http_response_header;
-        }
+        global $http_response_header;
+        $responseHeaders = is_array($http_response_header) ? $http_response_header : [];
 
-        $statusLine = $responseHeaders !== [] ? (string) $responseHeaders[0] : '';
-        if (preg_match('/\s(\d{3})\s/', $statusLine, $matches) === 1) {
+        $statusLine = [] !== $responseHeaders ? (string) $responseHeaders[0] : '';
+        if (1 === preg_match('/\s(\d{3})\s/', $statusLine, $matches)) {
             return ['statusCode' => (int) $matches[1]];
         }
 

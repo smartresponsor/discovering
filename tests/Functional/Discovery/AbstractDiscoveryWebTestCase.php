@@ -8,22 +8,6 @@ use App\Dto\Discovery\ReindexRequest;
 use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
-
-use function array_filter;
-use function array_values;
-use function dirname;
-use function getenv;
-use function is_dir;
-use function is_file;
-use function is_string;
-use function json_decode;
-use function json_encode;
-use function mkdir;
-use function unlink;
-
-use const JSON_THROW_ON_ERROR;
-
 
 /**
  * Exercises the abstract discovery web test case test case for the Discovering component.
@@ -37,20 +21,35 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
         parent::setUp();
 
         self::ensureKernelShutdown();
-        self::bootKernel();
         $this->resetConfiguredDiscoveryStorage();
-        self::ensureKernelShutdown();
 
-        self::bootKernel();
-        $indexer = static::getContainer()->get(DiscoveryIndexerInterface::class);
+        $client = static::createClient();
+
+        /** @var DiscoveryIndexerInterface $indexer */
+        $indexer = $client->getContainer()->get(DiscoveryIndexerInterface::class);
         $indexer->rebuild(new ReindexRequest());
 
         self::ensureKernelShutdown();
     }
 
+    protected function tearDown(): void
+    {
+        self::ensureKernelShutdown();
+
+        while (\restore_error_handler()) {
+        }
+
+        while (\restore_exception_handler()) {
+        }
+
+        parent::tearDown();
+    }
+
     /** @param array<string, string> $server */
     protected function createDiscoveryClient(array $server = []): KernelBrowser
     {
+        self::ensureKernelShutdown();
+
         return static::createClient([], $server);
     }
 
@@ -80,12 +79,11 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
         ];
     }
 
-
     /** @return array<string, mixed> */
     protected function jsonResponsePayload(KernelBrowser $client): array
     {
         /** @var array<string, mixed> $payload */
-        $payload = json_decode((string) $client->getResponse()->getContent(), true, 512, JSON_THROW_ON_ERROR);
+        $payload = \json_decode((string) $client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR);
 
         return $payload;
     }
@@ -93,7 +91,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
     /** @param array<string, mixed> $payload */
     protected function jsonRequestBody(array $payload): string
     {
-        return json_encode($payload, JSON_THROW_ON_ERROR);
+        return \json_encode($payload, \JSON_THROW_ON_ERROR);
     }
 
     /** @return array<string, mixed> */
@@ -145,7 +143,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
     }
 
     /** @param array<string, mixed> $parameters
-     *  @return array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function managementMutationPayload(
         string $uri,
@@ -217,7 +215,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
     }
 
     /** @param array<string, mixed> $planPayload
-     *  @return array<string, mixed>
+     * @return array<string, mixed>
      */
     protected function executeRollbackPlanPayload(array $planPayload): array
     {
@@ -233,65 +231,64 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
 
     private function resetConfiguredDiscoveryStorage(): void
     {
-        $container = static::getContainer();
-        $parameterBag = $container->get('parameter_bag');
-        if (!$parameterBag instanceof ContainerBagInterface) {
+        $directory = $this->discoveryStorageRoot();
+        if (!\is_dir($directory)) {
+            \mkdir($directory, 0o777, true);
+
             return;
         }
 
-        foreach ($this->configuredResettablePaths($parameterBag) as $path) {
-            if (is_file($path)) {
-                unlink($path);
+        $items = \scandir($directory);
+        if (false === $items) {
+            return;
+        }
+
+        foreach ($items as $item) {
+            if ('.' === $item || '..' === $item) {
+                continue;
             }
+
+            $this->removePathRecursively($directory.'/'.$item);
         }
     }
 
-    /** @return list<string> */
-    private function configuredResettablePaths(ContainerBagInterface $parameterBag): array
+    private function discoveryStorageRoot(): string
     {
-        $paths = [
-            $this->stringParameter($parameterBag, 'app.discovery.default_sqlite_path'),
-            $this->stringParameter($parameterBag, 'app.discovery.default_feedback_path'),
-        ];
-
-        if ('file' === $this->stringParameter($parameterBag, 'app.discovery.default_operation_log_backend')) {
-            $paths[] = $this->stringParameter($parameterBag, 'app.discovery.default_operation_log_path');
-        }
-
-        if ('file' === $this->stringParameter($parameterBag, 'app.discovery.default_rebuild_evidence_backend')) {
-            $paths[] = $this->stringParameter($parameterBag, 'app.discovery.default_rebuild_evidence_path');
-        }
-
-        if ('file' === $this->stringParameter($parameterBag, 'app.discovery.default_libsource_event_log_backend')) {
-            $paths[] = $this->stringParameter($parameterBag, 'app.discovery.default_libsource_event_log_path');
-        }
-
-        if ('file' === $this->stringParameter($parameterBag, 'app.discovery.default_rate_limit_backend')) {
-            $paths[] = $this->stringParameter($parameterBag, 'app.discovery.default_rate_limit_store_path');
-        }
-
-        $directory = dirname(__DIR__, 3) . '/var/discovery';
-        if (!is_dir($directory)) {
-            mkdir($directory, 0o777, true);
-        }
-
-        /** @var list<string> $resolved */
-        $resolved = array_values(array_filter($paths, static fn (string $path): bool => '' !== $path));
-
-        return $resolved;
+        return \dirname(__DIR__, 3).'/var/discovery';
     }
 
-    private function stringParameter(ContainerBagInterface $parameterBag, string $name): string
+    private function removePathRecursively(string $path): void
     {
-        $value = $parameterBag->has($name) ? $parameterBag->get($name) : '';
+        clearstatcache(true, $path);
 
-        return is_string($value) ? $value : '';
+        if (\is_dir($path)) {
+            $items = \scandir($path);
+            if (false === $items) {
+                return;
+            }
+
+            foreach ($items as $item) {
+                if ('.' === $item || '..' === $item) {
+                    continue;
+                }
+
+                $this->removePathRecursively($path.'/'.$item);
+            }
+
+            @rmdir($path);
+
+            return;
+        }
+
+        if (\is_file($path)) {
+            @\unlink($path);
+        }
     }
 
     private function envValue(string $key): string
     {
-        $value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+        $value = $_ENV[$key] ?? $_SERVER[$key] ?? \getenv($key);
 
-        return is_string($value) ? $value : '';
+        return \is_string($value) ? $value : '';
     }
 }

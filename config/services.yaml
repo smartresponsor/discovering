@@ -283,5 +283,7 @@ services:
 
   App\EventSubscriber\DiscoveryEndpointSecuritySubscriber:
     arguments:
+      $requestSurfacePolicy: '@App\Service\Discovery\Http\DiscoveryRequestSurfacePolicy'
       $managementToken: '%env(APP_DISCOVERY_MANAGEMENT_TOKEN)%'
       $apiWriteToken: '%env(APP_DISCOVERY_API_WRITE_TOKEN)%'
+      $jsonResponseFactory: '@App\Service\Discovery\Http\DiscoveryJsonResponseFactory'

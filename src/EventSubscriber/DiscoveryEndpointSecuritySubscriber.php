@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\EventSubscriber;
 
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Service\Discovery\Http\DiscoveryRequestSurfacePolicy;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -30,6 +31,7 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
     ];
 
     public function __construct(
+        private readonly DiscoveryRequestSurfacePolicy $requestSurfacePolicy,
         private readonly string $managementToken,
         private readonly string $apiWriteToken,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
@@ -53,7 +55,7 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        if ($this->isProtectedManagementPath($path) && !$this->hasExpectedToken($request, 'X-Discovery-Management-Token', $this->managementToken)) {
+        if ($this->requestSurfacePolicy->isProtectedManagementPath($path) && !$this->hasExpectedToken($request, 'X-Discovery-Management-Token', $this->managementToken)) {
             $event->setResponse($this->jsonResponseFactory->error(
                 code: 'discovery_management_forbidden',
                 message: 'Forbidden discovery management request.',
@@ -63,7 +65,7 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
             return;
         }
 
-        if ($this->isProtectedMutationPath($request, $path)) {
+        if ($this->requestSurfacePolicy->isProtectedMutationPath($request, $path)) {
             if (!$this->hasAcceptedMutationContentType($request)) {
                 $event->setResponse($this->jsonResponseFactory->error(
                     code: 'discovery_mutation_unsupported_content_type',
@@ -88,7 +90,7 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
             }
         }
 
-        if ($this->isProtectedApiWritePath($request, $path) && !$this->hasExpectedToken($request, 'X-Discovery-Api-Write-Token', $this->apiWriteToken)) {
+        if ($this->requestSurfacePolicy->isProtectedApiWritePath($request, $path) && !$this->hasExpectedToken($request, 'X-Discovery-Api-Write-Token', $this->apiWriteToken)) {
             $event->setResponse($this->jsonResponseFactory->error(
                 code: 'discovery_api_write_unauthorized',
                 message: 'Unauthorized discovery API write request.',
@@ -97,35 +99,9 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
         }
     }
 
-    private function isProtectedManagementPath(string $path): bool
-    {
-        return str_starts_with($path, '/management/discovery');
-    }
-
-    private function isProtectedManagementMutationPath(Request $request, string $path): bool
-    {
-        if (!$request->isMethod(Request::METHOD_POST)) {
-            return false;
-        }
-
-        return $this->isProtectedManagementPath($path);
-    }
-
-    private function isProtectedApiWritePath(Request $request, string $path): bool
-    {
-        return $request->isMethod(Request::METHOD_POST)
-            && ($path === '/api/discovery/click' || $path === '/api/v1/discovery/click');
-    }
-
-    private function isProtectedMutationPath(Request $request, string $path): bool
-    {
-        return $this->isProtectedApiWritePath($request, $path)
-            || $this->isProtectedManagementMutationPath($request, $path);
-    }
-
     private function hasExpectedToken(Request $request, string $headerName, string $expectedToken): bool
     {
-        if ($expectedToken === '') {
+        if ('' === $expectedToken) {
             return false;
         }
 
@@ -137,12 +113,12 @@ final class DiscoveryEndpointSecuritySubscriber implements EventSubscriberInterf
     private function hasAcceptedMutationContentType(Request $request): bool
     {
         $contentType = strtolower(trim((string) $request->headers->get('Content-Type', '')));
-        if ($contentType === '') {
+        if ('' === $contentType) {
             return false;
         }
 
         foreach (self::ACCEPTED_MUTATION_CONTENT_TYPES as $acceptedType) {
-            if ($contentType === $acceptedType || str_starts_with($contentType, $acceptedType . ';')) {
+            if ($contentType === $acceptedType || str_starts_with($contentType, $acceptedType.';')) {
                 return true;
             }
         }

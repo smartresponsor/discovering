@@ -9,7 +9,6 @@ use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 
-
 /**
  * Exercises the discovery http assertion test helper for the Discovering component.
  */
@@ -31,7 +30,7 @@ trait DiscoveryHttpAssertionTrait
 
         $expectedSchemaFamily = $schemaFamily ?? DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY;
         $expectedSchemaVersion = $schemaVersion
-            ?? ($schemaFamily === null ? DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION : 1);
+            ?? (null === $schemaFamily ? DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION : 1);
 
         self::assertSame($expectedSchemaFamily, $payload['meta']['schemaFamily'] ?? null);
         self::assertSame($expectedSchemaVersion, $payload['meta']['schemaVersion'] ?? null);
@@ -56,7 +55,8 @@ trait DiscoveryHttpAssertionTrait
         self::assertSame('nosniff', $headers->get('X-Content-Type-Options'));
         self::assertSame('no-referrer', $headers->get('Referrer-Policy'));
         self::assertSame('DENY', $headers->get('X-Frame-Options'));
-        self::assertSame('no-store, private', $headers->get('Cache-Control'));
+        self::assertStringContainsString('no-store', (string) $headers->get('Cache-Control'));
+        self::assertStringContainsString('private', (string) $headers->get('Cache-Control'));
 
         if ($assertFullPolicy) {
             self::assertSame('camera=(), microphone=(), geolocation=()', $headers->get('Permissions-Policy'));

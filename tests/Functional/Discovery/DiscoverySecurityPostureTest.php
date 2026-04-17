@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Discovery;
 
-
 /**
  * Exercises the discovery security posture test case for the Discovering component.
  */
@@ -43,10 +42,7 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $headers = $client->getResponse()->headers;
-        self::assertSame('nosniff', $headers->get('X-Content-Type-Options'));
-        self::assertSame('DENY', $headers->get('X-Frame-Options'));
-        self::assertSame('no-store, private', $headers->get('Cache-Control'));
+        $this->assertDiscoverySecurityHeaders($client->getResponse(), assertFullPolicy: false);
     }
 
     public function testUnauthorizedApiWriteStillCarriesResponseSecurityHeaders(): void

@@ -6,11 +6,10 @@ namespace App\Tests\Unit\Discovery;
 
 use App\Service\Discovery\Playbook\PlaybookManagementSurfaceBuilder;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the playbook management surface builder test case for the Discovering component.
@@ -46,10 +45,7 @@ final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystem
             new DiscoverySourceRecordJsonFileEncoder(),
         );
 
-        $surface = (new PlaybookManagementSurfaceBuilder(
-            $repository,
-            new DirectoryBackedFamilyManagementSurfaceBuilder(),
-        ))->build();
+        $surface = (new PlaybookManagementSurfaceBuilder($repository, new DirectoryBackedFamilyManagementSurfaceBuilder()))->build();
 
         self::assertSame('playbook-file-source-provider', $surface->sourceName);
         self::assertSame($repository->getStorageDirectoryPath(), $surface->storageDirectoryPath);

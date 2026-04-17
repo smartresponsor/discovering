@@ -15,7 +15,6 @@ use App\Service\Discovery\DiscoveryService;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
-
 /**
  * Exercises the discovery service test case for the Discovering component.
  */
@@ -28,7 +27,7 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
 
-        $adapter = new class() implements DiscoveryAdapterInterface {
+        $adapter = new class implements DiscoveryAdapterInterface {
             public function upsert(string $resource, string $id, array $document): void
             {
             }
@@ -71,7 +70,7 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
 
             public function getBackendName(): string
             {
-                return 'in-memory';
+                return 'sqlite-fts5';
             }
         };
 
