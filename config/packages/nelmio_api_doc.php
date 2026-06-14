@@ -21,7 +21,7 @@ return static function (ContainerConfigurator $container): void {
         'areas' => [
             'default' => false,
             'public_discovery' => [
-                'path_patterns' => ['^/api/discovery', '^/api/v1/discovery'],
+                'path_patterns' => ['^/api/discovery', '^/api/discovery'],
             ],
             'management_discovery' => [
                 'path_patterns' => ['^/management/discovery'],

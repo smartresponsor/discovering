@@ -13,7 +13,7 @@ This document describes the first executable rollback primitive for the Discover
 
 ## Execution primitives
 
-- `discovering:rollback:execute --current=<evidence> --target=<evidence>`
+- `app:discovery:rollback:execute --current=<evidence> --target=<evidence>`
 - `POST /management/discovery/rollback/execute`
 
 ## Safety posture

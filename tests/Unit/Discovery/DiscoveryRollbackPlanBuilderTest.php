@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Discovery;
 
 use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery rollback plan builder test case for the Discovering component.
@@ -71,7 +70,7 @@ final class DiscoveryRollbackPlanBuilderTest extends TestCase
         self::assertSame('reb-previous', $plan->previousEvidenceId);
         self::assertSame('discovering__reb_current', $plan->currentPhysicalIndex);
         self::assertSame('discovering__reb_previous', $plan->rollbackTargetPhysicalIndex);
-        self::assertSame('discovering:rollback:execute --current=reb-current --target=reb-previous', $plan->recommendedCommand);
+        self::assertSame('app:discovery:rollback:execute --current=reb-current --target=reb-previous', $plan->recommendedCommand);
     }
 
     public function testBuildReturnsNoPreviousCandidateWhenOnlyOneGlobalRebuildExists(): void

@@ -39,23 +39,23 @@ final class DiscoveryPlatformProbeCommand extends Command
         $output->writeln('Probes:');
 
         foreach ($report->probes as $probe) {
-            $output->writeln(sprintf('- %s [%s] %s => %s', $probe->name, $probe->backend, $probe->target, $probe->status));
+            $output->writeln(sprintf('- %s [%s] %s => %s', $probe->nameEntity, $probe->backend, $probe->target, $probe->status));
             foreach ($probe->details as $detail) {
                 $output->writeln(sprintf('  · %s', $detail));
             }
         }
 
-        if ($report->failingProbeNames !== []) {
+        if ([] !== $report->failingProbeNames) {
             $output->writeln(sprintf('Failing probes: %s', implode(', ', $report->failingProbeNames)));
         }
 
-        if ($report->notes !== []) {
+        if ([] !== $report->notes) {
             $output->writeln('Notes:');
             foreach ($report->notes as $note) {
                 $output->writeln(sprintf('- %s', $note));
             }
         }
 
-        return $report->failingProbeCount === 0 ? Command::SUCCESS : Command::FAILURE;
+        return 0 === $report->failingProbeCount ? Command::SUCCESS : Command::FAILURE;
     }
 }

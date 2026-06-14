@@ -8,17 +8,15 @@ use App\Dto\Discovery\LibsourceEventLogQuery;
 use App\Dto\Discovery\LibsourceOperatorEvent;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-
 /**
  * Handles management HTTP endpoints for the discovery libsource log management surface.
  */
-final class DiscoveryLibsourceLogManagementController extends AbstractController
+final class DiscoveryLibsourceLogManagementController
 {
     public function __construct(
         private readonly LibsourceEventLogSurfaceBuilder $surfaceBuilder,
@@ -30,13 +28,28 @@ final class DiscoveryLibsourceLogManagementController extends AbstractController
      * Handles the index endpoint for the discovery libsource log management HTTP surface.
      */
     #[Route('/management/discovery/libsource/log', name: 'app_management_discovery_libsource_log', methods: ['GET'])]
-    public function index(Request $request): Response
+    /**
+     * @return Response|array<string, mixed>
+     */
+    public function index(Request $request): Response|array
     {
         $query = $this->createQuery($request);
 
-        return $this->render('management/discovery/libsource_log.html.twig', [
-            'surface' => $this->surfaceBuilder->build($query),
-        ]);
+        return [
+            '_view' => [
+                'surface' => 'discovery',
+                'operation' => 'libsource-log',
+                'component' => 'Discovering',
+                'intent' => 'management',
+            ],
+            'data' => [
+                'surface' => $this->surfaceBuilder->build($query),
+            ],
+            'meta' => [
+                'source_controller' => self::class,
+                'legacy_template' => 'management/discovery/libsource_log.html.twig',
+            ],
+        ];
     }
 
     /**
@@ -76,13 +89,13 @@ final class DiscoveryLibsourceLogManagementController extends AbstractController
         $preset = $request->query->get('preset');
         $search = $request->query->get('search');
         $level = $request->query->get('level');
-        $page = (int) ($request->query->get('page', 1));
-        $perPage = (int) ($request->query->get('perPage', 10));
+        $page = (int) $request->query->get('page', 1);
+        $perPage = (int) $request->query->get('perPage', 10);
 
         return new LibsourceEventLogQuery(
-            preset: is_string($preset) && $preset !== '' ? $preset : null,
-            search: is_string($search) && $search !== '' ? $search : null,
-            level: is_string($level) && $level !== '' ? $level : null,
+            preset: is_string($preset) && '' !== $preset ? $preset : null,
+            search: is_string($search) && '' !== $search ? $search : null,
+            level: is_string($level) && '' !== $level ? $level : null,
             page: $page > 0 ? $page : 1,
             perPage: $perPage > 0 ? $perPage : 10,
         );

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Rebuild;
 
 use App\Dto\Discovery\DiscoveryRebuildSummary;
-
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 
 /**
  * Provides the file discovery rebuild evidence store capability within the discovery component.
@@ -52,7 +52,7 @@ final class FileDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidenc
         }
 
         $payload = file_get_contents($this->path);
-        if (!is_string($payload) || $payload === '') {
+        if (!is_string($payload) || '' === $payload) {
             return [];
         }
 

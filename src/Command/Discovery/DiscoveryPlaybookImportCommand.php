@@ -38,8 +38,9 @@ final class DiscoveryPlaybookImportCommand extends Command
     {
         $inputPath = $input->getArgument('inputPath');
 
-        if (!is_string($inputPath) || $inputPath === '') {
+        if (!is_string($inputPath) || '' === $inputPath) {
             $output->writeln('Input path is required.');
+
             return Command::INVALID;
         }
 
@@ -47,6 +48,7 @@ final class DiscoveryPlaybookImportCommand extends Command
             $importedCount = $this->repository->importFile($inputPath);
         } catch (\Throwable $e) {
             $output->writeln(sprintf('Failed to import playbook records: %s', $e->getMessage()));
+
             return Command::FAILURE;
         }
 

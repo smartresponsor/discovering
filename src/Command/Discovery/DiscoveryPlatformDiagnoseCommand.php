@@ -44,12 +44,12 @@ final class DiscoveryPlatformDiagnoseCommand extends Command
         $output->writeln(sprintf('Recommended action: %s', $diagnostics->recommendedAction));
 
         $output->writeln('Store backends:');
-        foreach ($diagnostics->storeBackends as $name => $backend) {
-            $output->writeln(sprintf('- %s: %s', $name, $backend));
+        foreach ($diagnostics->storeBackends as $nameEntity => $backend) {
+            $output->writeln(sprintf('- %s: %s', $nameEntity, $backend));
         }
 
         $output->writeln('Blocking stores:');
-        if ($diagnostics->blockingStores === []) {
+        if ([] === $diagnostics->blockingStores) {
             $output->writeln('- none');
         } else {
             foreach ($diagnostics->blockingStores as $storeName) {
@@ -71,6 +71,6 @@ final class DiscoveryPlatformDiagnoseCommand extends Command
         $output->writeln(sprintf('- overall status: %s', $probeReport->overallStatus));
         $output->writeln(sprintf('- recommended action: %s', $probeReport->recommendedAction));
 
-        return $probeReport->failingProbeCount === 0 ? Command::SUCCESS : Command::FAILURE;
+        return 0 === $probeReport->failingProbeCount ? Command::SUCCESS : Command::FAILURE;
     }
 }

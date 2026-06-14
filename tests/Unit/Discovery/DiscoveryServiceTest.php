@@ -6,13 +6,14 @@ namespace App\Tests\Unit\Discovery;
 
 use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
-use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryHighlightingService;
 use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\DiscoveryModePresetService;
 use App\Service\Discovery\DiscoveryScoringService;
 use App\Service\Discovery\DiscoveryService;
+use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -22,8 +23,8 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItBuildsRankedHitsWithFeedbackAwareBoosting(): void
     {
-        $path = $this->createTempFilePath('discovering-service-feedback-', '.sqlite');
-        $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
+        $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
 
@@ -70,7 +71,7 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
 
             public function getBackendName(): string
             {
-                return 'sqlite-fts5';
+                return 'behavioral-fixture';
             }
         };
 
@@ -85,12 +86,10 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
             mode: DiscoveryMode::GOVERNANCE,
         ));
 
-        self::assertSame(1, $result->total);
+        self::assertSame(2, $result->total);
         self::assertSame('briefing-2', $result->hits[0]->id);
         self::assertSame(2, $result->hits[0]->feedbackCount);
         self::assertGreaterThan(0.0, $result->hits[0]->feedbackBoost);
         self::assertContains('feedback boost 4.75', $result->hits[0]->matchReasons);
-
-        @unlink($path);
     }
 }

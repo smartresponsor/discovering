@@ -6,15 +6,12 @@ namespace App\Controller\Management;
 
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-
 
 /**
  * Handles management HTTP endpoints for the abstract directory backed family management surface.
  */
-abstract class AbstractDirectoryBackedFamilyManagementController extends AbstractController
+abstract class AbstractDirectoryBackedFamilyManagementController
 {
     public function __construct(private readonly DiscoveryJsonResponseFactory $jsonResponseFactory)
     {
@@ -23,17 +20,35 @@ abstract class AbstractDirectoryBackedFamilyManagementController extends Abstrac
     /**
      * @param list<object> $operatorEventTrail
      */
+    /**
+     * @return array<string, mixed>
+     */
     protected function renderDirectoryBackedFamilyManagement(
         string $template,
         object $surface,
         mixed $lastActionResult,
         array $operatorEventTrail,
-    ): Response {
-        return $this->render($template, [
-            'surface' => $surface,
-            'lastActionResult' => $lastActionResult,
-            'operatorEventTrail' => $operatorEventTrail,
-        ]);
+    ): array {
+        $operation = basename($template, '.html.twig');
+        $operation = str_replace('_', '-', $operation);
+
+        return [
+            '_view' => [
+                'surface' => 'discovery',
+                'operation' => $operation,
+                'component' => 'Discovering',
+                'intent' => 'management',
+            ],
+            'data' => [
+                'surface' => $surface,
+                'lastActionResult' => $lastActionResult,
+                'operatorEventTrail' => $operatorEventTrail,
+            ],
+            'meta' => [
+                'source_controller' => static::class,
+                'legacy_template' => $template,
+            ],
+        ];
     }
 
     /**

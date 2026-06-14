@@ -6,14 +6,13 @@ namespace App\ServiceInterface\Discovery\Source;
 
 use App\Dto\Discovery\DiscoverySourceRecord;
 
-
 /**
  * Defines the contract for the discovery source provider capability within the discovery component.
  */
 interface DiscoverySourceProviderInterface
 {
     /**
-     * Performs the get source name operation defined by this discovery contract.
+     * Performs the get source nameEntity operation defined by this discovery contract.
      */
     public function getSourceName(): string;
 

@@ -7,8 +7,7 @@ namespace App\Service\Discovery\Libsource;
 use App\Dto\Discovery\LibsourceDiagnosticEntry;
 use App\Dto\Discovery\LibsourceManagementActionResult;
 use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
-
+use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
 /**
  * Provides the libsource management action capability within the discovery component.

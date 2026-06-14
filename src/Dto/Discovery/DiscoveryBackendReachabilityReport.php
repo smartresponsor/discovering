@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery backend reachability report contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryBackendReachabilityReport
+final readonly class DiscoveryBackendReachabilityReport
 {
     /**
      * @param list<DiscoveryBackendProbeResult> $probes
-     * @param list<string> $failingProbeNames
-     * @param list<string> $notes
+     * @param list<string>                      $failingProbeNames
+     * @param list<string>                      $notes
      */
     public function __construct(
         public string $checkedAt,

@@ -7,8 +7,7 @@ namespace App\Service\Discovery\Libsource;
 use App\Dto\Discovery\LibsourceEventLogQuery;
 use App\Dto\Discovery\LibsourceEventLogSurface;
 use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
-
+use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
 /**
  * Builds the libsource event log surface output used by discovery management or diagnostics flows.
@@ -69,6 +68,7 @@ final class LibsourceEventLogSurfaceBuilder
 
     /**
      * @param list<LibsourceOperatorEvent> $events
+     *
      * @return list<string>
      */
     private function buildAvailableLevels(array $events): array
@@ -91,11 +91,11 @@ final class LibsourceEventLogSurfaceBuilder
             return false;
         }
 
-        if ($query->level !== null && $query->level !== '' && $event->level !== $query->level) {
+        if (null !== $query->level && '' !== $query->level && $event->level !== $query->level) {
             return false;
         }
 
-        if ($query->search === null || $query->search === '') {
+        if (null === $query->search || '' === $query->search) {
             return true;
         }
 
@@ -111,15 +111,15 @@ final class LibsourceEventLogSurfaceBuilder
 
     private function matchesPreset(LibsourceOperatorEvent $event, ?string $preset): bool
     {
-        if ($preset === null || $preset === '') {
+        if (null === $preset || '' === $preset) {
             return true;
         }
 
         return match ($preset) {
-            'warnings' => $event->level === 'warning',
-            'inspections' => $event->eventName === 'action:inspect',
+            'warnings' => 'warning' === $event->level,
+            'inspections' => 'action:inspect' === $event->eventName,
             'maintenance' => in_array($event->eventName, ['action:rebuild-coverage', 'action:clear-event-log'], true),
-            'audits' => $event->eventName === 'action:audit-alignment',
+            'audits' => 'action:audit-alignment' === $event->eventName,
             default => true,
         };
     }

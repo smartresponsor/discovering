@@ -1,17 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery query contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryQuery
+final readonly class DiscoveryQuery
 {
     /**
      * @param array<string, scalar|null> $filters
-     * @param array<string, float|int> $resourceWeights
+     * @param array<string, float|int>   $resourceWeights
      */
     public function __construct(
         public string $query = '',
@@ -39,7 +39,6 @@ final class DiscoveryQuery
     }
 
     /**
-     * @param mixed $payload
      * @return array<string, float>
      */
     private static function normalizeResourceWeights(mixed $payload): array

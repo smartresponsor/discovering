@@ -7,18 +7,16 @@ namespace App\Controller\Management;
 use App\Dto\Discovery\ReindexRequest;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 
-
 /**
  * Handles management HTTP endpoints for the discovery management surface.
  */
-final class DiscoveryManagementController extends AbstractController
+final class DiscoveryManagementController
 {
     public function __construct(
         private readonly DiscoveryIndexerInterface $discoveryIndexer,
@@ -35,7 +33,7 @@ final class DiscoveryManagementController extends AbstractController
     public function rebuild(Request $request): JsonResponse
     {
         $requestedDeploymentMode = trim((string) $request->request->get('deploymentMode', $request->query->get('deploymentMode', 'auto')));
-        if ($requestedDeploymentMode === '') {
+        if ('' === $requestedDeploymentMode) {
             $requestedDeploymentMode = 'auto';
         }
 

@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\Source\Repository;
 
-
 /**
  * Provides briefing file discovery source record access for discovery source and management workflows.
  */
 final class BriefingFileDiscoverySourceRecordRepository extends AbstractDirectoryBackedDiscoverySourceRecordRepository
 {
     /**
-     * Returns the source name value exposed by this service.
+     * Returns the source nameEntity value exposed by this service.
      */
     public function getSourceName(): string
     {
@@ -31,7 +30,7 @@ final class BriefingFileDiscoverySourceRecordRepository extends AbstractDirector
      */
     public function getStorageDirectoryPath(): string
     {
-        return $this->getProjectDir() . '/resources/discovery/briefings';
+        return $this->getProjectDir().'/resources/discovery/briefings';
     }
 
     /**
@@ -39,7 +38,7 @@ final class BriefingFileDiscoverySourceRecordRepository extends AbstractDirector
      */
     public function getStoragePath(): string
     {
-        return $this->getStorageDirectoryPath() . '/briefing_source_records.json';
+        return $this->getStorageDirectoryPath().'/briefing_source_records.json';
     }
 
     /**
@@ -47,6 +46,6 @@ final class BriefingFileDiscoverySourceRecordRepository extends AbstractDirector
      */
     public function getLegacyStoragePath(): string
     {
-        return $this->getProjectDir() . '/resources/discovery/briefing_source_records.json';
+        return $this->getProjectDir().'/resources/discovery/briefing_source_records.json';
     }
 }

@@ -1,3 +1,21 @@
-# Management Controller Manifest
+# Discovery management controllers
 
-This area owns operator-facing management controllers and shared controller helpers. Route-owning family controllers remain explicit Symfony controllers, while reusable render/export mechanics are centralized to reduce duplication across live source families.
+This directory contains operator-facing management controllers.
+
+## Current controllers
+
+- `DiscoveryOverviewManagementController`
+- `DiscoveryManagementController`
+- `DiscoveryLibsourceManagementController`
+- `DiscoveryLibsourceLogManagementController`
+- `DiscoveryPlaybookManagementController`
+- `DiscoveryBriefingManagementController`
+- `AbstractDirectoryBackedFamilyManagementController`
+
+## Rules
+
+- Concrete management controller class names should end with `ManagementController`.
+- Management route names should use the `app_management_discovery_*` prefix.
+- Management route paths should stay under `/management/discovery`.
+- Management controllers should render templates under `templates/management/discovery/`.
+- Shared abstract controller primitives may omit the `ManagementController` suffix only when they are abstract support classes.

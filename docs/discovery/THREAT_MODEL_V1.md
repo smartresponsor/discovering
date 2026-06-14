@@ -4,8 +4,8 @@
 This document covers the current `Discovering` HTTP surfaces and operator flows:
 
 - public discovery UI: `/discovery`
-- public discovery API: `/api/discovery`, `/api/v1/discovery`
-- discovery feedback write API: `/api/discovery/click`, `/api/v1/discovery/click`
+- public discovery API: `/api/discovery`, `/api/discovery`
+- discovery feedback write API: `/api/discovery/click`, `/api/discovery/click`
 - discovery management surfaces: `/management/discovery*`
 - local/operator rebuild and export flows
 

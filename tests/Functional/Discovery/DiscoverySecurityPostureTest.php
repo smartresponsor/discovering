@@ -25,7 +25,7 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
     public function testVersionedDiscoveryApiCarriesResponseSecurityHeaders(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/api/v1/discovery', [
+        $client->request('GET', '/api/discovery', [
             'query' => 'governance',
             'resource' => 'briefing',
         ]);
@@ -42,13 +42,16 @@ final class DiscoverySecurityPostureTest extends AbstractDiscoveryWebTestCase
 
         self::assertResponseIsSuccessful();
 
-        $this->assertDiscoverySecurityHeaders($client->getResponse(), assertFullPolicy: false);
+        $headers = $client->getResponse()->headers;
+        self::assertSame('nosniff', $headers->get('X-Content-Type-Options'));
+        self::assertSame('DENY', $headers->get('X-Frame-Options'));
+        self::assertSame('no-store, private', $headers->get('Cache-Control'));
     }
 
     public function testUnauthorizedApiWriteStillCarriesResponseSecurityHeaders(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('POST', '/api/v1/discovery/click', [], [], ['CONTENT_TYPE' => 'application/json'], $this->jsonRequestBody($this->discoveryClickPayload()));
+        $client->request('POST', '/api/discovery/click', [], [], ['CONTENT_TYPE' => 'application/json'], $this->jsonRequestBody($this->discoveryClickPayload()));
 
         self::assertResponseStatusCodeSame(401);
 

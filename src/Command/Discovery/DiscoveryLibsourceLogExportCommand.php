@@ -43,9 +43,9 @@ final class DiscoveryLibsourceLogExportCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $surface = $this->surfaceBuilder->build(new LibsourceEventLogQuery(
-            preset: (($input->getOption('preset') ?: null)),
-            search: (($input->getOption('search') ?: null)),
-            level: (($input->getOption('level') ?: null)),
+            preset: ($input->getOption('preset') ?: null),
+            search: ($input->getOption('search') ?: null),
+            level: ($input->getOption('level') ?: null),
             page: max(1, (int) $input->getOption('page')),
             perPage: max(1, (int) $input->getOption('per-page')),
         ));

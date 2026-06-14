@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery state topology contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryStateTopology
+final readonly class DiscoveryStateTopology
 {
     /**
      * @param list<DiscoveryStateStoreDescriptor> $stores
-     * @param list<string> $notes
+     * @param list<string>                        $notes
      */
     public function __construct(
         public string $localStateRoot,

@@ -15,7 +15,7 @@
 
 ### Access control
 - `/management/discovery*` requires `X-Discovery-Management-Token`
-- `POST /api/discovery/click` and `POST /api/v1/discovery/click` require `X-Discovery-Api-Write-Token`
+- `POST /api/discovery/click` and `POST /api/discovery/click` require `X-Discovery-Api-Write-Token`
 - read-only discovery queries remain publicly callable by design
 
 ### Response hardening

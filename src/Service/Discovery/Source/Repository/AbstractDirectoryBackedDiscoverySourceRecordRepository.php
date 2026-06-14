@@ -7,7 +7,7 @@ namespace App\Service\Discovery\Source\Repository;
 use App\Dto\Discovery\DiscoverySourceRecord;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-
+use App\ServiceInterface\Discovery\Source\Repository\DiscoverySourceRecordRepositoryInterface;
 
 /**
  * Provides abstract directory backed discovery source record access for discovery source and management workflows.
@@ -43,7 +43,7 @@ abstract class AbstractDirectoryBackedDiscoverySourceRecordRepository implements
         $directoryPath = $this->getStorageDirectoryPath();
 
         if (is_dir($directoryPath)) {
-            $matches = glob($directoryPath . '/*.json');
+            $matches = glob($directoryPath.'/*.json');
             $paths = is_array($matches) ? array_values(array_filter($matches, 'is_string')) : [];
             sort($paths);
 

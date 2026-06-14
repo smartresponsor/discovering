@@ -7,10 +7,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Dto\Discovery\DiscoveryRebuildSummary;
 use App\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore;
 use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
+use App\Service\Discovery\Rebuild\DoctrineDiscoveryRebuildEvidenceStore;
 use App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
-use App\Service\Discovery\Rebuild\PdoDiscoveryRebuildEvidenceStore;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the configurable discovery rebuild evidence store test case for the Discovering component.
@@ -20,11 +20,11 @@ final class ConfigurableDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempF
     public function testSelectsFileBackendWhenConfigured(): void
     {
         $path = $this->createTempFilePath('discovering-rebuild-evidence-', '.json');
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $store = new ConfigurableDiscoveryRebuildEvidenceStore(
             new FileDiscoveryRebuildEvidenceStore($path, new DiscoveryRebuildEvidenceJsonSerializer()),
-            new PdoDiscoveryRebuildEvidenceStore('', null, null, 'discovery_rebuild_evidence'),
+            new DoctrineDiscoveryRebuildEvidenceStore($entityManager),
             backend: 'file',
-            pdoDsn: '',
         );
 
         $store->append(new DiscoveryRebuildSummary('ev-1', 'global', 'full', 'sqlite', 'in_place', false, '2026-04-03T18:00:00+00:00', '2026-04-03T18:00:05+00:00', 1, 1, 0));
@@ -37,11 +37,11 @@ final class ConfigurableDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempF
     public function testRejectsUnknownBackend(): void
     {
         $path = $this->createTempFilePath('discovering-rebuild-evidence-', '.json');
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $store = new ConfigurableDiscoveryRebuildEvidenceStore(
             new FileDiscoveryRebuildEvidenceStore($path, new DiscoveryRebuildEvidenceJsonSerializer()),
-            new PdoDiscoveryRebuildEvidenceStore('', null, null, 'discovery_rebuild_evidence'),
+            new DoctrineDiscoveryRebuildEvidenceStore($entityManager),
             backend: 'redis',
-            pdoDsn: '',
         );
 
         $this->expectException(\RuntimeException::class);

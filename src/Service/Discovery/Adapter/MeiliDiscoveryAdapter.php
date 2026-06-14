@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service\Discovery\Adapter;
 
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
-
 
 /**
  * Implements the meili discovery adapter used by the discovery runtime.
@@ -43,6 +43,7 @@ final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface, Discover
     public function search(string $resource, string $query, int $limit = 20, int $offset = 0): array
     {
         $response = $this->request('POST', sprintf('/indexes/%s/search', $this->indexUid($resource)), ['q' => $query, 'limit' => $limit, 'offset' => $offset]);
+
         return $response['hits'] ?? [];
     }
 
@@ -62,7 +63,7 @@ final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface, Discover
     }
 
     /**
-     * Returns the backend name value exposed by this service.
+     * Returns the backend nameEntity value exposed by this service.
      */
     public function getBackendName(): string
     {
@@ -77,48 +78,48 @@ final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface, Discover
         return false;
     }
 
-
     private function indexUid(string $resource): string
     {
         $normalized = preg_replace('/[^a-z0-9_]+/i', '_', strtolower($resource)) ?: 'global';
         $normalized = trim($normalized, '_') ?: 'global';
         $prefix = trim($this->indexPrefix);
 
-        if ($prefix === '') {
+        if ('' === $prefix) {
             return $normalized;
         }
 
         $normalizedPrefix = preg_replace('/[^a-z0-9_]+/i', '_', strtolower($prefix)) ?: 'discovery';
         $normalizedPrefix = trim($normalizedPrefix, '_') ?: 'discovery';
 
-        return $normalizedPrefix . '__' . $normalized;
+        return $normalizedPrefix.'__'.$normalized;
     }
 
     /** @return array<string, mixed> */
     private function request(string $method, string $path, ?array $body = null): array
     {
         $base = rtrim($this->base ?? (getenv('DISCOVERY_URL') ?: ''), '/');
-        if ($base === '') {
+        if ('' === $base) {
             return [];
         }
 
-        $headers = ["Content-Type: application/json"];
+        $headers = ['Content-Type: application/json'];
         $key = $this->key ?? (getenv('DISCOVERY_API_KEY') ?: null);
-        if ($key !== null && $key !== '') {
-            $headers[] = 'Authorization: Bearer ' . $key;
+        if (null !== $key && '' !== $key) {
+            $headers[] = 'Authorization: Bearer '.$key;
         }
 
         $context = ['http' => ['method' => $method, 'header' => $headers, 'ignore_errors' => true]];
-        if ($body !== null) {
+        if (null !== $body) {
             $context['http']['content'] = json_encode($body, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         }
 
-        $raw = @file_get_contents($base . $path, false, stream_context_create($context));
-        if ($raw === false || $raw === '') {
+        $raw = @file_get_contents($base.$path, false, stream_context_create($context));
+        if (false === $raw || '' === $raw) {
             return [];
         }
 
         $decoded = json_decode($raw, true);
+
         return is_array($decoded) ? $decoded : [];
     }
 }

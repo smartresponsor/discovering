@@ -39,7 +39,7 @@ final class DiscoveryPlaybookExportCommand extends Command
         $json = $this->repository->exportJson();
         $outputPath = $input->getArgument('outputPath');
 
-        if (is_string($outputPath) && $outputPath !== '') {
+        if (is_string($outputPath) && '' !== $outputPath) {
             $directory = dirname($outputPath);
 
             if (!is_dir($directory)) {
@@ -48,6 +48,7 @@ final class DiscoveryPlaybookExportCommand extends Command
 
             file_put_contents($outputPath, $json);
             $output->writeln(sprintf('Exported playbook source records to %s.', $outputPath));
+
             return Command::SUCCESS;
         }
 

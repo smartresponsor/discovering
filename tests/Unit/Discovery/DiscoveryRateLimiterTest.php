@@ -35,7 +35,7 @@ final class DiscoveryRateLimiterTest extends DiscoveryTempFilesystemTestCase
             managementMutationWindowSeconds: 60,
         );
 
-        $request = Request::create('/api/v1/discovery', 'GET');
+        $request = Request::create('/api/discovery', 'GET');
         $request->server->set('REMOTE_ADDR', '127.0.0.1');
 
         $first = $limiter->consumeForRequest($request);

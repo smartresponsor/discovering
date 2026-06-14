@@ -6,11 +6,11 @@ namespace App\Tests\Unit\Discovery;
 
 use App\Dto\Discovery\LibsourceOperatorEvent;
 use App\Service\Discovery\Libsource\Log\ConfigurableLibsourceOperatorEventLogStore;
+use App\Service\Discovery\Libsource\Log\DoctrineLibsourceOperatorEventLogStore;
 use App\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore;
 use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
-use App\Service\Discovery\Libsource\Log\PdoLibsourceOperatorEventLogStore;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the configurable libsource operator event log store test case for the Discovering component.
@@ -20,11 +20,11 @@ final class ConfigurableLibsourceOperatorEventLogStoreTest extends DiscoveryTemp
     public function testSelectsFileBackendWhenConfigured(): void
     {
         $path = $this->createTempFilePath('discovering-libsource-log-', '.json');
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $store = new ConfigurableLibsourceOperatorEventLogStore(
             new FileLibsourceOperatorEventLogStore($path, new LibsourceOperatorEventJsonSerializer()),
-            new PdoLibsourceOperatorEventLogStore('', null, null, 'discovery_libsource_operator_event_log'),
+            new DoctrineLibsourceOperatorEventLogStore($entityManager),
             backend: 'file',
-            pdoDsn: '',
         );
 
         $store->append(new LibsourceOperatorEvent('sync.completed', 'info', 'Sync completed.', []));
@@ -37,11 +37,11 @@ final class ConfigurableLibsourceOperatorEventLogStoreTest extends DiscoveryTemp
     public function testRejectsUnknownBackend(): void
     {
         $path = $this->createTempFilePath('discovering-libsource-log-', '.json');
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $store = new ConfigurableLibsourceOperatorEventLogStore(
             new FileLibsourceOperatorEventLogStore($path, new LibsourceOperatorEventJsonSerializer()),
-            new PdoLibsourceOperatorEventLogStore('', null, null, 'discovery_libsource_operator_event_log'),
+            new DoctrineLibsourceOperatorEventLogStore($entityManager),
             backend: 'redis',
-            pdoDsn: '',
         );
 
         $this->expectException(\RuntimeException::class);

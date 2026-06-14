@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Discovery;
 
 use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
 use App\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery rollback executor test case for the Discovering component.

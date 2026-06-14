@@ -6,9 +6,9 @@ This runbook describes the minimum operator loop around discovery rebuilds, expo
 
 1. Review management overview at `/management/discovery`.
 2. Export current state topology, operations, and rollback posture.
-3. Run `discovering:rebuild` for the intended scope.
+3. Run `app:discovery:rebuild` for the intended scope.
 4. Confirm rebuild evidence and staged promotion outcome.
-5. Perform smoke checks against `/api/v1/discovery` and operator exports.
+5. Perform smoke checks against `/api/discovery` and operator exports.
 6. If behavior regresses, use the rollback plan export to recover the previous physical index target.
 
 ## Pre-cutover checks
@@ -32,4 +32,4 @@ Rollback planning is available now. Rollback execution is still an operator acti
 
 ## Rollback execution
 
-When rollback posture is ready, operators can now execute rollback with `discovering:rollback:execute --current=<evidence> --target=<evidence>` or the guarded management mutation endpoint.
+When rollback posture is ready, operators can now execute rollback with `app:discovery:rollback:execute --current=<evidence> --target=<evidence>` or the guarded management mutation endpoint.

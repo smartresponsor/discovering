@@ -6,7 +6,7 @@ namespace App\Service\Discovery\Rebuild;
 
 use App\Dto\Discovery\DiscoveryRebuildSummary;
 use App\Dto\Discovery\DiscoveryRollbackPlan;
-
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 
 /**
  * Builds the discovery rollback plan output used by discovery management or diagnostics flows.
@@ -26,7 +26,7 @@ final class DiscoveryRollbackPlanBuilder
         $evidence = $this->rebuildEvidenceStore->latest(10);
         $globalEvidence = array_values(array_filter(
             $evidence,
-            static fn (DiscoveryRebuildSummary $summary): bool => $summary->resource === 'global',
+            static fn (DiscoveryRebuildSummary $summary): bool => 'global' === $summary->resource,
         ));
 
         $current = $globalEvidence[0] ?? null;
@@ -41,14 +41,14 @@ final class DiscoveryRollbackPlanBuilder
                 currentPhysicalIndex: null,
                 rollbackTargetPhysicalIndex: null,
                 recommendedCommand: null,
-                notes: ['No global rebuild evidence is recorded yet. Run discovering:rebuild before planning rollback.'],
+                notes: ['No global rebuild evidence is recorded yet. Run app:discovery:rebuild before planning rollback.'],
             );
         }
 
         $currentPhysicalIndex = $this->resolvePhysicalIndex($current);
         $previousPhysicalIndex = $previous instanceof DiscoveryRebuildSummary ? $this->resolvePhysicalIndex($previous) : null;
 
-        if ($currentPhysicalIndex === null) {
+        if (null === $currentPhysicalIndex) {
             return new DiscoveryRollbackPlan(
                 rollbackReady: false,
                 status: 'current_index_unknown',
@@ -61,7 +61,7 @@ final class DiscoveryRollbackPlanBuilder
             );
         }
 
-        if ($previousPhysicalIndex === null) {
+        if (null === $previousPhysicalIndex) {
             return new DiscoveryRollbackPlan(
                 rollbackReady: false,
                 status: 'no_previous_candidate',
@@ -88,7 +88,7 @@ final class DiscoveryRollbackPlanBuilder
         }
 
         $notes = [];
-        if (!$current->aliasSwapApplied || $current->deploymentMode !== 'staged_alias_swap') {
+        if (!$current->aliasSwapApplied || 'staged_alias_swap' !== $current->deploymentMode) {
             $notes[] = 'Latest rebuild did not complete as a staged alias swap; rollback execution may be blocked or require a different target posture.';
         }
         $notes[] = 'Validate query smoke checks and management export health before and after performing rollback.';
@@ -100,7 +100,7 @@ final class DiscoveryRollbackPlanBuilder
             previousEvidenceId: $previous->evidenceId,
             currentPhysicalIndex: $currentPhysicalIndex,
             rollbackTargetPhysicalIndex: $previousPhysicalIndex,
-            recommendedCommand: sprintf('discovering:rollback:execute --current=%s --target=%s', $current->evidenceId, $previous->evidenceId),
+            recommendedCommand: sprintf('app:discovery:rollback:execute --current=%s --target=%s', $current->evidenceId, $previous->evidenceId),
             notes: $notes,
         );
     }
@@ -108,11 +108,11 @@ final class DiscoveryRollbackPlanBuilder
     private function resolvePhysicalIndex(DiscoveryRebuildSummary $summary): ?string
     {
         $index = $summary->stagedIndexes['global'] ?? null;
-        if (is_string($index) && $index !== '') {
+        if (is_string($index) && '' !== $index) {
             return $index;
         }
 
-        if ($summary->resource === 'global' && $summary->deploymentMode === 'in_place') {
+        if ('global' === $summary->resource && 'in_place' === $summary->deploymentMode) {
             return 'discovering';
         }
 

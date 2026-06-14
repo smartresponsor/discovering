@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Libsource\Log;
 
 use App\Dto\Discovery\LibsourceOperatorEvent;
-
+use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
 /**
  * Provides the file libsource operator event log store capability within the discovery component.
@@ -39,7 +39,7 @@ final class FileLibsourceOperatorEventLogStore implements LibsourceOperatorEvent
 
         $contents = file_get_contents($this->path);
 
-        if ($contents === false || trim($contents) === '') {
+        if (false === $contents || '' === trim($contents)) {
             return [];
         }
 

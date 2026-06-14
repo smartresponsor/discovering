@@ -6,8 +6,7 @@ namespace App\Service\Discovery\Libsource;
 
 use App\Dto\Discovery\LibsourceManagementActionResult;
 use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
-
+use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
 /**
  * Builds the libsource operator event trail output used by discovery management or diagnostics flows.
@@ -34,7 +33,7 @@ final class LibsourceOperatorEventTrailBuilder
             ),
         ];
 
-        if ($lastActionResult !== null) {
+        if (null !== $lastActionResult) {
             $events[] = new LibsourceOperatorEvent(
                 eventName: sprintf('action:%s', $lastActionResult->actionName),
                 level: 'info',
@@ -44,7 +43,7 @@ final class LibsourceOperatorEventTrailBuilder
         }
 
         foreach ($this->eventLogStore->all() as $storedEvent) {
-            if ($lastActionResult !== null
+            if (null !== $lastActionResult
                 && $storedEvent->eventName === sprintf('action:%s', $lastActionResult->actionName)
                 && $storedEvent->summary === $lastActionResult->summary
             ) {

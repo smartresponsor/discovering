@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\Source\Repository;
 
-
 /**
  * Provides playbook file discovery source record access for discovery source and management workflows.
  */
 final class PlaybookFileDiscoverySourceRecordRepository extends AbstractDirectoryBackedDiscoverySourceRecordRepository
 {
     /**
-     * Returns the source name value exposed by this service.
+     * Returns the source nameEntity value exposed by this service.
      */
     public function getSourceName(): string
     {
@@ -31,7 +30,7 @@ final class PlaybookFileDiscoverySourceRecordRepository extends AbstractDirector
      */
     public function getStorageDirectoryPath(): string
     {
-        return $this->getProjectDir() . '/resources/discovery/playbooks';
+        return $this->getProjectDir().'/resources/discovery/playbooks';
     }
 
     /**
@@ -39,7 +38,7 @@ final class PlaybookFileDiscoverySourceRecordRepository extends AbstractDirector
      */
     public function getStoragePath(): string
     {
-        return $this->getStorageDirectoryPath() . '/playbook_source_records.json';
+        return $this->getStorageDirectoryPath().'/playbook_source_records.json';
     }
 
     /**
@@ -47,6 +46,6 @@ final class PlaybookFileDiscoverySourceRecordRepository extends AbstractDirector
      */
     public function getLegacyStoragePath(): string
     {
-        return $this->getProjectDir() . '/resources/discovery/playbook_source_records.json';
+        return $this->getProjectDir().'/resources/discovery/playbook_source_records.json';
     }
 }

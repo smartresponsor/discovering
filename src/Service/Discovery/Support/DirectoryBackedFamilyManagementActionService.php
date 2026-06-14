@@ -7,7 +7,7 @@ namespace App\Service\Discovery\Support;
 use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
 use App\Dto\Discovery\DiscoverySourceRecord;
 use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-
+use App\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 
 /**
  * Provides the directory backed family management action capability within the discovery component.
@@ -63,7 +63,7 @@ final class DirectoryBackedFamilyManagementActionService implements DirectoryBac
     {
         $existingFiles = $this->repository->listStorageFiles();
 
-        if ($existingFiles !== []) {
+        if ([] !== $existingFiles) {
             return new DirectoryBackedFamilyManagementActionResult(
                 actionName: 'ensure-sample-registry',
                 summary: sprintf('%s registry already has %d file(s); sample seeding skipped.', ucfirst($this->familyLabel), count($existingFiles)),
@@ -82,7 +82,7 @@ final class DirectoryBackedFamilyManagementActionService implements DirectoryBac
 
         $createdFiles = [];
         foreach ($this->sampleSeedDefinitions as $definition) {
-            $path = $directoryPath . '/' . $definition['fileName'];
+            $path = $directoryPath.'/'.$definition['fileName'];
             $createdFiles[] = $path;
 
             $this->repository->replaceAll([
@@ -136,7 +136,7 @@ final class DirectoryBackedFamilyManagementActionService implements DirectoryBac
             }
         }
 
-        if ($directoryFiles !== []) {
+        if ([] !== $directoryFiles) {
             return new DirectoryBackedFamilyManagementActionResult(
                 actionName: 'migrate-legacy-storage',
                 summary: sprintf('Directory-backed %s registry already exists; legacy migration skipped to avoid overwrite.', $this->familyLabel),

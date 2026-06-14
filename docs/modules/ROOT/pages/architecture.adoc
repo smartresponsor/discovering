@@ -5,9 +5,9 @@ It does not duplicate the full Markdown corpus.
 
 == Primary architecture sources in this repository
 
-* `ARCHITECTURE_MANIFEST.md`
-* `BOUNDING_MANIFEST.md`
-* `PRODUCT_MANIFEST.md`
+* `docs/manifests/ARCHITECTURE_MANIFEST.md`
+* `docs/manifests/BOUNDING_MANIFEST.md`
+* `docs/manifests/PRODUCT_MANIFEST.md`
 * `docs/discovery/SHARED_STATE_TOPOLOGY_V1.md`
 * `docs/discovery/STAGED_REBUILD_V1.md`
 * `docs/discovery/REBUILD_EVIDENCE_V1.md`

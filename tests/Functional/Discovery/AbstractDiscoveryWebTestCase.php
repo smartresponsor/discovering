@@ -21,10 +21,8 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
         parent::setUp();
 
         self::ensureKernelShutdown();
-        $this->resetConfiguredDiscoveryStorage();
 
         $client = static::createClient();
-
         /** @var DiscoveryIndexerInterface $indexer */
         $indexer = $client->getContainer()->get(DiscoveryIndexerInterface::class);
         $indexer->rebuild(new ReindexRequest());
@@ -35,12 +33,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
     protected function tearDown(): void
     {
         self::ensureKernelShutdown();
-
-        while (\restore_error_handler()) {
-        }
-
-        while (\restore_exception_handler()) {
-        }
+        $this->resetConfiguredDiscoveryStorage();
 
         parent::tearDown();
     }
@@ -182,7 +175,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
     /** @param array<string, mixed> $parameters */
     protected function requestPublicDiscoveryQuery(KernelBrowser $client, array $parameters = []): void
     {
-        $client->request('GET', '/api/v1/discovery', $parameters + [
+        $client->request('GET', '/api/discovery', $parameters + [
             'query' => 'governance',
             'resource' => 'briefing',
         ]);
@@ -231,13 +224,16 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
 
     private function resetConfiguredDiscoveryStorage(): void
     {
-        $directory = $this->discoveryStorageRoot();
+        $directory = \dirname(__DIR__, 3).'/var/discovery';
         if (!\is_dir($directory)) {
-            \mkdir($directory, 0o777, true);
-
             return;
         }
 
+        $this->removeDirectoryContentsRecursively($directory);
+    }
+
+    private function removeDirectoryContentsRecursively(string $directory): void
+    {
         $items = \scandir($directory);
         if (false === $items) {
             return;
@@ -248,40 +244,18 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
                 continue;
             }
 
-            $this->removePathRecursively($directory.'/'.$item);
-        }
-    }
+            $path = $directory.'/'.$item;
+            \clearstatcache(true, $path);
 
-    private function discoveryStorageRoot(): string
-    {
-        return \dirname(__DIR__, 3).'/var/discovery';
-    }
-
-    private function removePathRecursively(string $path): void
-    {
-        clearstatcache(true, $path);
-
-        if (\is_dir($path)) {
-            $items = \scandir($path);
-            if (false === $items) {
-                return;
+            if (\is_dir($path)) {
+                $this->removeDirectoryContentsRecursively($path);
+                @rmdir($path);
+                continue;
             }
 
-            foreach ($items as $item) {
-                if ('.' === $item || '..' === $item) {
-                    continue;
-                }
-
-                $this->removePathRecursively($path.'/'.$item);
+            if (\is_file($path)) {
+                @\unlink($path);
             }
-
-            @rmdir($path);
-
-            return;
-        }
-
-        if (\is_file($path)) {
-            @\unlink($path);
         }
     }
 
@@ -289,6 +263,6 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
     {
         $value = $_ENV[$key] ?? $_SERVER[$key] ?? \getenv($key);
 
-        return \is_string($value) ? $value : '';
+        return is_string($value) ? $value : '';
     }
 }

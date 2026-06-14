@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Command\Discovery;
 
 use App\Service\Discovery\Libsource\LibsourceOperatorEventTrailBuilder;
-use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
+use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the libsource event log surface contract used by discovery application, management, or state coordination flows.
  */
-final class LibsourceEventLogSurface
+final readonly class LibsourceEventLogSurface
 {
     /**
      * @param list<LibsourceOperatorEvent> $events
-     * @param list<string> $availableLevels
-     * @param array<string, string> $availablePresets
+     * @param list<string>                 $availableLevels
+     * @param array<string, string>        $availablePresets
      */
     public function __construct(
         public string $backendClass,

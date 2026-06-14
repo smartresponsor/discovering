@@ -1,0 +1,35 @@
+= Canonization
+
+This page is the Antora entry point for Discovering canonicalization work.
+It indexes the cleanup waves without duplicating their detailed Markdown records.
+
+== Wave records
+
+* `docs/discovery/CANONIZATION_WAVE2_SERVICE_CONTRACT_EXTRACTION.md`
+* `docs/discovery/CANONIZATION_WAVE3_SUBSCRIBER_LAYER.md`
+* `docs/discovery/CANONIZATION_WAVE4_DTO_VALUE_OBJECT_SHAPE.md`
+* `docs/discovery/CANONIZATION_WAVE5_FORM_BOUNDARY.md`
+* `docs/discovery/CANONIZATION_WAVE6_ENTITY_FIRST_MIGRATION_BASELINE.md`
+* `docs/discovery/CANONIZATION_WAVE7_ROOT_MANIFEST_TAXONOMY.md`
+* `docs/discovery/CANONIZATION_WAVE8_RESIDUAL_LEGACY_PATHS.md`
+* `docs/discovery/CANONIZATION_WAVE9_SERVICE_INTERFACE_TAXONOMY.md`
+* `docs/discovery/CANONIZATION_WAVE10_CONFIG_SERVICE_WIRING.md`
+* `docs/discovery/CANONIZATION_WAVE11_CONSOLE_COMMAND_TAXONOMY.md`
+* `docs/discovery/CANONIZATION_WAVE12_ROUTE_TAXONOMY.md`
+* `docs/discovery/CANONIZATION_WAVE13_TEST_TAXONOMY.md`
+* `docs/discovery/CANONIZATION_WAVE14_DOCUMENTATION_TAXONOMY.md`
+
+== Canonical cleanup boundaries
+
+The canonicalization waves use touched-file delivery only.
+They do not define a cumulative repository overwrite workflow.
+Legacy files are retired only when they are explicitly named as touched files and moved to backup by the apply script.
+
+== Verification
+
+The current machine-readable structural check is:
+
+[source,bash]
+----
+php tools/discovering_canon_audit.php
+----

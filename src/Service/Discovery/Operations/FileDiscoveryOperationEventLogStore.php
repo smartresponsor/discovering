@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Operations;
 
 use App\Dto\Discovery\DiscoveryOperationEvent;
-
+use App\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 
 /**
  * Provides the file discovery operation event log store capability within the discovery component.
@@ -38,7 +38,7 @@ final class FileDiscoveryOperationEventLogStore implements DiscoveryOperationEve
         }
 
         $contents = file_get_contents($this->path);
-        if ($contents === false || trim($contents) === '') {
+        if (false === $contents || '' === trim($contents)) {
             return [];
         }
 
@@ -55,7 +55,7 @@ final class FileDiscoveryOperationEventLogStore implements DiscoveryOperationEve
         }
 
         $events = $this->all();
-        if ($events === []) {
+        if ([] === $events) {
             return [];
         }
 

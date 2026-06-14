@@ -1,7 +1,5 @@
-discovery_controllers:
-  resource: ../../src/Controller/Discovery/
-  type: attribute
+discovery_public_routes:
+  resource: discovery_public.yaml
 
-management_discovery_controllers:
-  resource: ../../src/Controller/Management/
-  type: attribute
+discovery_management_routes:
+  resource: discovery_management.yaml

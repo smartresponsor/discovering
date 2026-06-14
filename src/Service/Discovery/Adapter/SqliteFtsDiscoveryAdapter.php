@@ -1,52 +1,50 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Service\Discovery\Adapter;
 
+use App\Entity\Discovery\DiscoveryIndexAliasEntity;
+use App\Entity\Discovery\DiscoveryIndexDocumentEntity;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
-use PDO;
-
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\SchemaTool;
 
 /**
- * Implements the sqlite fts discovery adapter used by the discovery runtime.
+ * Implements the discovery index adapter used by the discovery runtime.
  */
 final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
 {
-    private ?PDO $pdo = null;
+    private bool $schemaReady = false;
 
     public function __construct(
-        private readonly ?string $path = null,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
     /**
      * Performs the upsert operation for this discovery service.
+     *
+     * @param array<string, mixed> $document
      */
     public function upsert(string $resource, string $id, array $document): void
     {
+        $this->ensureSchema();
         $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
-        $this->createIndex($index);
-        $this->remove($index, $id);
 
-        $statement = $this->pdo()->prepare(sprintf(
-            'INSERT INTO %s (id, title, resource, reference, status, content) VALUES (:id, :title, :resource, :reference, :status, :content)',
-            $index,
-        ));
+        $entity = $this->findDocument($index, $id) ?? new DiscoveryIndexDocumentEntity();
+        $entity->setIndexName($index);
+        $entity->setDocumentId($id);
+        $entity->setTitle((string) ($document['title'] ?? ''));
+        $entity->setResource((string) ($document['resource'] ?? $resource));
+        $entity->setReference((string) ($document['reference'] ?? ''));
+        $entity->setStatus((string) ($document['status'] ?? ''));
+        $entity->setContent((string) ($document['content'] ?? ''));
+        $entity->setUpdatedAt(gmdate(DATE_ATOM));
 
-        $statement->execute([
-            'id' => $id,
-            'title' => (string) ($document['title'] ?? ''),
-            'resource' => (string) ($document['resource'] ?? $resource),
-            'reference' => (string) ($document['reference'] ?? ''),
-            'status' => (string) ($document['status'] ?? ''),
-            'content' => trim(implode(' ', [
-                (string) ($document['title'] ?? ''),
-                (string) ($document['reference'] ?? ''),
-                (string) ($document['status'] ?? ''),
-                (string) ($document['content'] ?? ''),
-            ])),
-        ]);
+        $this->entityManager->persist($entity);
+        $this->entityManager->flush();
     }
 
     /**
@@ -54,37 +52,81 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
      */
     public function remove(string $resource, string $id): void
     {
+        $this->ensureSchema();
         $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
-        $this->createIndex($index);
-        $statement = $this->pdo()->prepare(sprintf('DELETE FROM %s WHERE id = :id', $index));
-        $statement->execute(['id' => $id]);
+
+        $this->entityManager->createQueryBuilder()
+            ->delete(DiscoveryIndexDocumentEntity::class, 'd')
+            ->where('d.indexName = :indexName')
+            ->andWhere('d.documentId = :documentId')
+            ->setParameter('indexName', $index)
+            ->setParameter('documentId', $id)
+            ->getQuery()
+            ->execute();
     }
 
     /**
      * Executes the search workflow against the active discovery source or backend.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function search(string $resource, string $query, int $limit = 20, int $offset = 0): array
     {
+        $this->ensureSchema();
         $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
-        $this->createIndex($index);
 
-        if ($query === '') {
-            $statement = $this->pdo()->prepare(sprintf('SELECT id, title, resource, reference, status, content, NULL AS ftsScore FROM %s ORDER BY rowid DESC LIMIT :limit OFFSET :offset', $index));
-            $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-            $statement->bindValue('offset', $offset, PDO::PARAM_INT);
-            $statement->execute();
-            return $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        $documents = $this->entityManager->createQueryBuilder()
+            ->select('d')
+            ->from(DiscoveryIndexDocumentEntity::class, 'd')
+            ->where('d.indexName = :indexName')
+            ->setParameter('indexName', $index)
+            ->orderBy('d.updatedAt', 'DESC')
+            ->addOrderBy('d.documentId', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $payloads = [];
+        foreach ($documents as $document) {
+            if (!$document instanceof DiscoveryIndexDocumentEntity) {
+                continue;
+            }
+
+            $payload = [
+                'id' => $document->documentId(),
+                'title' => $document->title(),
+                'resource' => $document->resource(),
+                'reference' => $document->reference(),
+                'status' => $document->status(),
+                'content' => $document->content(),
+                'ftsScore' => null,
+                'updatedAt' => $document->updatedAt(),
+            ];
+
+            $payload['ftsScore'] = $this->scoreDocument($payload, $query);
+            if ('' !== $query && null === $payload['ftsScore']) {
+                continue;
+            }
+
+            $payloads[] = $payload;
         }
 
-        $statement = $this->pdo()->prepare(sprintf(
-            'SELECT id, title, resource, reference, status, content, bm25(%1$s, 5.0, 1.0, 1.0, 1.0, 0.5) AS ftsScore FROM %1$s WHERE %1$s MATCH :query ORDER BY ftsScore ASC LIMIT :limit OFFSET :offset',
-            $index,
-        ));
-        $statement->bindValue('query', $query);
-        $statement->bindValue('limit', $limit, PDO::PARAM_INT);
-        $statement->bindValue('offset', $offset, PDO::PARAM_INT);
-        $statement->execute();
-        return $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        if ('' !== $query) {
+            usort($payloads, static function (array $left, array $right): int {
+                $leftScore = (float) ($left['ftsScore'] ?? 0.0);
+                $rightScore = (float) ($right['ftsScore'] ?? 0.0);
+                if ($leftScore === $rightScore) {
+                    return [$right['updatedAt'] ?? '', $right['id'] ?? ''] <=> [$left['updatedAt'] ?? '', $left['id'] ?? ''];
+                }
+
+                return $rightScore <=> $leftScore;
+            });
+        }
+
+        return array_slice(array_values(array_map(static function (array $payload): array {
+            unset($payload['updatedAt']);
+
+            return $payload;
+        }, $payloads)), $offset, $limit);
     }
 
     /**
@@ -92,8 +134,8 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
      */
     public function createIndex(string $resource): void
     {
-        $index = $this->normalizeIndexName($this->resolveActiveIndex($resource));
-        $this->pdo()->exec(sprintf('CREATE VIRTUAL TABLE IF NOT EXISTS %s USING fts5(id UNINDEXED, title, resource, reference, status, content)', $index));
+        $this->ensureSchema();
+        $this->resolveActiveIndex($resource);
     }
 
     /**
@@ -103,16 +145,18 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
     {
         $alias = $this->normalizeIndexName($from);
         $target = $this->normalizeIndexName($to);
-        $this->createIndex($target);
-        $statement = $this->pdo()->prepare('INSERT INTO discovery_index_aliases (alias, target) VALUES (:alias, :target) ON CONFLICT(alias) DO UPDATE SET target = excluded.target');
-        $statement->execute([
-            'alias' => $alias,
-            'target' => $target,
-        ]);
+        $this->ensureSchema();
+
+        $entity = $this->findAlias($alias) ?? new DiscoveryIndexAliasEntity();
+        $entity->setAlias($alias);
+        $entity->setTarget($target);
+
+        $this->entityManager->persist($entity);
+        $this->entityManager->flush();
     }
 
     /**
-     * Returns the backend name value exposed by this service.
+     * Returns the backend nameEntity value exposed by this service.
      */
     public function getBackendName(): string
     {
@@ -127,30 +171,19 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
         return true;
     }
 
-    private function pdo(): PDO
+    private function ensureSchema(): void
     {
-        if ($this->pdo instanceof PDO) {
-            return $this->pdo;
+        if ($this->schemaReady) {
+            return;
         }
 
-        $databasePath = $this->path ?: (getenv('DISCOVERY_SQLITE_PATH') ?: sys_get_temp_dir() . '/discovering.sqlite');
-        $directory = dirname($databasePath);
+        $tool = new SchemaTool($this->entityManager);
+        $tool->updateSchema([
+            $this->entityManager->getClassMetadata(DiscoveryIndexDocumentEntity::class),
+            $this->entityManager->getClassMetadata(DiscoveryIndexAliasEntity::class),
+        ]);
 
-        if (!is_dir($directory)) {
-            @mkdir($directory, 0o777, true);
-        }
-
-        $pdo = new PDO('sqlite:' . $databasePath);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->pdo = $pdo;
-        $this->createAliasTable();
-
-        return $this->pdo;
-    }
-
-    private function createAliasTable(): void
-    {
-        $this->pdo()->exec('CREATE TABLE IF NOT EXISTS discovery_index_aliases (alias TEXT PRIMARY KEY, target TEXT NOT NULL)');
+        $this->schemaReady = true;
     }
 
     private function resolveActiveIndex(string $resource): string
@@ -158,10 +191,13 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
         $resolved = $this->normalizeIndexName($resource);
 
         for ($i = 0; $i < 8; ++$i) {
-            $statement = $this->pdo()->prepare('SELECT target FROM discovery_index_aliases WHERE alias = :alias LIMIT 1');
-            $statement->execute(['alias' => $resolved]);
-            $target = $statement->fetchColumn();
-            if (!is_string($target) || $target === '' || $target === $resolved) {
+            $alias = $this->findAlias($resolved);
+            if (null === $alias) {
+                return $resolved;
+            }
+
+            $target = $alias->target();
+            if ('' === $target || $target === $resolved) {
                 return $resolved;
             }
 
@@ -171,9 +207,64 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
         return $resolved;
     }
 
+    private function findAlias(string $alias): ?DiscoveryIndexAliasEntity
+    {
+        $entity = $this->entityManager->find(DiscoveryIndexAliasEntity::class, $alias);
+
+        return $entity instanceof DiscoveryIndexAliasEntity ? $entity : null;
+    }
+
+    private function findDocument(string $index, string $documentId): ?DiscoveryIndexDocumentEntity
+    {
+        $entity = $this->entityManager->getRepository(DiscoveryIndexDocumentEntity::class)->findOneBy([
+            'indexName' => $index,
+            'documentId' => $documentId,
+        ]);
+
+        return $entity instanceof DiscoveryIndexDocumentEntity ? $entity : null;
+    }
+
+    /**
+     * @param array<string, mixed> $document
+     */
+    private function scoreDocument(array $document, string $query): ?float
+    {
+        $query = trim($query);
+        if ('' === $query) {
+            return null;
+        }
+
+        $tokens = array_values(array_filter(preg_split('/[^a-z0-9]+/i', strtolower($query)) ?: [], static fn (string $token): bool => '' !== $token));
+        if ([] === $tokens) {
+            return null;
+        }
+
+        $haystack = strtolower(trim(implode(' ', [
+            (string) ($document['title'] ?? ''),
+            (string) ($document['reference'] ?? ''),
+            (string) ($document['resource'] ?? ''),
+            (string) ($document['status'] ?? ''),
+            (string) ($document['content'] ?? ''),
+        ])));
+
+        $matchCount = 0;
+        foreach ($tokens as $token) {
+            if (str_contains($haystack, $token)) {
+                ++$matchCount;
+            }
+        }
+
+        if (0 === $matchCount) {
+            return null;
+        }
+
+        return -1.0 * (float) $matchCount;
+    }
+
     private function normalizeIndexName(string $resource): string
     {
         $normalized = preg_replace('/[^a-z0-9_]+/i', '_', strtolower($resource)) ?: 'global';
+
         return trim($normalized, '_') ?: 'global';
     }
 }

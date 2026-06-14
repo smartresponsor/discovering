@@ -6,9 +6,9 @@ namespace App\Service\Discovery\Operations;
 
 use App\Dto\Discovery\DiscoveryOperationEvent;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-
 
 /**
  * Provides the discovery operation logger capability within the discovery component.
@@ -41,7 +41,7 @@ final class DiscoveryOperationLogger
             $baseContext['method'] = $request->getMethod();
             $baseContext['path'] = $request->getPathInfo();
             $route = $request->attributes->get('_route');
-            if (is_string($route) && $route !== '') {
+            if (is_string($route) && '' !== $route) {
                 $baseContext['route'] = $route;
             }
         }
@@ -74,18 +74,18 @@ final class DiscoveryOperationLogger
     private function resolveRequestId(Request $request): string
     {
         $requestId = $request->attributes->get(self::REQUEST_ID_ATTRIBUTE);
-        if (is_string($requestId) && $requestId !== '') {
+        if (is_string($requestId) && '' !== $requestId) {
             return $requestId;
         }
 
         $headerRequestId = trim((string) $request->headers->get(self::REQUEST_ID_HEADER, ''));
-        if ($headerRequestId !== '') {
+        if ('' !== $headerRequestId) {
             $request->attributes->set(self::REQUEST_ID_ATTRIBUTE, $headerRequestId);
 
             return $headerRequestId;
         }
 
-        $requestId = 'req-' . bin2hex(random_bytes(8));
+        $requestId = 'req-'.bin2hex(random_bytes(8));
         $request->attributes->set(self::REQUEST_ID_ATTRIBUTE, $requestId);
 
         return $requestId;
@@ -93,6 +93,6 @@ final class DiscoveryOperationLogger
 
     private function generateConsoleRequestId(): string
     {
-        return 'console-' . bin2hex(random_bytes(8));
+        return 'console-'.bin2hex(random_bytes(8));
     }
 }

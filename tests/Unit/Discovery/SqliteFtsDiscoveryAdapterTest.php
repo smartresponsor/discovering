@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Tests\Unit\Discovery;
 
 use App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the sqlite fts discovery adapter test case for the Discovering component.
@@ -14,8 +15,8 @@ final class SqliteFtsDiscoveryAdapterTest extends DiscoveryTempFilesystemTestCas
 {
     public function testItReturnsFtsScoreAndContentForNonEmptyQueries(): void
     {
-        $path = $this->createTempSqlitePath('discovering-sqlite-');
-        $adapter = new SqliteFtsDiscoveryAdapter($path);
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
+        $adapter = new SqliteFtsDiscoveryAdapter($entityManager);
 
         $adapter->upsert('global', 'briefing-1', [
             'title' => 'Search portability briefing',
@@ -32,6 +33,5 @@ final class SqliteFtsDiscoveryAdapterTest extends DiscoveryTempFilesystemTestCas
         self::assertArrayHasKey('content', $results[0]);
         self::assertIsNumeric($results[0]['ftsScore']);
         self::assertSame('Search portability governance context', $results[0]['content']);
-
     }
 }

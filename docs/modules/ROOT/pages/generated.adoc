@@ -1,0 +1,20 @@
+= Generated Artifacts
+
+This page documents where generated documentation outputs belong.
+
+== OpenAPI
+
+Generated OpenAPI artifacts belong under:
+
+* `docs/generated/openapi/`
+
+The repository keeps Nelmio/OpenAPI wiring in Symfony config and treats generated OpenAPI files as derived artifacts.
+
+== Code reference
+
+Generated code-reference artifacts belong under:
+
+* `docs/generated/doctum/`
+
+No hand-maintained architectural narrative should be placed under generated directories.
+Use this page as the stable Antora pointer to those generated surfaces.

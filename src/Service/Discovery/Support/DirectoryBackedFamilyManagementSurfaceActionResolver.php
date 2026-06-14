@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Support;
 
 use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
+use App\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
-
 
 /**
  * Provides the directory backed family management surface action resolver capability within the discovery component.
@@ -25,7 +25,7 @@ final class DirectoryBackedFamilyManagementSurfaceActionResolver
     {
         $action = $request->query->get('action');
 
-        if (!is_string($action) || $action === '') {
+        if (!is_string($action) || '' === $action) {
             return null;
         }
 

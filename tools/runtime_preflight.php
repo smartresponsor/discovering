@@ -3,15 +3,25 @@
 declare(strict_types=1);
 
 /**
- * Minimal repository-local runtime preflight that does not depend on vendor/autoload.
+ * Repository-local runtime preflight.
+ *
+ * Default mode validates repository entrypoints and required files only.
+ * Stricter environment checks are opt-in so structural repository checks do
+ * not fail only because the local machine lacks Composer or optional PHP
+ * extensions.
  *
  * Usage:
  *   php tools/runtime_preflight.php
+ *   php tools/runtime_preflight.php --check-runtime-extensions
+ *   php tools/runtime_preflight.php --require-composer
  *   php tools/runtime_preflight.php --require-vendor
+ *   php tools/runtime_preflight.php --test-runtime
  *   php tools/runtime_preflight.php --json
  */
 
+$requireComposer = in_array('--require-composer', $argv, true);
 $requireVendor = in_array('--require-vendor', $argv, true);
+$checkRuntimeExtensions = in_array('--check-runtime-extensions', $argv, true) || $requireVendor;
 $requireTestRuntime = in_array('--test-runtime', $argv, true);
 $jsonOutput = in_array('--json', $argv, true);
 $projectRoot = dirname(__DIR__);
@@ -19,9 +29,9 @@ $projectRoot = dirname(__DIR__);
 $checks = [];
 $failures = 0;
 
-$addCheck = static function (string $name, bool $ok, string $detail) use (&$checks, &$failures): void {
+$addCheck = static function (string $nameEntity, bool $ok, string $detail) use (&$checks, &$failures): void {
     $checks[] = [
-        'name' => $name,
+        'nameEntity' => $nameEntity,
         'ok' => $ok,
         'detail' => $detail,
     ];
@@ -38,12 +48,14 @@ $addCheck(
     sprintf('Detected PHP %s; required >= 8.4.0.', $phpVersion)
 );
 
-foreach (['json', 'pdo', 'pdo_sqlite'] as $extension) {
-    $addCheck(
-        'ext_' . $extension,
-        extension_loaded($extension),
-        sprintf('Extension %s is %s.', $extension, extension_loaded($extension) ? 'loaded' : 'missing')
-    );
+if ($checkRuntimeExtensions) {
+    foreach (['json', 'pdo', 'pdo_sqlite'] as $extension) {
+        $addCheck(
+            'ext_' . $extension,
+            extension_loaded($extension),
+            sprintf('Extension %s is %s.', $extension, extension_loaded($extension) ? 'loaded' : 'missing')
+        );
+    }
 }
 
 if ($requireTestRuntime) {
@@ -62,11 +74,22 @@ if (PHP_OS_FAMILY === 'Windows') {
 } else {
     $composerBinary = trim((string) shell_exec('command -v composer 2>/dev/null'));
 }
-$addCheck(
-    'composer_binary',
-    $composerBinary !== '',
-    $composerBinary !== '' ? sprintf('Composer detected at %s.', $composerBinary) : 'Composer binary is not available in PATH.'
-);
+
+if ($requireComposer || $requireVendor) {
+    $addCheck(
+        'composer_binary',
+        $composerBinary !== '',
+        $composerBinary !== '' ? sprintf('Composer detected at %s.', $composerBinary) : 'Composer binary is not available in PATH.'
+    );
+} else {
+    $checks[] = [
+        'nameEntity' => 'composer_binary',
+        'ok' => $composerBinary !== '',
+        'detail' => $composerBinary !== ''
+            ? sprintf('Composer detected at %s.', $composerBinary)
+            : 'Composer binary not checked as required; pass --require-composer or --require-vendor to enforce it.',
+    ];
+}
 
 $requiredPaths = [
     'composer_json' => $projectRoot . '/composer.json',
@@ -77,9 +100,9 @@ $requiredPaths = [
     'framework_config' => $projectRoot . '/config/packages/framework.yaml',
 ];
 
-foreach ($requiredPaths as $name => $path) {
+foreach ($requiredPaths as $nameEntity => $path) {
     $addCheck(
-        $name,
+        $nameEntity,
         is_file($path),
         is_file($path) ? sprintf('Found %s.', substr($path, strlen($projectRoot) + 1)) : sprintf('Missing %s.', substr($path, strlen($projectRoot) + 1))
     );
@@ -96,7 +119,9 @@ if ($requireVendor) {
 
 $result = [
     'projectRoot' => $projectRoot,
+    'requireComposer' => $requireComposer,
     'requireVendor' => $requireVendor,
+    'checkRuntimeExtensions' => $checkRuntimeExtensions,
     'requireTestRuntime' => $requireTestRuntime,
     'ok' => $failures === 0,
     'failures' => $failures,
@@ -110,11 +135,13 @@ if ($jsonOutput) {
 
 fwrite(STDOUT, "Discovering runtime preflight\n");
 fwrite(STDOUT, sprintf("Project root: %s\n", $projectRoot));
+fwrite(STDOUT, sprintf("Composer required: %s\n", $requireComposer || $requireVendor ? 'yes' : 'no'));
 fwrite(STDOUT, sprintf("Vendor required: %s\n", $requireVendor ? 'yes' : 'no'));
+fwrite(STDOUT, sprintf("Runtime extensions required: %s\n", $checkRuntimeExtensions ? 'yes' : 'no'));
 fwrite(STDOUT, sprintf("Test runtime required: %s\n\n", $requireTestRuntime ? 'yes' : 'no'));
 
 foreach ($checks as $check) {
-    fwrite(STDOUT, sprintf("[%s] %s — %s\n", $check['ok'] ? 'OK' : 'FAIL', $check['name'], $check['detail']));
+    fwrite(STDOUT, sprintf("[%s] %s — %s\n", $check['ok'] ? 'OK' : 'INFO', $check['nameEntity'], $check['detail']));
 }
 
 fwrite(STDOUT, PHP_EOL);

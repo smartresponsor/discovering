@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends '@Interfacing/base.html.twig' %}
 
 {% block title %}Libsource Event Log{% endblock %}
 
@@ -112,7 +112,7 @@
                                 {% if event.context is not empty %}
                                     <div class="mt-2">
                                         {% for name, value in event.context %}
-                                            {% if value is iterable and value is not same as(false) and value is not same as(true) and value is not same as(null) and value is not string %}
+                                            {% if value is iterable and value is not same as(false) and value is not same as(true) and value is not same as(null) %}
                                                 <div class="small text-muted mb-1">{{ name }}</div>
                                                 <div class="mb-2">
                                                     {% for item in value %}

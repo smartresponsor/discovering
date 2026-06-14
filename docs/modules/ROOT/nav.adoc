@@ -3,3 +3,6 @@
 * xref:install.adoc[Install]
 * xref:operations.adoc[Operations]
 * xref:api.adoc[API]
+* xref:canonization.adoc[Canonization]
+* xref:manifests.adoc[Manifests]
+* xref:generated.adoc[Generated Artifacts]

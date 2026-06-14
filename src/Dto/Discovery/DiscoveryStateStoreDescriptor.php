@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery state store descriptor contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryStateStoreDescriptor
+final readonly class DiscoveryStateStoreDescriptor
 {
     /**
      * @param list<string> $concerns
      */
     public function __construct(
-        public string $name,
+        public string $nameEntity,
         public string $backend,
         public string $path,
         public string $storageMode,
@@ -30,7 +29,7 @@ final class DiscoveryStateStoreDescriptor
     public function toArray(): array
     {
         return [
-            'name' => $this->name,
+            'nameEntity' => $this->nameEntity,
             'backend' => $this->backend,
             'path' => $this->path,
             'storageMode' => $this->storageMode,

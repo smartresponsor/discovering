@@ -10,7 +10,6 @@ use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 
-
 /**
  * Builds the discovery platform diagnostics output used by discovery management or diagnostics flows.
  */
@@ -39,14 +38,14 @@ final class DiscoveryPlatformDiagnosticsBuilder
         $blockingStores = [];
 
         foreach ($topology->stores as $store) {
-            $storeBackends[$store->name] = $store->backend;
+            $storeBackends[$store->nameEntity] = $store->backend;
 
             if ($store->multiReplicaWriteReady) {
-                $multiReplicaWriteReadyStores[] = $store->name;
+                $multiReplicaWriteReadyStores[] = $store->nameEntity;
                 continue;
             }
 
-            $blockingStores[] = $store->name;
+            $blockingStores[] = $store->nameEntity;
         }
 
         $notes = array_values($topology->notes);
@@ -94,7 +93,7 @@ final class DiscoveryPlatformDiagnosticsBuilder
             } else {
                 $recommendedAction = 'Shared coordination is configured. Review remaining platform notes before rollout.';
             }
-        } elseif ($blockingStores !== []) {
+        } elseif ([] !== $blockingStores) {
             $postureStatus = 'transitioning';
             $riskLevel = 'high';
             $recommendedAction = sprintf('Complete stronger coordination for blocking stores: %s.', implode(', ', $blockingStores));

@@ -16,7 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Provides a CLI entry point for the discovery rollback execute workflow.
  */
-#[AsCommand(name: 'discovering:rollback:execute', description: 'Executes the current discovery rollback alias swap when the plan is ready.')]
+#[AsCommand(name: 'app:discovery:rollback:execute', description: 'Executes the current discovery rollback alias swap when the plan is ready.', aliases: ['discovering:rollback:execute'])]
 final class DiscoveryRollbackExecuteCommand extends Command
 {
     public function __construct(
@@ -64,7 +64,7 @@ final class DiscoveryRollbackExecuteCommand extends Command
             context: $result->toArray(),
         );
 
-        if ($result->notes !== []) {
+        if ([] !== $result->notes) {
             $io->section('Operator notes');
             $io->listing($result->notes);
         }
@@ -72,10 +72,10 @@ final class DiscoveryRollbackExecuteCommand extends Command
         return $result->executed ? Command::SUCCESS : Command::FAILURE;
     }
 
-    private function readOption(InputInterface $input, string $name): ?string
+    private function readOption(InputInterface $input, string $nameEntity): ?string
     {
-        $value = trim((string) $input->getOption($name));
+        $value = trim((string) $input->getOption($nameEntity));
 
-        return $value === '' ? null : $value;
+        return '' === $value ? null : $value;
     }
 }

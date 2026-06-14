@@ -7,7 +7,6 @@ namespace App\Tests\Contract\Discovery;
 use App\Service\Discovery\Http\DiscoveryApiContract;
 use App\Tests\Functional\Discovery\AbstractDiscoveryWebTestCase;
 
-
 /**
  * Exercises the discovery api envelope contract test case for the Discovering component.
  */
@@ -18,7 +17,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
     public function testVersionedDiscoveryEndpointRespectsEnvelopeContract(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/api/v1/discovery', [
+        $client->request('GET', '/api/discovery', [
             'query' => 'governance live source',
             'resource' => 'briefing',
         ]);
@@ -32,7 +31,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
 
         self::assertDiscoveryEnvelopeContract($payload);
         self::assertFalse($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
+        self::assertSame('/api/discovery', $payload['meta']['canonicalPath']);
     }
 
     public function testLegacyDiscoveryAliasAdvertisesCanonicalSchemaContract(): void
@@ -49,7 +48,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
 
         self::assertDiscoveryEnvelopeContract($payload);
         self::assertTrue($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
+        self::assertSame('/api/discovery', $payload['meta']['canonicalPath']);
     }
 
     public function testWriteAuthorizationErrorRespectsEnvelopeContract(): void
@@ -57,7 +56,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
         $client = $this->createDiscoveryClient();
         $client->request(
             'POST',
-            '/api/v1/discovery/click',
+            '/api/discovery/click',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],

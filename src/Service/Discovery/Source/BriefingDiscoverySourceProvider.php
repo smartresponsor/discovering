@@ -7,7 +7,6 @@ namespace App\Service\Discovery\Source;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
-
 /**
  * Provides the briefing discovery source provider capability within the discovery component.
  */
@@ -19,7 +18,7 @@ final class BriefingDiscoverySourceProvider implements DiscoverySourceProviderIn
     }
 
     /**
-     * Returns the source name value exposed by this service.
+     * Returns the source nameEntity value exposed by this service.
      */
     public function getSourceName(): string
     {

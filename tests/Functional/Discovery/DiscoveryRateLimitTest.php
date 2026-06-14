@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional\Discovery;
 
-
 /**
  * Exercises the discovery rate limit test case for the Discovering component.
  */
@@ -15,7 +14,7 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
         $client = $this->createDiscoveryClient();
 
         for ($attempt = 0; $attempt < 4; ++$attempt) {
-            $client->request('GET', '/api/v1/discovery', [
+            $client->request('GET', '/api/discovery', [
                 'query' => 'governance',
                 'resource' => 'briefing',
             ]);
@@ -25,7 +24,7 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
         $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery');
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/discovery');
         self::assertSame('discovery_rate_limited', $payload['error']['code']);
         self::assertSame('query', $payload['error']['details']['scope']);
         $this->assertRateLimitHeaders($client->getResponse(), 'query', 3);
@@ -36,14 +35,14 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
         $client = $this->createApiWriteClient();
 
         for ($attempt = 0; $attempt < 3; ++$attempt) {
-            $this->requestApiWrite($client, 'POST', '/api/v1/discovery/click', $this->discoveryClickPayload());
+            $this->requestApiWrite($client, 'POST', '/api/discovery/click', $this->discoveryClickPayload());
         }
 
         self::assertResponseStatusCodeSame(429);
 
         $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click');
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/discovery/click');
         self::assertSame('write', $payload['error']['details']['scope']);
         $this->assertRateLimitHeaders($client->getResponse(), 'write', 2);
     }

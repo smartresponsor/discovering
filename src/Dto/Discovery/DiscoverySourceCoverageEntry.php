@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery source coverage entry contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoverySourceCoverageEntry
+final readonly class DiscoverySourceCoverageEntry
 {
     /**
      * @param list<string> $sampleResourceIds

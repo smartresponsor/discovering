@@ -15,24 +15,9 @@ abstract class AbstractDiscoveryContractWebTestCase extends WebTestCase
 {
     use DiscoveryHttpAssertionTrait;
 
-    protected function tearDown(): void
-    {
-        self::ensureKernelShutdown();
-
-        while (restore_error_handler()) {
-        }
-
-        while (restore_exception_handler()) {
-        }
-
-        parent::tearDown();
-    }
-
     /** @param array<string, string> $server */
     protected function createDiscoveryClient(array $server = []): KernelBrowser
     {
-        self::ensureKernelShutdown();
-
         return static::createClient([], $server);
     }
 

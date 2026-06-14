@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery source record contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoverySourceRecord
+final readonly class DiscoverySourceRecord
 {
     /**
      * @param array<string, mixed> $filters

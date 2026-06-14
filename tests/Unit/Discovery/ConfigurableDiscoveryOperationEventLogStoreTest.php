@@ -7,10 +7,10 @@ namespace App\Tests\Unit\Discovery;
 use App\Dto\Discovery\DiscoveryOperationEvent;
 use App\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore;
 use App\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
+use App\Service\Discovery\Operations\DoctrineDiscoveryOperationEventLogStore;
 use App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
-use App\Service\Discovery\Operations\PdoDiscoveryOperationEventLogStore;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the configurable discovery operation event log store test case for the Discovering component.
@@ -20,11 +20,11 @@ final class ConfigurableDiscoveryOperationEventLogStoreTest extends DiscoveryTem
     public function testSelectsFileBackendWhenConfigured(): void
     {
         $path = $this->createTempJsonPath('discovering-operation-log-');
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $store = new ConfigurableDiscoveryOperationEventLogStore(
             new FileDiscoveryOperationEventLogStore($path, new DiscoveryOperationEventJsonSerializer()),
-            new PdoDiscoveryOperationEventLogStore('', null, null, 'discovery_operation_event_log'),
+            new DoctrineDiscoveryOperationEventLogStore($entityManager),
             backend: 'file',
-            pdoDsn: '',
         );
 
         $store->append(new DiscoveryOperationEvent('req-1', 'http', 'discovery.query', 'ok', '2026-04-03T18:00:00+00:00', []));
@@ -36,11 +36,11 @@ final class ConfigurableDiscoveryOperationEventLogStoreTest extends DiscoveryTem
     public function testRejectsUnknownBackend(): void
     {
         $path = $this->createTempJsonPath('discovering-operation-log-');
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $store = new ConfigurableDiscoveryOperationEventLogStore(
             new FileDiscoveryOperationEventLogStore($path, new DiscoveryOperationEventJsonSerializer()),
-            new PdoDiscoveryOperationEventLogStore('', null, null, 'discovery_operation_event_log'),
+            new DoctrineDiscoveryOperationEventLogStore($entityManager),
             backend: 'redis',
-            pdoDsn: '',
         );
 
         $this->expectException(\RuntimeException::class);

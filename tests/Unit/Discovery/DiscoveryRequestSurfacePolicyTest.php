@@ -17,7 +17,7 @@ final class DiscoveryRequestSurfacePolicyTest extends TestCase
     {
         $policy = new DiscoveryRequestSurfacePolicy();
 
-        $writeRequest = Request::create('/api/v1/discovery/click', 'POST');
+        $writeRequest = Request::create('/api/discovery/click', 'POST');
         $writeRequest->server->set('REMOTE_ADDR', '127.0.0.1');
 
         self::assertSame('write', $policy->resolveScope($writeRequest));
@@ -27,7 +27,7 @@ final class DiscoveryRequestSurfacePolicyTest extends TestCase
 
         self::assertSame('management_mutation', $policy->resolveScope($managementRequest));
 
-        $queryRequest = Request::create('/api/v1/discovery', 'GET');
+        $queryRequest = Request::create('/api/discovery', 'GET');
         $queryRequest->server->set('REMOTE_ADDR', '127.0.0.1');
 
         self::assertSame('query', $policy->resolveScope($queryRequest));
@@ -37,7 +37,7 @@ final class DiscoveryRequestSurfacePolicyTest extends TestCase
     {
         $policy = new DiscoveryRequestSurfacePolicy();
 
-        self::assertTrue($policy->wantsJsonResponse('/api/v1/discovery'));
+        self::assertTrue($policy->wantsJsonResponse('/api/discovery'));
         self::assertTrue($policy->wantsJsonResponse('/management/discovery/rebuild'));
         self::assertTrue($policy->wantsJsonResponse('/management/discovery/briefing/export'));
         self::assertTrue($policy->wantsJsonResponse('/management/discovery/inspect/briefing'));

@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery platform diagnostics contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryPlatformDiagnostics
+final readonly class DiscoveryPlatformDiagnostics
 {
     /**
      * @param array<string, string> $storeBackends
-     * @param list<string> $multiReplicaWriteReadyStores
-     * @param list<string> $blockingStores
-     * @param list<string> $notes
+     * @param list<string>          $multiReplicaWriteReadyStores
+     * @param list<string>          $blockingStores
+     * @param list<string>          $notes
      */
     public function __construct(
         public string $backendName,

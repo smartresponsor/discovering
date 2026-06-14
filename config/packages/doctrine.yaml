@@ -1,0 +1,12 @@
+doctrine:
+  dbal:
+    driver: 'pdo_sqlite'
+    path: '%kernel.project_dir%/var/discovery/discovering.sqlite'
+  orm:
+    auto_mapping: true
+    mappings:
+      App:
+        is_bundle: false
+        type: attribute
+        dir: '%kernel.project_dir%/src/Entity'
+        prefix: 'App\Entity'

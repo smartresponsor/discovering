@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Source\Repository;
 
 use App\Dto\Discovery\DiscoverySourceRecord;
-
+use App\ServiceInterface\Discovery\Source\Repository\DiscoverySourceRecordRepositoryInterface;
 
 /**
  * Provides document discovery source record access for discovery source and management workflows.
@@ -13,7 +13,7 @@ use App\Dto\Discovery\DiscoverySourceRecord;
 final class DocumentDiscoverySourceRecordRepository implements DiscoverySourceRecordRepositoryInterface
 {
     /**
-     * Returns the source name value exposed by this service.
+     * Returns the source nameEntity value exposed by this service.
      */
     public function getSourceName(): string
     {

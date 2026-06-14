@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Rebuild;
 
 use App\Dto\Discovery\DiscoveryRebuildSummary;
-
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 
 /**
  * Provides the configurable discovery rebuild evidence store capability within the discovery component.
@@ -14,9 +14,8 @@ final class ConfigurableDiscoveryRebuildEvidenceStore implements DiscoveryRebuil
 {
     public function __construct(
         private readonly FileDiscoveryRebuildEvidenceStore $fileStore,
-        private readonly PdoDiscoveryRebuildEvidenceStore $pdoStore,
+        private readonly DoctrineDiscoveryRebuildEvidenceStore $doctrineStore,
         private readonly string $backend,
-        private readonly string $pdoDsn,
     ) {
     }
 
@@ -40,8 +39,8 @@ final class ConfigurableDiscoveryRebuildEvidenceStore implements DiscoveryRebuil
     {
         return match (strtolower(trim($this->backend))) {
             '', 'file' => $this->fileStore,
-            'pdo' => trim($this->pdoDsn) !== '' ? $this->pdoStore : $this->fileStore,
-            default => throw new \RuntimeException(sprintf('Unsupported discovery rebuild evidence backend "%s". Expected "file" or "pdo".', $this->backend)),
+            'doctrine' => $this->doctrineStore,
+            default => throw new \RuntimeException(sprintf('Unsupported discovery rebuild evidence backend "%s". Expected "file" or "doctrine".', $this->backend)),
         };
     }
 }

@@ -7,6 +7,18 @@ Core entity name: **Discovery**
 
 The repository is intended to evolve as a Laravel-Scout-like discovery layer for Symfony applications. Its mission is not to become a generic search engine, but to help applications expose, index, scope, and retrieve relevant resources through a coherent discovery model.
 
+
+## Repository manifest taxonomy
+
+Canonical producer-facing manifests live under `docs/manifests/`:
+
+- `docs/manifests/BOUNDING_MANIFEST.md`
+- `docs/manifests/ARCHITECTURE_MANIFEST.md`
+- `docs/manifests/PRODUCT_MANIFEST.md`
+- `docs/manifests/CODEX_CLI_PROMPT.txt`
+
+The repository root is intentionally reserved for standard Symfony/project entry points and should not accumulate stale patch manifests.
+
 ## Current business seed
 - seeded discovery source providers for demo and development
 - typed query / result model

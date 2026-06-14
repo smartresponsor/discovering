@@ -1,0 +1,21 @@
+= Manifests
+
+This page is the Antora entry point for producer-facing manifests.
+
+== Manifest sources
+
+* `docs/manifests/ARCHITECTURE_MANIFEST.md`
+* `docs/manifests/BOUNDING_MANIFEST.md`
+* `docs/manifests/PRODUCT_MANIFEST.md`
+* `docs/manifests/ROOT_MANIFEST_INDEX.md`
+* `docs/manifests/SEED_NOTE.md`
+
+== Role
+
+Manifests describe component intent, boundaries and publication posture.
+They are durable repository assets, so they belong under `docs/manifests/` instead of repository root.
+
+== Root discipline
+
+Root-level one-off patch manifests and temporary delivery metadata are not considered permanent documentation.
+They should be retired through touched-file cleanup waves when found.

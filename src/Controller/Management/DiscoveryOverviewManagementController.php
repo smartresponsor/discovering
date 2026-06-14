@@ -7,23 +7,21 @@ namespace App\Controller\Management;
 use App\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
 use App\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
 use App\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
 use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
+use App\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-
 /**
  * Handles management HTTP endpoints for the discovery overview management surface.
  */
-final class DiscoveryOverviewManagementController extends AbstractController
+final class DiscoveryOverviewManagementController
 {
     public function __construct(
         private readonly DiscoveryOverviewServiceInterface $overviewService,
@@ -42,7 +40,10 @@ final class DiscoveryOverviewManagementController extends AbstractController
      * Handles the index endpoint for the discovery overview management HTTP surface.
      */
     #[Route('/management/discovery', name: 'app_management_discovery_overview', methods: ['GET'])]
-    public function index(): Response
+    /**
+     * @return Response|array<string, mixed>
+     */
+    public function index(): Response|array
     {
         $overview = $this->overviewService->buildOverview();
         $operations = $this->operationLogStore->latest(10);
@@ -51,13 +52,25 @@ final class DiscoveryOverviewManagementController extends AbstractController
         $rollbackPlan = $this->rollbackPlanBuilder->build();
         $this->operationLogger->recordHttp('discovery.management.overview');
 
-        return $this->render('management/discovery/overview.html.twig', [
-            'overview' => $overview,
-            'operations' => $operations,
-            'stateTopology' => $stateTopology,
-            'platformDiagnostics' => $platformDiagnostics,
-            'rollbackPlan' => $rollbackPlan,
-        ]);
+        return [
+            '_view' => [
+                'surface' => 'discovery',
+                'operation' => 'management-overview',
+                'component' => 'Discovering',
+                'intent' => 'management',
+            ],
+            'data' => [
+                'overview' => $overview,
+                'operations' => $operations,
+                'stateTopology' => $stateTopology,
+                'platformDiagnostics' => $platformDiagnostics,
+                'rollbackPlan' => $rollbackPlan,
+            ],
+            'meta' => [
+                'source_controller' => self::class,
+                'legacy_template' => 'management/discovery/overview.html.twig',
+            ],
+        ];
     }
 
     /**
@@ -92,8 +105,6 @@ final class DiscoveryOverviewManagementController extends AbstractController
         ]);
     }
 
-
-
     /**
      * Handles the executeRollback endpoint for the discovery overview management HTTP surface.
      */
@@ -104,8 +115,8 @@ final class DiscoveryOverviewManagementController extends AbstractController
         $targetEvidenceId = trim((string) $request->request->get('target', $request->query->get('target', '')));
 
         $result = $this->rollbackExecutor->execute(
-            expectedCurrentEvidenceId: $currentEvidenceId === '' ? null : $currentEvidenceId,
-            expectedTargetEvidenceId: $targetEvidenceId === '' ? null : $targetEvidenceId,
+            expectedCurrentEvidenceId: '' === $currentEvidenceId ? null : $currentEvidenceId,
+            expectedTargetEvidenceId: '' === $targetEvidenceId ? null : $targetEvidenceId,
         );
 
         $this->operationLogger->recordHttp(
@@ -147,7 +158,6 @@ final class DiscoveryOverviewManagementController extends AbstractController
         ]);
     }
 
-
     /**
      * Handles the exportPlatformDiagnostics endpoint for the discovery overview management HTTP surface.
      */
@@ -161,7 +171,6 @@ final class DiscoveryOverviewManagementController extends AbstractController
             'schemaVersion' => 1,
         ]);
     }
-
 
     /**
      * Handles the exportPlatformProbes endpoint for the discovery overview management HTTP surface.

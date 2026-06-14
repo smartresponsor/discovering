@@ -32,7 +32,7 @@ final class DiscoveryManagementExportContractTest extends AbstractDiscoveryWebTe
     public function testOperationsExportRespectsEnvelopeContract(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/api/v1/discovery', [
+        $client->request('GET', '/api/discovery', [
             'query' => 'governance',
             'resource' => 'briefing',
         ]);

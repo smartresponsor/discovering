@@ -1,5 +1,16 @@
-# Discovery Source Repository Manifest
+# File-backed discovery source repositories
 
-This area owns repository-like source record storage for discovery source providers. It is the intermediate layer between hardcoded seeded providers and future entity-backed / database-backed discovery source implementations.
+This directory contains source-record repositories for file-backed discovery materials.
 
-File-backed live sources are also owned here, including JSON import / export tooling, multi-file directory-backed registries for project-local discovery records, and the shared abstract foundation used by live source families such as playbooks and briefings.
+## Canonical distinction
+
+These classes are service-layer source repositories, not Doctrine repositories.
+
+They manage directory-backed or file-backed source records for discovery families such as projects, offerings, documents, playbooks and briefings.
+
+## Rules
+
+- Keep these classes under `src/Service/Discovery/Source/Repository/` while they are file/source-record services.
+- Do not move them to `src/Repository/` unless they become Doctrine repositories.
+- Class names may keep the `Repository` suffix because their responsibility is source-record collection access, but their namespace must make the non-Doctrine role explicit.
+- Doctrine persistence repositories, when introduced, should be handled by a separate Repository/Persistence wave.

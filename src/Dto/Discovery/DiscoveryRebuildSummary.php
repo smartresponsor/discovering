@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery rebuild summary contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryRebuildSummary
+final readonly class DiscoveryRebuildSummary
 {
     /**
-     * @param array<string, int> $indexedCountsByResource
+     * @param array<string, int>    $indexedCountsByResource
      * @param array<string, string> $stagedIndexes
      */
     public function __construct(

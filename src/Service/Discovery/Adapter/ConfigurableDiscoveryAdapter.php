@@ -7,7 +7,6 @@ namespace App\Service\Discovery\Adapter;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 
-
 /**
  * Implements the configurable discovery adapter used by the discovery runtime.
  */
@@ -62,7 +61,7 @@ final class ConfigurableDiscoveryAdapter implements DiscoveryAdapterInterface, D
     }
 
     /**
-     * Returns the backend name value exposed by this service.
+     * Returns the backend nameEntity value exposed by this service.
      */
     public function getBackendName(): string
     {
@@ -82,7 +81,7 @@ final class ConfigurableDiscoveryAdapter implements DiscoveryAdapterInterface, D
 
     private function active(): DiscoveryAdapterInterface
     {
-        if (strtolower(trim($this->backend)) === 'meili' && trim($this->meiliBase) !== '') {
+        if ('meili' === strtolower(trim($this->backend)) && '' !== trim($this->meiliBase)) {
             return $this->meiliAdapter;
         }
 

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the libsource management action result contract used by discovery application, management, or state coordination flows.
  */
-final class LibsourceManagementActionResult
+final readonly class LibsourceManagementActionResult
 {
     /**
      * @param array<string, mixed> $payload

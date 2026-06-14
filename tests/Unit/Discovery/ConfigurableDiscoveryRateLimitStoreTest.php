@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Discovery;
 
 use App\Service\Discovery\RateLimit\ConfigurableDiscoveryRateLimitStore;
+use App\Service\Discovery\RateLimit\DoctrineDiscoveryRateLimitStore;
 use App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
-use App\Service\Discovery\RateLimit\PdoDiscoveryRateLimitStore;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the configurable discovery rate limit store test case for the Discovering component.
@@ -18,9 +18,10 @@ final class ConfigurableDiscoveryRateLimitStoreTest extends DiscoveryTempFilesys
     public function testSelectsFileBackendWhenConfigured(): void
     {
         $path = $this->createTempJsonPath('discovering-rate-limit-configurable-');
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $store = new ConfigurableDiscoveryRateLimitStore(
             new FileDiscoveryRateLimitStore($path),
-            new PdoDiscoveryRateLimitStore('', null, null, 'discovery_rate_limit_bucket'),
+            new DoctrineDiscoveryRateLimitStore($entityManager),
             backend: 'file',
         );
 
@@ -33,9 +34,10 @@ final class ConfigurableDiscoveryRateLimitStoreTest extends DiscoveryTempFilesys
     public function testRejectsUnknownBackend(): void
     {
         $path = $this->createTempJsonPath('discovering-rate-limit-configurable-');
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $store = new ConfigurableDiscoveryRateLimitStore(
             new FileDiscoveryRateLimitStore($path),
-            new PdoDiscoveryRateLimitStore('', null, null, 'discovery_rate_limit_bucket'),
+            new DoctrineDiscoveryRateLimitStore($entityManager),
             backend: 'redis',
         );
 

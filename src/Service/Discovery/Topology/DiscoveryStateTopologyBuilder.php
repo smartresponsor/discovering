@@ -7,7 +7,6 @@ namespace App\Service\Discovery\Topology;
 use App\Dto\Discovery\DiscoveryStateStoreDescriptor;
 use App\Dto\Discovery\DiscoveryStateTopology;
 
-
 /**
  * Builds the discovery state topology output used by discovery management or diagnostics flows.
  */
@@ -19,26 +18,14 @@ final class DiscoveryStateTopologyBuilder
         private readonly string $indexBackend,
         private readonly string $meiliUrl,
         private readonly string $meiliIndexPrefix,
-        private readonly string $feedbackPath,
-        private readonly string $feedbackBackend,
-        private readonly string $feedbackPdoDsn,
-        private readonly string $feedbackPdoTable,
         private readonly string $operationLogPath,
         private readonly string $operationLogBackend,
-        private readonly string $operationLogPdoDsn,
-        private readonly string $operationLogPdoTable,
         private readonly string $rebuildEvidencePath,
         private readonly string $rebuildEvidenceBackend,
-        private readonly string $rebuildEvidencePdoDsn,
-        private readonly string $rebuildEvidencePdoTable,
         private readonly string $libsourceEventLogPath,
         private readonly string $libsourceEventLogBackend,
-        private readonly string $libsourceEventLogPdoDsn,
-        private readonly string $libsourceEventLogPdoTable,
-        private readonly string $rateLimitBackend,
         private readonly string $rateLimitStorePath,
-        private readonly string $rateLimitPdoDsn,
-        private readonly string $rateLimitPdoTable,
+        private readonly string $rateLimitBackend,
     ) {
     }
 
@@ -47,15 +34,15 @@ final class DiscoveryStateTopologyBuilder
      */
     public function build(): DiscoveryStateTopology
     {
-        $localStateRoot = $this->normalizePath($this->projectDir . '/var/discovery');
+        $localStateRoot = $this->normalizePath($this->projectDir.'/var/discovery');
 
         $stores = [
             $this->discoveryIndexStore($localStateRoot),
-            $this->feedbackStore($localStateRoot),
-            $this->coordinationStore('operationLog', $this->operationLogPath, $this->operationLogBackend, $this->operationLogPdoDsn, $this->operationLogPdoTable, $localStateRoot, 'shared-event-history'),
-            $this->coordinationStore('rebuildEvidence', $this->rebuildEvidencePath, $this->rebuildEvidenceBackend, $this->rebuildEvidencePdoDsn, $this->rebuildEvidencePdoTable, $localStateRoot, 'shared-evidence-history'),
-            $this->coordinationStore('libsourceEventLog', $this->libsourceEventLogPath, $this->libsourceEventLogBackend, $this->libsourceEventLogPdoDsn, $this->libsourceEventLogPdoTable, $localStateRoot, 'shared-operator-history'),
-            $this->rateLimitStore($localStateRoot),
+            $this->feedbackStore(),
+            $this->coordinationStore('operationLog', $this->operationLogPath, $this->operationLogBackend, $localStateRoot, 'shared-event-history'),
+            $this->coordinationStore('rebuildEvidence', $this->rebuildEvidencePath, $this->rebuildEvidenceBackend, $localStateRoot, 'shared-evidence-history'),
+            $this->coordinationStore('libsourceEventLog', $this->libsourceEventLogPath, $this->libsourceEventLogBackend, $localStateRoot, 'shared-operator-history'),
+            $this->coordinationStore('rateLimitStore', $this->rateLimitStorePath, $this->rateLimitBackend, $localStateRoot, 'shared-counter-coordination'),
         ];
 
         $sharedStateConfigured = false;
@@ -78,49 +65,36 @@ final class DiscoveryStateTopologyBuilder
             $notes[] = 'One or more discovery state stores are configured outside the local var/discovery root or through a shared coordination backend.';
         }
 
-        $indexUsesMeili = strtolower(trim($this->indexBackend)) === 'meili' && trim($this->meiliUrl) !== '';
-        $feedbackUsesPdo = strtolower(trim($this->feedbackBackend)) === 'pdo' && trim($this->feedbackPdoDsn) !== '';
-        if ($indexUsesMeili && $feedbackUsesPdo) {
+        if ('meili' === strtolower(trim($this->indexBackend)) && '' !== trim($this->meiliUrl)) {
             $notes[] = 'Discovery index uses a shared Meilisearch backend.';
-            $notes[] = 'Feedback learning uses a shared PDO coordination backend.';
-        } elseif ($indexUsesMeili) {
-            $notes[] = 'Discovery index uses a shared Meilisearch backend.';
-            $notes[] = 'Feedback learning still remains SQLite-oriented until a shared PDO backend is configured.';
-        } elseif ($feedbackUsesPdo) {
-            $notes[] = 'Feedback learning uses a shared PDO coordination backend.';
-            $notes[] = 'SQLite-backed discovery index state still remains single-node oriented and is not treated as multi-replica write-safe.';
         } else {
-            $notes[] = 'SQLite-backed discovery index and feedback state remain single-node oriented and are not treated as multi-replica write-safe.';
+            $notes[] = 'Discovery index remains local SQLite FTS until Meilisearch is configured.';
         }
 
-        $strongerStoreNotes = [];
+        $sharedDoctrineStores = [];
         foreach ([
-            ['name' => 'operation log', 'backend' => $this->operationLogBackend, 'dsn' => $this->operationLogPdoDsn],
-            ['name' => 'rebuild evidence', 'backend' => $this->rebuildEvidenceBackend, 'dsn' => $this->rebuildEvidencePdoDsn],
-            ['name' => 'libsource event log', 'backend' => $this->libsourceEventLogBackend, 'dsn' => $this->libsourceEventLogPdoDsn],
-            ['name' => 'rate limiting', 'backend' => $this->rateLimitBackend, 'dsn' => $this->rateLimitPdoDsn],
+            ['nameEntity' => 'operation log', 'backend' => $this->operationLogBackend],
+            ['nameEntity' => 'rebuild evidence', 'backend' => $this->rebuildEvidenceBackend],
+            ['nameEntity' => 'libsource event log', 'backend' => $this->libsourceEventLogBackend],
+            ['nameEntity' => 'rate limiting', 'backend' => $this->rateLimitBackend],
         ] as $candidate) {
-            if (strtolower(trim((string) $candidate['backend'])) === 'pdo' && trim((string) $candidate['dsn']) !== '') {
-                $strongerStoreNotes[] = sprintf('%s uses a shared PDO coordination backend.', ucfirst((string) $candidate['name']));
+            if ('doctrine' === strtolower(trim((string) $candidate['backend']))) {
+                $sharedDoctrineStores[] = sprintf('%s uses a shared Doctrine ORM coordination backend.', ucfirst((string) $candidate['nameEntity']));
             }
         }
 
-        if ($strongerStoreNotes === []) {
-            $notes[] = 'Operation, evidence, libsource event, and rate-limit stores still default to local JSON files unless their stronger PDO coordination backends are configured.';
+        if ([] === $sharedDoctrineStores) {
+            $notes[] = 'Operation, evidence, libsource event, and rate-limit stores remain file-oriented unless their Doctrine backends are configured.';
         } else {
-            foreach ($strongerStoreNotes as $note) {
+            foreach ($sharedDoctrineStores as $note) {
                 $notes[] = $note;
             }
         }
 
-        if ($indexUsesMeili && $feedbackUsesPdo) {
-            $notes[] = 'Overall distributed readiness can be treated as true when stronger coordination stores are configured for the remaining mutable discovery state.';
-        } elseif ($indexUsesMeili) {
-            $notes[] = 'Overall distributed readiness still remains false until feedback state moves beyond SQLite single-node storage.';
-        } elseif ($feedbackUsesPdo) {
-            $notes[] = 'Overall distributed readiness still remains false until discovery index moves beyond SQLite single-node storage.';
-        } elseif ($strongerStoreNotes !== []) {
-            $notes[] = 'Overall distributed readiness still remains false until discovery index and feedback state move beyond SQLite single-node storage.';
+        if ($distributedReady) {
+            $notes[] = 'Overall distributed readiness can be treated as true when the mutable discovery stores are backed by Doctrine or another shared backend.';
+        } else {
+            $notes[] = 'Overall distributed readiness still remains false until every mutable discovery store moves beyond local file-backed state.';
         }
 
         return new DiscoveryStateTopology(
@@ -134,12 +108,12 @@ final class DiscoveryStateTopologyBuilder
 
     private function discoveryIndexStore(string $localStateRoot): DiscoveryStateStoreDescriptor
     {
-        if (strtolower(trim($this->indexBackend)) === 'meili') {
-            $sharedConfigured = trim($this->meiliUrl) !== '';
+        if ('meili' === strtolower(trim($this->indexBackend))) {
+            $sharedConfigured = '' !== trim($this->meiliUrl);
             $prefix = trim($this->meiliIndexPrefix);
-            $path = trim($this->meiliUrl) === ''
-                ? sprintf('meili:%s', $prefix === '' ? 'discovering' : $prefix)
-                : sprintf('%s#%s', trim($this->meiliUrl), $prefix === '' ? 'discovering' : $prefix);
+            $path = '' === trim($this->meiliUrl)
+                ? sprintf('meili:%s', '' === $prefix ? 'discovering' : $prefix)
+                : sprintf('%s#%s', trim($this->meiliUrl), '' === $prefix ? 'discovering' : $prefix);
 
             return new DiscoveryStateStoreDescriptor(
                 name: 'discoveryIndex',
@@ -155,7 +129,20 @@ final class DiscoveryStateTopologyBuilder
         return $this->sqliteStore('discoveryIndex', $this->discoverySqlitePath, $localStateRoot);
     }
 
-    private function sqliteStore(string $name, string $path, string $localStateRoot): DiscoveryStateStoreDescriptor
+    private function feedbackStore(): DiscoveryStateStoreDescriptor
+    {
+        return new DiscoveryStateStoreDescriptor(
+            name: 'feedbackStore',
+            backend: 'doctrine',
+            path: 'doctrine:discovery_feedback',
+            storageMode: 'database',
+            sharedConfigured: true,
+            multiReplicaWriteReady: true,
+            concerns: ['database-coordination-store', 'shared-feedback-coordination'],
+        );
+    }
+
+    private function sqliteStore(string $nameEntity, string $path, string $localStateRoot): DiscoveryStateStoreDescriptor
     {
         $normalizedPath = $this->normalizePath($path);
         $sharedConfigured = !$this->isLocalStatePath($normalizedPath, $localStateRoot);
@@ -166,7 +153,7 @@ final class DiscoveryStateTopologyBuilder
         }
 
         return new DiscoveryStateStoreDescriptor(
-            name: $name,
+            name: $nameEntity,
             backend: 'sqlite',
             path: $normalizedPath,
             storageMode: $sharedConfigured ? 'shared_file' : 'local_file',
@@ -176,24 +163,29 @@ final class DiscoveryStateTopologyBuilder
         );
     }
 
-    private function feedbackStore(string $localStateRoot): DiscoveryStateStoreDescriptor
-    {
-        if (strtolower(trim($this->feedbackBackend)) === 'pdo') {
-            return $this->coordinationStore(
-                name: 'feedbackStore',
-                path: $this->feedbackPath,
-                backend: $this->feedbackBackend,
-                pdoDsn: $this->feedbackPdoDsn,
-                pdoTable: $this->feedbackPdoTable,
-                localStateRoot: $localStateRoot,
-                coordinationConcern: 'shared-feedback-coordination',
+    private function coordinationStore(
+        string $nameEntity,
+        string $path,
+        string $backend,
+        string $localStateRoot,
+        string $coordinationConcern,
+    ): DiscoveryStateStoreDescriptor {
+        if ('doctrine' === strtolower(trim($backend))) {
+            return new DiscoveryStateStoreDescriptor(
+                name: $nameEntity,
+                backend: 'doctrine',
+                path: sprintf('doctrine:%s', $nameEntity),
+                storageMode: 'database',
+                sharedConfigured: true,
+                multiReplicaWriteReady: true,
+                concerns: ['database-coordination-store', $coordinationConcern],
             );
         }
 
-        return $this->sqliteStore('feedbackStore', $this->feedbackPath, $localStateRoot);
+        return $this->jsonStore($nameEntity, $path, $localStateRoot);
     }
 
-    private function jsonStore(string $name, string $path, string $localStateRoot): DiscoveryStateStoreDescriptor
+    private function jsonStore(string $nameEntity, string $path, string $localStateRoot): DiscoveryStateStoreDescriptor
     {
         $normalizedPath = $this->normalizePath($path);
         $sharedConfigured = !$this->isLocalStatePath($normalizedPath, $localStateRoot);
@@ -204,7 +196,7 @@ final class DiscoveryStateTopologyBuilder
         }
 
         return new DiscoveryStateStoreDescriptor(
-            name: $name,
+            name: $nameEntity,
             backend: 'json_file',
             path: $normalizedPath,
             storageMode: $sharedConfigured ? 'shared_file' : 'local_file',
@@ -214,55 +206,9 @@ final class DiscoveryStateTopologyBuilder
         );
     }
 
-    private function coordinationStore(
-        string $name,
-        string $path,
-        string $backend,
-        string $pdoDsn,
-        string $pdoTable,
-        string $localStateRoot,
-        string $coordinationConcern,
-    ): DiscoveryStateStoreDescriptor {
-        if (strtolower(trim($backend)) === 'pdo') {
-            $dsn = trim($pdoDsn);
-            $sharedConfigured = $dsn !== '';
-            $sqliteDsn = str_starts_with(strtolower($dsn), 'sqlite:');
-
-            $concerns = ['database-coordination-store', $coordinationConcern];
-            if ($sqliteDsn) {
-                $concerns[] = 'sqlite-single-writer';
-            }
-
-            return new DiscoveryStateStoreDescriptor(
-                name: $name,
-                backend: 'pdo_table',
-                path: $dsn === '' ? sprintf('pdo:%s', $pdoTable) : sprintf('%s#%s', $dsn, $pdoTable),
-                storageMode: 'database',
-                sharedConfigured: $sharedConfigured,
-                multiReplicaWriteReady: $sharedConfigured && !$sqliteDsn,
-                concerns: $concerns,
-            );
-        }
-
-        return $this->jsonStore($name, $path, $localStateRoot);
-    }
-
-    private function rateLimitStore(string $localStateRoot): DiscoveryStateStoreDescriptor
-    {
-        return $this->coordinationStore(
-            name: 'rateLimitStore',
-            path: $this->rateLimitStorePath,
-            backend: $this->rateLimitBackend,
-            pdoDsn: $this->rateLimitPdoDsn,
-            pdoTable: $this->rateLimitPdoTable,
-            localStateRoot: $localStateRoot,
-            coordinationConcern: 'shared-counter-coordination',
-        );
-    }
-
     private function isLocalStatePath(string $path, string $localStateRoot): bool
     {
-        return $path === $localStateRoot || str_starts_with($path, $localStateRoot . '/');
+        return $path === $localStateRoot || str_starts_with($path, $localStateRoot.'/');
     }
 
     private function normalizePath(string $path): string

@@ -14,7 +14,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-
 /**
  * Handles management HTTP endpoints for the discovery briefing management surface.
  */
@@ -34,7 +33,10 @@ final class DiscoveryBriefingManagementController extends AbstractDirectoryBacke
      * Handles the index endpoint for the discovery briefing management HTTP surface.
      */
     #[Route('/management/discovery/briefing', name: 'app_management_discovery_briefing', methods: ['GET'])]
-    public function index(Request $request): Response
+    /**
+     * @return Response|array<string, mixed>
+     */
+    public function index(Request $request): Response|array
     {
         $lastActionResult = $this->actionResolver->resolve($request);
 

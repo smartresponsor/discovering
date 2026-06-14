@@ -1,0 +1,4023 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Static canonicalization audit for the Discovering Symfony component.
+ *
+ * This tool is intentionally read-only. It scans the current working tree and
+ * reports structural findings that guide touched-file cleanup waves.
+ */
+
+$root = dirname(__DIR__);
+$src = $root . DIRECTORY_SEPARATOR . 'src';
+$tests = $root . DIRECTORY_SEPARATOR . 'tests';
+
+if (!is_dir($src)) {
+    fwrite(STDERR, "Cannot find src directory from {$root}\n");
+    exit(1);
+}
+
+$format = 'text';
+foreach ($argv as $arg) {
+    if ($arg === '--format=json') {
+        $format = 'json';
+    }
+}
+
+/** @return list<string> */
+function phpFiles(string $directory): array
+{
+    if (!is_dir($directory)) {
+        return [];
+    }
+
+    $files = [];
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS)
+    );
+
+    foreach ($iterator as $file) {
+        if (!$file instanceof SplFileInfo || !$file->isFile()) {
+            continue;
+        }
+
+        if ($file->getExtension() === 'php') {
+            $files[] = $file->getPathname();
+        }
+    }
+
+    sort($files);
+
+    return $files;
+}
+
+function relativePath(string $root, string $path): string
+{
+    $root = rtrim(str_replace('\\', '/', realpath($root) ?: $root), '/');
+    $path = str_replace('\\', '/', realpath($path) ?: $path);
+
+    if (str_starts_with($path, $root . '/')) {
+        return substr($path, strlen($root) + 1);
+    }
+
+    return $path;
+}
+
+/** @return array{namespace:string|null,type:string|null,name:string|null} */
+function readPhpSymbol(string $path): array
+{
+    $contents = file_get_contents($path);
+    if ($contents === false) {
+        return ['namespace' => null, 'type' => null, 'name' => null];
+    }
+
+    $namespace = null;
+    if (preg_match('/^namespace\s+([^;]+);/m', $contents, $match) === 1) {
+        $namespace = $match[1];
+    }
+
+    $type = null;
+    $name = null;
+    if (preg_match('/^(?:final\s+|abstract\s+)?(class|interface|trait|enum)\s+(\w+)/m', $contents, $match) === 1) {
+        $type = $match[1];
+        $name = $match[2];
+    }
+
+    return ['namespace' => $namespace, 'type' => $type, 'name' => $name];
+}
+
+$srcFiles = phpFiles($src);
+$testFiles = phpFiles($tests);
+$findings = [];
+$symbols = [];
+
+foreach ($srcFiles as $file) {
+    $relative = relativePath($root, $file);
+    $symbol = readPhpSymbol($file);
+    $symbols[] = ['path' => $relative] + $symbol;
+
+    $basename = basename($file, '.php');
+    if ($symbol['name'] !== null && $symbol['name'] !== $basename) {
+        $findings[] = [
+            'severity' => 'error',
+            'code' => 'class_file_name_mismatch',
+            'path' => $relative,
+            'message' => sprintf('Class/interface name %s does not match file name %s.', $symbol['name'], $basename),
+        ];
+    }
+
+    if ($symbol['namespace'] !== null && $symbol['namespace'] !== 'App' && !str_starts_with($symbol['namespace'], 'App\\')) {
+        $findings[] = [
+            'severity' => 'error',
+            'code' => 'namespace_not_app',
+            'path' => $relative,
+            'message' => sprintf('Namespace %s does not start with App\\.', $symbol['namespace']),
+        ];
+    }
+
+    if ($symbol['type'] === 'interface' && str_starts_with($relative, 'src/Service/')) {
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'interface_inside_service_layer',
+            'path' => $relative,
+            'message' => 'Interface contract is located inside the service implementation layer.',
+        ];
+    }
+
+    if (str_starts_with($relative, 'src/EventSubscriber/')) {
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'event_subscriber_layer_name',
+            'path' => $relative,
+            'message' => 'Subscriber is under src/EventSubscriber; canonical cleanup should evaluate src/Subscriber.',
+        ];
+    }
+
+    if (str_starts_with($relative, 'src/Entity/') && $symbol['name'] !== null && !str_ends_with($symbol['name'], 'Entity')) {
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'entity_missing_entity_suffix',
+            'path' => $relative,
+            'message' => 'Entity class does not end with Entity.',
+        ];
+    }
+
+    if (str_starts_with($relative, 'src/Command/') && $symbol['name'] !== null && !str_ends_with($symbol['name'], 'Command')) {
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'command_missing_command_suffix',
+            'path' => $relative,
+            'message' => 'Command class does not end with Command.',
+        ];
+    }
+
+    if (str_starts_with($relative, 'src/Controller/') && $symbol['name'] !== null && !str_ends_with($symbol['name'], 'Controller')) {
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'controller_missing_controller_suffix',
+            'path' => $relative,
+            'message' => 'Controller class does not end with Controller.',
+        ];
+    }
+
+    if (str_starts_with($relative, 'src/Form/') && $symbol['name'] !== null && !str_ends_with($symbol['name'], 'Type')) {
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'form_missing_type_suffix',
+            'path' => $relative,
+            'message' => 'Symfony form class does not end with Type.',
+        ];
+    }
+}
+
+$migrationCandidates = [];
+$migrationsRoot = $root . DIRECTORY_SEPARATOR . 'migrations';
+if (is_dir($migrationsRoot)) {
+    $migrationIterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($migrationsRoot, FilesystemIterator::SKIP_DOTS)
+    );
+
+    foreach ($migrationIterator as $migrationFile) {
+        if (!$migrationFile instanceof SplFileInfo || !$migrationFile->isFile()) {
+            continue;
+        }
+
+        if ($migrationFile->getExtension() === 'php') {
+            $migrationCandidates[] = $migrationFile->getPathname();
+        }
+    }
+
+    sort($migrationCandidates);
+}
+$entityFiles = array_values(array_filter(
+    $srcFiles,
+    static fn (string $file): bool => str_contains(str_replace('\\', '/', $file), '/src/Entity/')
+));
+
+$rootManifestFiles = [];
+foreach (['ARCHITECTURE_MANIFEST.md', 'BOUNDING_MANIFEST.md', 'PRODUCT_MANIFEST.md', 'CODEX_CLI_PROMPT.txt'] as $rootManifestName) {
+    if (is_file($root . DIRECTORY_SEPARATOR . $rootManifestName)) {
+        $rootManifestFiles[] = $rootManifestName;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'root_manifest_file',
+            'path' => $rootManifestName,
+            'message' => 'Durable producer-facing manifest belongs under docs/manifests/ rather than repository root.',
+        ];
+    }
+}
+
+$stalePatchManifestFiles = [];
+foreach (['MANIFEST.txt', 'PATCH_MANIFEST.txt'] as $patchManifestName) {
+    if (is_file($root . DIRECTORY_SEPARATOR . $patchManifestName)) {
+        $stalePatchManifestFiles[] = $patchManifestName;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'stale_root_patch_manifest',
+            'path' => $patchManifestName,
+            'message' => 'One-off patch delivery metadata should not remain as a permanent root artifact.',
+        ];
+    }
+}
+
+if ($entityFiles !== [] && $migrationCandidates === []) {
+    $findings[] = [
+        'severity' => 'warning',
+        'code' => 'entity_without_migrations',
+        'path' => 'migrations/',
+        'message' => 'Doctrine entities exist, but no Doctrine migrations were found.',
+    ];
+}
+
+foreach ($entityFiles as $entityFile) {
+    $entityContents = file_get_contents($entityFile);
+    if ($entityContents === false) {
+        continue;
+    }
+
+    if (preg_match("/ORM\\\\Table\(name:\s*'([^']+)'/", $entityContents, $match) !== 1) {
+        continue;
+    }
+
+    if (!str_starts_with($match[1], 'discovery_')) {
+        $findings[] = [
+            'severity' => 'error',
+            'code' => 'entity_table_prefix_violation',
+            'path' => relativePath($root, $entityFile),
+            'message' => sprintf('Doctrine table %s does not use the required discovery_ prefix.', $match[1]),
+        ];
+    }
+}
+
+
+
+
+$readonlyScanRoots = [
+    'DTO' => $root . '/src/Dto/Discovery',
+    'ValueObject' => $root . '/src/ValueObject/Discovery',
+];
+
+foreach ($readonlyScanRoots as $label => $scanRoot) {
+    if (!is_dir($scanRoot)) {
+        continue;
+    }
+
+    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($scanRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($iterator as $file) {
+        if (!$file instanceof SplFileInfo || !$file->isFile() || $file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $contents = (string) file_get_contents($file->getPathname());
+        if (preg_match('/\\b(?:final\\s+)?class\\s+\\w+\\b/', $contents) === 1 && !str_contains($contents, 'readonly class')) {
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'dto_value_object_not_readonly',
+                'path' => relativePath($root, $file->getPathname()),
+                'message' => sprintf('%s data carrier is not declared readonly.', $label),
+            ];
+        }
+    }
+}
+
+// Wave 4 DTO/ValueObject readonly posture.
+
+
+
+
+// Wave 8 residual legacy path posture.
+$legacyServiceInterfaceFiles = [];
+$legacyServiceInterfaceCandidates = [
+    'src/Service/Discovery/Diagnostics/DiscoveryProbeTransportInterface.php',
+    'src/Service/Discovery/DiscoveryFeedbackStoreInterface.php',
+    'src/Service/Discovery/Libsource/Log/LibsourceOperatorEventLogStoreInterface.php',
+    'src/Service/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php',
+    'src/Service/Discovery/RateLimit/DiscoveryRateLimitStoreInterface.php',
+    'src/Service/Discovery/Rebuild/DiscoveryRebuildEvidenceStoreInterface.php',
+    'src/Service/Discovery/Source/Repository/DiscoverySourceRecordRepositoryInterface.php',
+    'src/Service/Discovery/Support/DirectoryBackedFamilyManagementActionServiceInterface.php',
+];
+
+foreach ($legacyServiceInterfaceCandidates as $legacyPath) {
+    if (is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $legacyPath))) {
+        $legacyServiceInterfaceFiles[] = $legacyPath;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'wave8_residual_service_interface_path',
+            'path' => $legacyPath,
+            'message' => 'Legacy service-layer interface path remains after ServiceInterface extraction and should be retired with backup.',
+        ];
+    }
+}
+
+$legacyEventSubscriberFiles = [];
+$legacyEventSubscriberCandidates = [
+    'src/EventSubscriber/DiscoveryEndpointSecuritySubscriber.php',
+    'src/EventSubscriber/DiscoveryMutationRequestHardeningSubscriber.php',
+    'src/EventSubscriber/DiscoveryRateLimitSubscriber.php',
+    'src/EventSubscriber/DiscoveryRequestCorrelationSubscriber.php',
+    'src/EventSubscriber/DiscoveryResponseSecurityHeadersSubscriber.php',
+];
+
+foreach ($legacyEventSubscriberCandidates as $legacyPath) {
+    if (is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $legacyPath))) {
+        $legacyEventSubscriberFiles[] = $legacyPath;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'wave8_residual_event_subscriber_path',
+            'path' => $legacyPath,
+            'message' => 'Legacy EventSubscriber path remains after Subscriber-layer extraction and should be retired with backup.',
+        ];
+    }
+}
+
+
+// Wave 10 config/service wiring taxonomy posture.
+$serviceConfigFindings = [];
+$rootServicesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'services.yaml';
+$discoveryServicesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'services' . DIRECTORY_SEPARATOR . 'discovery.yaml';
+
+if (!is_file($discoveryServicesFile)) {
+    $serviceConfigFindings[] = 'missing_discovery_services_file';
+    $findings[] = [
+        'severity' => 'warning',
+        'code' => 'missing_discovery_services_file',
+        'path' => 'config/services/discovery.yaml',
+        'message' => 'Discovery-specific service wiring should live in config/services/discovery.yaml and be imported by the root services file.',
+    ];
+}
+
+if (is_file($rootServicesFile)) {
+    $rootServicesContents = (string) file_get_contents($rootServicesFile);
+    if (!str_contains($rootServicesContents, 'services/discovery.yaml')) {
+        $serviceConfigFindings[] = 'missing_discovery_services_import';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_discovery_services_import',
+            'path' => 'config/services.yaml',
+            'message' => 'Root services.yaml should import config/services/discovery.yaml for component-specific wiring.',
+        ];
+    }
+
+    $rootDiscoverySpecificLines = preg_grep('/^\s+App\\\\Service\\\\Discovery\\\\|^\s+App\\\\ServiceInterface\\\\Discovery\\\\|^\s+app\.discovery\./', explode("\n", $rootServicesContents));
+    if ($rootDiscoverySpecificLines !== false && $rootDiscoverySpecificLines !== []) {
+        $serviceConfigFindings[] = 'root_services_contains_discovery_wiring';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'root_services_contains_discovery_wiring',
+            'path' => 'config/services.yaml',
+            'message' => 'Root services.yaml still contains Discovery-specific parameters or service wiring.',
+        ];
+    }
+}
+
+
+// Wave 11 console command taxonomy posture.
+$commandNameFindings = [];
+foreach ($srcFiles as $commandFile) {
+    $relative = relativePath($root, $commandFile);
+    if (!str_starts_with($relative, 'src/Command/Discovery/') || !str_ends_with($relative, 'Command.php')) {
+        continue;
+    }
+
+    $commandContents = (string) file_get_contents($commandFile);
+    if (preg_match("/AsCommand\\(\\s*name:\\s*'([^']+)'/", $commandContents, $commandMatch) !== 1) {
+        $commandNameFindings[] = $relative . ':missing_as_command_name';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'command_missing_as_command_name',
+            'path' => $relative,
+            'message' => 'Discovery command should declare an explicit Symfony AsCommand name.',
+        ];
+
+        continue;
+    }
+
+    $commandName = $commandMatch[1];
+    if (!str_starts_with($commandName, 'app:discovery:')) {
+        $commandNameFindings[] = $relative . ':' . $commandName;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'command_name_prefix_violation',
+            'path' => $relative,
+            'message' => sprintf('Discovery command name %s should use the canonical app:discovery:* namespace.', $commandName),
+        ];
+    }
+}
+
+$commandManifestPath = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Command' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'MANIFEST.md';
+if (!is_file($commandManifestPath)) {
+    $commandNameFindings[] = 'missing_command_manifest';
+    $findings[] = [
+        'severity' => 'warning',
+        'code' => 'missing_command_manifest',
+        'path' => 'src/Command/Discovery/MANIFEST.md',
+        'message' => 'Discovery command layer should declare its console naming taxonomy and operator surface.',
+    ];
+}
+
+
+// Wave 12 HTTP route taxonomy posture.
+$routeTaxonomyFindings = [];
+$routeAggregateFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'discovery.yaml';
+$routePublicFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'discovery_public.yaml';
+$routeManagementFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'discovery_management.yaml';
+$routeManifestFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'MANIFEST.md';
+
+if (!is_file($routePublicFile)) {
+    $routeTaxonomyFindings[] = 'missing_public_route_file';
+    $findings[] = [
+        'severity' => 'warning',
+        'code' => 'missing_public_route_file',
+        'path' => 'config/routes/discovery_public.yaml',
+        'message' => 'Public Discovery controller imports should live in their own route file.',
+    ];
+}
+
+if (!is_file($routeManagementFile)) {
+    $routeTaxonomyFindings[] = 'missing_management_route_file';
+    $findings[] = [
+        'severity' => 'warning',
+        'code' => 'missing_management_route_file',
+        'path' => 'config/routes/discovery_management.yaml',
+        'message' => 'Management Discovery controller imports should live in their own route file.',
+    ];
+}
+
+if (!is_file($routeManifestFile)) {
+    $routeTaxonomyFindings[] = 'missing_route_manifest';
+    $findings[] = [
+        'severity' => 'warning',
+        'code' => 'missing_route_manifest',
+        'path' => 'config/routes/MANIFEST.md',
+        'message' => 'Route configuration should have a manifest documenting public and management HTTP surfaces.',
+    ];
+}
+
+if (is_file($routeAggregateFile)) {
+    $routeAggregateContents = (string) file_get_contents($routeAggregateFile);
+    foreach (['discovery_public.yaml', 'discovery_management.yaml'] as $expectedRouteImport) {
+        if (!str_contains($routeAggregateContents, $expectedRouteImport)) {
+            $routeTaxonomyFindings[] = 'missing_route_import:' . $expectedRouteImport;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'missing_route_surface_import',
+                'path' => 'config/routes/discovery.yaml',
+                'message' => sprintf('Route aggregate should import %s.', $expectedRouteImport),
+            ];
+        }
+    }
+}
+
+foreach ($srcFiles as $controllerFile) {
+    $relative = relativePath($root, $controllerFile);
+    if (!str_starts_with($relative, 'src/Controller/') || !str_ends_with($relative, 'Controller.php')) {
+        continue;
+    }
+
+    $controllerContents = (string) file_get_contents($controllerFile);
+    if (preg_match_all("/name:\s*'([^']+)'/", $controllerContents, $routeNameMatches) !== false) {
+        foreach ($routeNameMatches[1] as $routeName) {
+            if (str_starts_with($relative, 'src/Controller/Discovery/') && !str_starts_with($routeName, 'app_discovery_')) {
+                $routeTaxonomyFindings[] = $relative . ':' . $routeName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'public_route_name_prefix_violation',
+                    'path' => $relative,
+                    'message' => sprintf('Public Discovery route name %s should use app_discovery_*.', $routeName),
+                ];
+            }
+
+            if (str_starts_with($relative, 'src/Controller/Management/') && !str_starts_with($routeName, 'app_management_discovery_')) {
+                $routeTaxonomyFindings[] = $relative . ':' . $routeName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'management_route_name_prefix_violation',
+                    'path' => $relative,
+                    'message' => sprintf('Management Discovery route name %s should use app_management_discovery_*.', $routeName),
+                ];
+            }
+        }
+    }
+}
+
+
+// Wave 13 test taxonomy posture.
+$testTaxonomyFindings = [];
+$requiredTestManifests = [
+    'tests/MANIFEST.md',
+    'tests/Unit/Discovery/MANIFEST.md',
+    'tests/Functional/Discovery/MANIFEST.md',
+    'tests/Contract/Discovery/MANIFEST.md',
+    'tests/Behavioral/Discovery/MANIFEST.md',
+    'tests/Support/MANIFEST.md',
+];
+
+foreach ($requiredTestManifests as $requiredTestManifest) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredTestManifest))) {
+        $testTaxonomyFindings[] = 'missing_manifest:' . $requiredTestManifest;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_test_taxonomy_manifest',
+            'path' => $requiredTestManifest,
+            'message' => 'Canonical test bucket should have a MANIFEST.md documenting its verification scope.',
+        ];
+    }
+}
+
+foreach ($testFiles as $testFile) {
+    $relative = relativePath($root, $testFile);
+    if ($relative === 'tests/bootstrap.php') {
+        continue;
+    }
+
+    $isCanonicalTestBucket = str_starts_with($relative, 'tests/Unit/Discovery/')
+        || str_starts_with($relative, 'tests/Functional/Discovery/')
+        || str_starts_with($relative, 'tests/Contract/Discovery/')
+        || str_starts_with($relative, 'tests/Behavioral/Discovery/')
+        || str_starts_with($relative, 'tests/Support/');
+
+    if (!$isCanonicalTestBucket) {
+        $testTaxonomyFindings[] = 'non_canonical_test_path:' . $relative;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'non_canonical_test_path',
+            'path' => $relative,
+            'message' => 'Discovering tests should live under Unit, Functional, Contract, Behavioral or Support taxonomy buckets.',
+        ];
+    }
+
+    $basename = basename($relative, '.php');
+    $isSupportFile = str_starts_with($relative, 'tests/Support/')
+        || str_starts_with($basename, 'Abstract')
+        || str_ends_with($basename, 'Trait')
+        || str_ends_with($basename, 'Factory')
+        || str_ends_with($basename, 'Assertions')
+        || str_ends_with($basename, 'TestCase');
+
+    if (!$isSupportFile && !str_ends_with($basename, 'Test')) {
+        $testTaxonomyFindings[] = 'test_suffix_violation:' . $relative;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'test_class_file_missing_test_suffix',
+            'path' => $relative,
+            'message' => 'Concrete Discovering test files should use the Test suffix.',
+        ];
+    }
+}
+
+
+// Wave 14 documentation taxonomy posture.
+$documentationTaxonomyFindings = [];
+$requiredDocumentationFiles = [
+    'docs/MANIFEST.md',
+    'docs/antora.yml',
+    'docs/modules/ROOT/nav.adoc',
+    'docs/modules/ROOT/pages/index.adoc',
+    'docs/modules/ROOT/pages/architecture.adoc',
+    'docs/modules/ROOT/pages/install.adoc',
+    'docs/modules/ROOT/pages/operations.adoc',
+    'docs/modules/ROOT/pages/api.adoc',
+    'docs/modules/ROOT/pages/canonization.adoc',
+    'docs/modules/ROOT/pages/manifests.adoc',
+    'docs/modules/ROOT/pages/generated.adoc',
+    'docs/generated/MANIFEST.md',
+];
+
+foreach ($requiredDocumentationFiles as $requiredDocumentationFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredDocumentationFile))) {
+        $documentationTaxonomyFindings[] = 'missing_documentation_file:' . $requiredDocumentationFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_documentation_taxonomy_file',
+            'path' => $requiredDocumentationFile,
+            'message' => 'Documentation taxonomy file is required for the Antora producer and docs bucket posture.',
+        ];
+    }
+}
+
+$antoraFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'antora.yml';
+if (is_file($antoraFile)) {
+    $antoraContents = (string) file_get_contents($antoraFile);
+    if (!str_contains($antoraContents, 'modules/ROOT/nav.adoc')) {
+        $documentationTaxonomyFindings[] = 'antora_missing_root_nav';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'antora_missing_root_nav',
+            'path' => 'docs/antora.yml',
+            'message' => 'Antora producer descriptor should reference modules/ROOT/nav.adoc.',
+        ];
+    }
+}
+
+$documentationNavFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . 'ROOT' . DIRECTORY_SEPARATOR . 'nav.adoc';
+if (is_file($documentationNavFile)) {
+    $documentationNavContents = (string) file_get_contents($documentationNavFile);
+    foreach (['index.adoc', 'architecture.adoc', 'install.adoc', 'operations.adoc', 'api.adoc', 'canonization.adoc', 'manifests.adoc', 'generated.adoc'] as $expectedNavPage) {
+        if (!str_contains($documentationNavContents, $expectedNavPage)) {
+            $documentationTaxonomyFindings[] = 'nav_missing_page:' . $expectedNavPage;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'documentation_nav_missing_page',
+                'path' => 'docs/modules/ROOT/nav.adoc',
+                'message' => sprintf('Antora navigation should expose %s.', $expectedNavPage),
+            ];
+        }
+    }
+}
+
+$generatedRoot = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'generated';
+if (is_dir($generatedRoot)) {
+    $generatedIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($generatedRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($generatedIterator as $generatedFile) {
+        if (!$generatedFile instanceof SplFileInfo || !$generatedFile->isFile()) {
+            continue;
+        }
+
+        $generatedRelative = relativePath($root, $generatedFile->getPathname());
+        $allowedGeneratedFile = $generatedRelative === 'docs/generated/MANIFEST.md'
+            || str_starts_with($generatedRelative, 'docs/generated/openapi/')
+            || str_starts_with($generatedRelative, 'docs/generated/doctum/');
+
+        if (!$allowedGeneratedFile) {
+            $documentationTaxonomyFindings[] = 'generated_file_outside_known_surface:' . $generatedRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'generated_documentation_unknown_surface',
+                'path' => $generatedRelative,
+                'message' => 'Generated documentation artifacts should live under known generated surfaces such as openapi or doctum.',
+            ];
+        }
+    }
+}
+
+
+
+// Wave 15 templates/UI taxonomy posture.
+$templateTaxonomyFindings = [];
+$requiredTemplateFiles = [
+    'templates/MANIFEST.md',
+    'templates/base.html.twig',
+    'templates/discovery/MANIFEST.md',
+    'templates/discovery/index.html.twig',
+    'templates/management/MANIFEST.md',
+    'templates/management/discovery/MANIFEST.md',
+];
+
+foreach ($requiredTemplateFiles as $requiredTemplateFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredTemplateFile))) {
+        $templateTaxonomyFindings[] = 'missing_template_taxonomy_file:' . $requiredTemplateFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_template_taxonomy_file',
+            'path' => $requiredTemplateFile,
+            'message' => 'Template taxonomy file is required for the public/operator UI surface posture.',
+        ];
+    }
+}
+
+$templateRoot = $root . DIRECTORY_SEPARATOR . 'templates';
+if (is_dir($templateRoot)) {
+    $templateIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($templateRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($templateIterator as $templateFile) {
+        if (!$templateFile instanceof SplFileInfo || !$templateFile->isFile()) {
+            continue;
+        }
+
+        $templateRelative = relativePath($root, $templateFile->getPathname());
+        if (!str_ends_with($templateRelative, '.twig') && basename($templateRelative) !== 'MANIFEST.md') {
+            $templateTaxonomyFindings[] = 'unexpected_template_file:' . $templateRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'unexpected_template_file',
+                'path' => $templateRelative,
+                'message' => 'Templates should be Twig files or MANIFEST.md taxonomy files.',
+            ];
+        }
+
+        if (str_ends_with($templateRelative, '.twig') && !str_ends_with($templateRelative, '.html.twig')) {
+            $templateTaxonomyFindings[] = 'non_html_twig_template:' . $templateRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'non_html_twig_template',
+                'path' => $templateRelative,
+                'message' => 'Concrete Discovering page templates should keep the .html.twig suffix.',
+            ];
+        }
+
+        if (str_starts_with($templateRelative, 'templates/management/') && !is_file($root . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'management' . DIRECTORY_SEPARATOR . 'MANIFEST.md')) {
+            $templateTaxonomyFindings[] = 'management_template_manifest_missing';
+        }
+    }
+}
+
+$publicDiscoveryTemplate = $root . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'index.html.twig';
+if (is_file($publicDiscoveryTemplate)) {
+    $publicDiscoveryTemplateContents = (string) file_get_contents($publicDiscoveryTemplate);
+    if (str_contains($publicDiscoveryTemplateContents, 'app_management_discovery_')) {
+        $templateTaxonomyFindings[] = 'public_template_links_management_surface';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'public_template_links_management_surface',
+            'path' => 'templates/discovery/index.html.twig',
+            'message' => 'Public discovery template should not directly expose management routes.',
+        ];
+    }
+}
+
+$managementDiscoveryRoot = $root . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'management' . DIRECTORY_SEPARATOR . 'discovery';
+if (is_dir($managementDiscoveryRoot)) {
+    $managementDiscoveryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($managementDiscoveryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($managementDiscoveryIterator as $managementTemplateFile) {
+        if (!$managementTemplateFile instanceof SplFileInfo || !$managementTemplateFile->isFile() || !str_ends_with($managementTemplateFile->getFilename(), '.twig')) {
+            continue;
+        }
+
+        $managementTemplateContents = (string) file_get_contents($managementTemplateFile->getPathname());
+        if (!str_contains($managementTemplateContents, "{% extends 'base.html.twig' %}") && !str_contains($managementTemplateContents, "{% extends 'management/discovery/")) {
+            $managementRelative = relativePath($root, $managementTemplateFile->getPathname());
+            $templateTaxonomyFindings[] = 'management_template_missing_canonical_extends:' . $managementRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'management_template_missing_canonical_extends',
+                'path' => $managementRelative,
+                'message' => 'Discovery management templates should extend base.html.twig or a discovery management primitive.',
+            ];
+        }
+    }
+}
+
+
+
+// Wave 16 controller taxonomy posture.
+$controllerTaxonomyFindings = [];
+$requiredControllerTaxonomyFiles = [
+    'src/Controller/MANIFEST.md',
+    'src/Controller/Discovery/MANIFEST.md',
+    'src/Controller/Management/MANIFEST.md',
+];
+
+foreach ($requiredControllerTaxonomyFiles as $requiredControllerTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredControllerTaxonomyFile))) {
+        $controllerTaxonomyFindings[] = 'missing_controller_taxonomy_file:' . $requiredControllerTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_controller_taxonomy_file',
+            'path' => $requiredControllerTaxonomyFile,
+            'message' => 'Controller taxonomy file is required for public/operator HTTP surface posture.',
+        ];
+    }
+}
+
+$controllerRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Controller';
+if (is_dir($controllerRoot)) {
+    $controllerIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($controllerRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($controllerIterator as $controllerFile) {
+        if (!$controllerFile instanceof SplFileInfo || !$controllerFile->isFile() || $controllerFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $controllerRelative = relativePath($root, $controllerFile->getPathname());
+        $controllerContents = (string) file_get_contents($controllerFile->getPathname());
+        $controllerClassName = basename($controllerFile->getFilename(), '.php');
+
+        if (!str_ends_with($controllerClassName, 'Controller')) {
+            $controllerTaxonomyFindings[] = 'controller_missing_suffix:' . $controllerRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'controller_missing_suffix',
+                'path' => $controllerRelative,
+                'message' => 'Concrete HTTP controller class files should keep the Controller suffix.',
+            ];
+        }
+
+        if (str_starts_with($controllerRelative, 'src/Controller/Discovery/')) {
+            if (!str_contains($controllerContents, 'namespace App\\Controller\\Discovery;')) {
+                $controllerTaxonomyFindings[] = 'public_controller_namespace_mismatch:' . $controllerRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'public_controller_namespace_mismatch',
+                    'path' => $controllerRelative,
+                    'message' => 'Public discovery controllers should use App\\Controller\\Discovery namespace.',
+                ];
+            }
+
+            if (str_contains($controllerContents, 'app_management_discovery_') || str_contains($controllerContents, '/management/discovery')) {
+                $controllerTaxonomyFindings[] = 'public_controller_exposes_management_route:' . $controllerRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'public_controller_exposes_management_route',
+                    'path' => $controllerRelative,
+                    'message' => 'Public discovery controllers should not expose management route names or paths.',
+                ];
+            }
+
+            if (str_contains($controllerContents, "render('management/discovery/")) {
+                $controllerTaxonomyFindings[] = 'public_controller_renders_management_template:' . $controllerRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'public_controller_renders_management_template',
+                    'path' => $controllerRelative,
+                    'message' => 'Public discovery controllers should not render management templates.',
+                ];
+            }
+        }
+
+        if (str_starts_with($controllerRelative, 'src/Controller/Management/')) {
+            if (!str_contains($controllerContents, 'namespace App\\Controller\\Management;')) {
+                $controllerTaxonomyFindings[] = 'management_controller_namespace_mismatch:' . $controllerRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'management_controller_namespace_mismatch',
+                    'path' => $controllerRelative,
+                    'message' => 'Management controllers should use App\\Controller\\Management namespace.',
+                ];
+            }
+
+            $isAbstractControllerPrimitive = str_contains($controllerContents, 'abstract class ');
+            if (!$isAbstractControllerPrimitive && !str_ends_with($controllerClassName, 'ManagementController')) {
+                $controllerTaxonomyFindings[] = 'management_controller_missing_management_suffix:' . $controllerRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'management_controller_missing_management_suffix',
+                    'path' => $controllerRelative,
+                    'message' => 'Concrete management controllers should keep the ManagementController suffix.',
+                ];
+            }
+
+            if (str_contains($controllerContents, '#[Route(') && !str_contains($controllerContents, 'app_management_discovery_')) {
+                $controllerTaxonomyFindings[] = 'management_controller_missing_route_prefix:' . $controllerRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'management_controller_missing_route_prefix',
+                    'path' => $controllerRelative,
+                    'message' => 'Management controller routes should use app_management_discovery_* route names.',
+                ];
+            }
+
+            if (str_contains($controllerContents, '#[Route(') && !str_contains($controllerContents, '/management/discovery')) {
+                $controllerTaxonomyFindings[] = 'management_controller_missing_path_prefix:' . $controllerRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'management_controller_missing_path_prefix',
+                    'path' => $controllerRelative,
+                    'message' => 'Management controller routes should stay under /management/discovery paths.',
+                ];
+            }
+        }
+    }
+}
+
+
+
+// Wave 17 repository/persistence taxonomy posture.
+$repositoryPersistenceTaxonomyFindings = [];
+$requiredPersistenceTaxonomyFiles = [
+    'src/Entity/MANIFEST.md',
+    'src/Entity/Discovery/MANIFEST.md',
+    'src/Service/Discovery/Source/Repository/MANIFEST.md',
+    'migrations/discovery_schema_baseline.sql',
+];
+
+foreach ($requiredPersistenceTaxonomyFiles as $requiredPersistenceTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredPersistenceTaxonomyFile))) {
+        $repositoryPersistenceTaxonomyFindings[] = 'missing_persistence_taxonomy_file:' . $requiredPersistenceTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_persistence_taxonomy_file',
+            'path' => $requiredPersistenceTaxonomyFile,
+            'message' => 'Persistence taxonomy file is required for Entity-first and source-repository posture.',
+        ];
+    }
+}
+
+$entityDiscoveryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Entity' . DIRECTORY_SEPARATOR . 'Discovery';
+if (is_dir($entityDiscoveryRoot)) {
+    $entityDiscoveryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($entityDiscoveryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($entityDiscoveryIterator as $entityFile) {
+        if (!$entityFile instanceof SplFileInfo || !$entityFile->isFile() || $entityFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $entityRelative = relativePath($root, $entityFile->getPathname());
+        $entityContents = (string) file_get_contents($entityFile->getPathname());
+        $entityClassName = basename($entityFile->getFilename(), '.php');
+
+        if (!str_contains($entityContents, 'namespace App\\Entity\\Discovery;')) {
+            $repositoryPersistenceTaxonomyFindings[] = 'entity_namespace_mismatch:' . $entityRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'entity_namespace_mismatch',
+                'path' => $entityRelative,
+                'message' => 'Discovery entities should use App\\Entity\\Discovery namespace.',
+            ];
+        }
+
+        if (!str_ends_with($entityClassName, 'Entity')) {
+            $repositoryPersistenceTaxonomyFindings[] = 'entity_missing_suffix:' . $entityRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'entity_missing_suffix',
+                'path' => $entityRelative,
+                'message' => 'Doctrine entity class names should keep the Entity suffix.',
+            ];
+        }
+
+        if (preg_match("/#\\[ORM\\\\Table\\(name:\\s*'([^']+)'/", $entityContents, $tableMatch) === 1) {
+            $tableName = $tableMatch[1];
+            if (!str_starts_with($tableName, 'discovery_')) {
+                $repositoryPersistenceTaxonomyFindings[] = 'entity_table_prefix_mismatch:' . $entityRelative . ':' . $tableName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'entity_table_prefix_mismatch',
+                    'path' => $entityRelative,
+                    'message' => sprintf('Discovery entity table "%s" must use the discovery_ prefix.', $tableName),
+                ];
+            }
+        } else {
+            $repositoryPersistenceTaxonomyFindings[] = 'entity_missing_table_mapping:' . $entityRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'entity_missing_table_mapping',
+                'path' => $entityRelative,
+                'message' => 'Discovery entity should declare an explicit ORM table name.',
+            ];
+        }
+
+        if (preg_match('/\\breadonly\\s+class\\b/', $entityContents) === 1 || preg_match('/\\breadonly\\s+final\\s+class\\b/', $entityContents) === 1 || preg_match('/\\bfinal\\s+readonly\\s+class\\b/', $entityContents) === 1) {
+            $repositoryPersistenceTaxonomyFindings[] = 'entity_marked_readonly:' . $entityRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'entity_marked_readonly',
+                'path' => $entityRelative,
+                'message' => 'Doctrine entities should remain mutable persistence models and must not be readonly.',
+            ];
+        }
+    }
+}
+
+$sourceRepositoryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Service' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'Source' . DIRECTORY_SEPARATOR . 'Repository';
+if (is_dir($sourceRepositoryRoot)) {
+    $sourceRepositoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($sourceRepositoryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($sourceRepositoryIterator as $sourceRepositoryFile) {
+        if (!$sourceRepositoryFile instanceof SplFileInfo || !$sourceRepositoryFile->isFile() || $sourceRepositoryFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $sourceRepositoryRelative = relativePath($root, $sourceRepositoryFile->getPathname());
+        $sourceRepositoryContents = (string) file_get_contents($sourceRepositoryFile->getPathname());
+
+        if (!str_contains($sourceRepositoryContents, 'namespace App\\Service\\Discovery\\Source\\Repository;')) {
+            $repositoryPersistenceTaxonomyFindings[] = 'source_repository_namespace_mismatch:' . $sourceRepositoryRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'source_repository_namespace_mismatch',
+                'path' => $sourceRepositoryRelative,
+                'message' => 'File-backed source repositories should stay under App\\Service\\Discovery\\Source\\Repository.',
+            ];
+        }
+
+        if (str_contains($sourceRepositoryContents, 'ServiceEntityRepository') || str_contains($sourceRepositoryContents, 'Doctrine\\Bundle\\DoctrineBundle\\Repository')) {
+            $repositoryPersistenceTaxonomyFindings[] = 'source_repository_mixes_doctrine_repository:' . $sourceRepositoryRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'source_repository_mixes_doctrine_repository',
+                'path' => $sourceRepositoryRelative,
+                'message' => 'File-backed source repositories should not mix Doctrine repository inheritance.',
+            ];
+        }
+    }
+}
+
+$doctrineRepositoryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Repository';
+if (is_dir($doctrineRepositoryRoot)) {
+    $doctrineRepositoryIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($doctrineRepositoryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($doctrineRepositoryIterator as $doctrineRepositoryFile) {
+        if (!$doctrineRepositoryFile instanceof SplFileInfo || !$doctrineRepositoryFile->isFile() || $doctrineRepositoryFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $doctrineRepositoryRelative = relativePath($root, $doctrineRepositoryFile->getPathname());
+        $doctrineRepositoryContents = (string) file_get_contents($doctrineRepositoryFile->getPathname());
+
+        if (!str_contains($doctrineRepositoryContents, 'namespace App\\Repository\\Discovery;')) {
+            $repositoryPersistenceTaxonomyFindings[] = 'doctrine_repository_namespace_unclassified:' . $doctrineRepositoryRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'doctrine_repository_namespace_unclassified',
+                'path' => $doctrineRepositoryRelative,
+                'message' => 'Doctrine repositories, when introduced, should be classified under App\\Repository\\Discovery.',
+            ];
+        }
+    }
+}
+
+
+
+// Wave 18 service-layer taxonomy posture.
+$serviceLayerTaxonomyFindings = [];
+$requiredServiceTaxonomyFiles = [
+    'src/Service/MANIFEST.md',
+    'src/Service/Discovery/MANIFEST.md',
+];
+
+foreach ($requiredServiceTaxonomyFiles as $requiredServiceTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredServiceTaxonomyFile))) {
+        $serviceLayerTaxonomyFindings[] = 'missing_service_taxonomy_file:' . $requiredServiceTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_service_taxonomy_file',
+            'path' => $requiredServiceTaxonomyFile,
+            'message' => 'Service taxonomy manifest is required for Discovering service-layer posture.',
+        ];
+    }
+}
+
+$allowedDiscoveryServiceBuckets = [
+    'Adapter',
+    'Briefing',
+    'Diagnostics',
+    'Document',
+    'Http',
+    'Indexer',
+    'Libsource',
+    'Operations',
+    'Overview',
+    'Playbook',
+    'RateLimit',
+    'Rebuild',
+    'Rollback',
+    'Source',
+    'Support',
+    'Topology',
+];
+
+$allowedDiscoveryRootServiceFiles = [
+    'ConfigurableDiscoveryFeedbackStore.php',
+    'DiscoveryHighlightingService.php',
+    'DiscoveryLearningService.php',
+    'DiscoveryModePresetService.php',
+    'DiscoveryScoringService.php',
+    'DiscoveryService.php',
+    'DoctrineDiscoveryFeedbackStore.php',
+];
+
+$allowedServiceSuffixes = [
+    'ActionService',
+    'Adapter',
+    'Builder',
+    'Contract',
+    'Decoder',
+    'Encoder',
+    'Executor',
+    'Factory',
+    'Indexer',
+    'Limiter',
+    'Logger',
+    'Namer',
+    'Policy',
+    'Provider',
+    'Repository',
+    'Registry',
+    'Resolver',
+    'Serializer',
+    'Service',
+    'Store',
+    'Transport',
+];
+
+$discoveryServiceRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Service' . DIRECTORY_SEPARATOR . 'Discovery';
+if (is_dir($discoveryServiceRoot)) {
+    $serviceRootChildren = new DirectoryIterator($discoveryServiceRoot);
+    foreach ($serviceRootChildren as $serviceRootChild) {
+        if ($serviceRootChild->isDot()) {
+            continue;
+        }
+
+        if ($serviceRootChild->isDir()) {
+            $bucketName = $serviceRootChild->getFilename();
+            if (!in_array($bucketName, $allowedDiscoveryServiceBuckets, true)) {
+                $serviceLayerTaxonomyFindings[] = 'unexpected_service_bucket:' . $bucketName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'unexpected_service_bucket',
+                    'path' => 'src/Service/Discovery/' . $bucketName,
+                    'message' => 'Discovering service bucket is not part of the current canonical capability taxonomy.',
+                ];
+            }
+            continue;
+        }
+
+        if ($serviceRootChild->isFile() && $serviceRootChild->getExtension() === 'php') {
+            $fileName = $serviceRootChild->getFilename();
+            if (!in_array($fileName, $allowedDiscoveryRootServiceFiles, true)) {
+                $serviceLayerTaxonomyFindings[] = 'unexpected_root_service_file:' . $fileName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'unexpected_root_service_file',
+                    'path' => 'src/Service/Discovery/' . $fileName,
+                    'message' => 'Root-level Discovering service file is not in the accepted transitional core-service list.',
+                ];
+            }
+        }
+    }
+
+    $serviceIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($discoveryServiceRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($serviceIterator as $serviceFile) {
+        if (!$serviceFile instanceof SplFileInfo || !$serviceFile->isFile() || $serviceFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $serviceRelative = relativePath($root, $serviceFile->getPathname());
+        $serviceContents = (string) file_get_contents($serviceFile->getPathname());
+        $serviceClassName = basename($serviceFile->getFilename(), '.php');
+
+        if (!str_contains($serviceContents, 'namespace App\\Service\\Discovery')) {
+            $serviceLayerTaxonomyFindings[] = 'service_namespace_mismatch:' . $serviceRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'service_namespace_mismatch',
+                'path' => $serviceRelative,
+                'message' => 'Discovering service files should use the App\\Service\\Discovery namespace family.',
+            ];
+        }
+
+        if (str_ends_with($serviceClassName, 'Interface')) {
+            $serviceLayerTaxonomyFindings[] = 'service_interface_in_service_layer:' . $serviceRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'service_interface_in_service_layer',
+                'path' => $serviceRelative,
+                'message' => 'Service interfaces belong under src/ServiceInterface, not src/Service.',
+            ];
+        }
+
+        $hasAllowedSuffix = false;
+        foreach ($allowedServiceSuffixes as $allowedServiceSuffix) {
+            if (str_ends_with($serviceClassName, $allowedServiceSuffix)) {
+                $hasAllowedSuffix = true;
+                break;
+            }
+        }
+
+        if (!$hasAllowedSuffix) {
+            $serviceLayerTaxonomyFindings[] = 'service_class_suffix_unclassified:' . $serviceRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'service_class_suffix_unclassified',
+                'path' => $serviceRelative,
+                'message' => 'Service class suffix is not part of the current type-identifiable service suffix taxonomy.',
+            ];
+        }
+    }
+}
+
+
+
+// Wave 19 service-interface mirror taxonomy posture.
+$serviceInterfaceMirrorTaxonomyFindings = [];
+$requiredServiceInterfaceTaxonomyFiles = [
+    'src/ServiceInterface/MANIFEST.md',
+    'src/ServiceInterface/Discovery/MANIFEST.md',
+];
+
+foreach ($requiredServiceInterfaceTaxonomyFiles as $requiredServiceInterfaceTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredServiceInterfaceTaxonomyFile))) {
+        $serviceInterfaceMirrorTaxonomyFindings[] = 'missing_service_interface_taxonomy_file:' . $requiredServiceInterfaceTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_service_interface_taxonomy_file',
+            'path' => $requiredServiceInterfaceTaxonomyFile,
+            'message' => 'ServiceInterface taxonomy manifest is required for the mirrored contract layer posture.',
+        ];
+    }
+}
+
+$allowedServiceInterfaceMirrorBuckets = [
+    'Adapter',
+    'Diagnostics',
+    'Document',
+    'Indexer',
+    'Libsource',
+    'Operations',
+    'Overview',
+    'RateLimit',
+    'Rebuild',
+    'Source',
+    'Support',
+];
+
+$allowedServiceInterfaceRootContracts = [
+    'DiscoveryFeedbackStoreInterface.php',
+    'DiscoveryServiceInterface.php',
+];
+
+$serviceInterfaceDiscoveryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'ServiceInterface' . DIRECTORY_SEPARATOR . 'Discovery';
+if (is_dir($serviceInterfaceDiscoveryRoot)) {
+    $serviceInterfaceRootChildren = new DirectoryIterator($serviceInterfaceDiscoveryRoot);
+    foreach ($serviceInterfaceRootChildren as $serviceInterfaceRootChild) {
+        if ($serviceInterfaceRootChild->isDot()) {
+            continue;
+        }
+
+        if ($serviceInterfaceRootChild->isDir()) {
+            $bucketName = $serviceInterfaceRootChild->getFilename();
+            if (!in_array($bucketName, $allowedServiceInterfaceMirrorBuckets, true)) {
+                $serviceInterfaceMirrorTaxonomyFindings[] = 'unexpected_service_interface_bucket:' . $bucketName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'unexpected_service_interface_bucket',
+                    'path' => 'src/ServiceInterface/Discovery/' . $bucketName,
+                    'message' => 'ServiceInterface bucket is not part of the current selective mirror taxonomy.',
+                ];
+            }
+
+            $serviceBucketPath = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Service' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . $bucketName;
+            if (!is_dir($serviceBucketPath)) {
+                $serviceInterfaceMirrorTaxonomyFindings[] = 'service_interface_bucket_without_service_bucket:' . $bucketName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'service_interface_bucket_without_service_bucket',
+                    'path' => 'src/ServiceInterface/Discovery/' . $bucketName,
+                    'message' => 'ServiceInterface bucket should mirror an existing src/Service/Discovery capability bucket.',
+                ];
+            }
+
+            continue;
+        }
+
+        if ($serviceInterfaceRootChild->isFile() && $serviceInterfaceRootChild->getExtension() === 'php') {
+            $fileName = $serviceInterfaceRootChild->getFilename();
+            if (!in_array($fileName, $allowedServiceInterfaceRootContracts, true)) {
+                $serviceInterfaceMirrorTaxonomyFindings[] = 'unexpected_root_service_interface_contract:' . $fileName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'unexpected_root_service_interface_contract',
+                    'path' => 'src/ServiceInterface/Discovery/' . $fileName,
+                    'message' => 'Root-level service interface contract is not in the accepted core contract list.',
+                ];
+            }
+        }
+    }
+
+    $serviceInterfaceIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($serviceInterfaceDiscoveryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($serviceInterfaceIterator as $serviceInterfaceFile) {
+        if (!$serviceInterfaceFile instanceof SplFileInfo || !$serviceInterfaceFile->isFile() || $serviceInterfaceFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $serviceInterfaceRelative = relativePath($root, $serviceInterfaceFile->getPathname());
+        $serviceInterfaceContents = (string) file_get_contents($serviceInterfaceFile->getPathname());
+        $serviceInterfaceClassName = basename($serviceInterfaceFile->getFilename(), '.php');
+
+        if (!str_ends_with($serviceInterfaceClassName, 'Interface')) {
+            $serviceInterfaceMirrorTaxonomyFindings[] = 'service_interface_missing_suffix:' . $serviceInterfaceRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'service_interface_missing_suffix',
+                'path' => $serviceInterfaceRelative,
+                'message' => 'ServiceInterface files must end with Interface.',
+            ];
+        }
+
+        if (!str_contains($serviceInterfaceContents, 'namespace App\\ServiceInterface\\Discovery')) {
+            $serviceInterfaceMirrorTaxonomyFindings[] = 'service_interface_namespace_mismatch:' . $serviceInterfaceRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'service_interface_namespace_mismatch',
+                'path' => $serviceInterfaceRelative,
+                'message' => 'Discovering service interfaces should use the App\\ServiceInterface\\Discovery namespace family.',
+            ];
+        }
+
+        if (!preg_match('/\\binterface\\s+' . preg_quote($serviceInterfaceClassName, '/') . '\\b/', $serviceInterfaceContents)) {
+            $serviceInterfaceMirrorTaxonomyFindings[] = 'service_interface_file_without_interface_declaration:' . $serviceInterfaceRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'service_interface_file_without_interface_declaration',
+                'path' => $serviceInterfaceRelative,
+                'message' => 'ServiceInterface PHP file should declare an interface matching the file name.',
+            ];
+        }
+    }
+}
+
+
+
+// Wave 20 DTO taxonomy posture.
+$dtoTaxonomyFindings = [];
+$requiredDtoTaxonomyFiles = [
+    'src/Dto/MANIFEST.md',
+    'src/Dto/Discovery/MANIFEST.md',
+];
+
+foreach ($requiredDtoTaxonomyFiles as $requiredDtoTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredDtoTaxonomyFile))) {
+        $dtoTaxonomyFindings[] = 'missing_dto_taxonomy_file:' . $requiredDtoTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_dto_taxonomy_file',
+            'path' => $requiredDtoTaxonomyFile,
+            'message' => 'DTO taxonomy manifest is required for immutable payload-layer posture.',
+        ];
+    }
+}
+
+$dtoDiscoveryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Discovery';
+if (is_dir($dtoDiscoveryRoot)) {
+    $dtoIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dtoDiscoveryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($dtoIterator as $dtoFile) {
+        if (!$dtoFile instanceof SplFileInfo || !$dtoFile->isFile() || $dtoFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $dtoRelative = relativePath($root, $dtoFile->getPathname());
+        $dtoContents = (string) file_get_contents($dtoFile->getPathname());
+        $dtoClassName = basename($dtoFile->getFilename(), '.php');
+
+        if (!str_contains($dtoContents, 'namespace App\\Dto\\Discovery;')) {
+            $dtoTaxonomyFindings[] = 'dto_namespace_mismatch:' . $dtoRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'dto_namespace_mismatch',
+                'path' => $dtoRelative,
+                'message' => 'Discovering DTO files should use App\\Dto\\Discovery namespace.',
+            ];
+        }
+
+        $declaresClass = preg_match('/\\b(?:final\\s+)?(?:readonly\\s+)?class\\s+' . preg_quote($dtoClassName, '/') . '\\b/', $dtoContents) === 1
+            || preg_match('/\\breadonly\\s+final\\s+class\\s+' . preg_quote($dtoClassName, '/') . '\\b/', $dtoContents) === 1;
+
+        if (!$declaresClass) {
+            $dtoTaxonomyFindings[] = 'dto_file_without_class_declaration:' . $dtoRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'dto_file_without_class_declaration',
+                'path' => $dtoRelative,
+                'message' => 'Discovering DTO files should declare a class matching the file name.',
+            ];
+        }
+
+        $isReadonlyClass = preg_match('/\\bfinal\\s+readonly\\s+class\\s+' . preg_quote($dtoClassName, '/') . '\\b/', $dtoContents) === 1
+            || preg_match('/\\breadonly\\s+final\\s+class\\s+' . preg_quote($dtoClassName, '/') . '\\b/', $dtoContents) === 1
+            || preg_match('/\\breadonly\\s+class\\s+' . preg_quote($dtoClassName, '/') . '\\b/', $dtoContents) === 1;
+
+        if (!$isReadonlyClass) {
+            $dtoTaxonomyFindings[] = 'dto_not_readonly:' . $dtoRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'dto_not_readonly',
+                'path' => $dtoRelative,
+                'message' => 'Discovering DTO classes should be readonly immutable payloads.',
+            ];
+        }
+
+        $forbiddenDtoInfrastructureMarkers = [
+            '#[ORM\\Entity',
+            'extends AbstractController',
+            'extends AbstractType',
+            'Symfony\\Component\\Form\\AbstractType',
+            'Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController',
+            'ServiceEntityRepository',
+        ];
+
+        foreach ($forbiddenDtoInfrastructureMarkers as $forbiddenDtoInfrastructureMarker) {
+            if (str_contains($dtoContents, $forbiddenDtoInfrastructureMarker)) {
+                $dtoTaxonomyFindings[] = 'dto_contains_infrastructure_marker:' . $dtoRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'dto_contains_infrastructure_marker',
+                    'path' => $dtoRelative,
+                    'message' => 'DTO classes must not declare Symfony controller/form or Doctrine persistence infrastructure.',
+                ];
+                break;
+            }
+        }
+    }
+}
+
+
+
+// Wave 21 value-object taxonomy posture.
+$valueObjectTaxonomyFindings = [];
+$requiredValueObjectTaxonomyFiles = [
+    'src/ValueObject/MANIFEST.md',
+    'src/ValueObject/Discovery/MANIFEST.md',
+];
+
+foreach ($requiredValueObjectTaxonomyFiles as $requiredValueObjectTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredValueObjectTaxonomyFile))) {
+        $valueObjectTaxonomyFindings[] = 'missing_value_object_taxonomy_file:' . $requiredValueObjectTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_value_object_taxonomy_file',
+            'path' => $requiredValueObjectTaxonomyFile,
+            'message' => 'ValueObject taxonomy manifest is required for immutable semantic value posture.',
+        ];
+    }
+}
+
+$valueObjectDiscoveryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'ValueObject' . DIRECTORY_SEPARATOR . 'Discovery';
+if (is_dir($valueObjectDiscoveryRoot)) {
+    $valueObjectIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($valueObjectDiscoveryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($valueObjectIterator as $valueObjectFile) {
+        if (!$valueObjectFile instanceof SplFileInfo || !$valueObjectFile->isFile() || $valueObjectFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $valueObjectRelative = relativePath($root, $valueObjectFile->getPathname());
+        $valueObjectContents = (string) file_get_contents($valueObjectFile->getPathname());
+        $valueObjectClassName = basename($valueObjectFile->getFilename(), '.php');
+
+        if (!str_contains($valueObjectContents, 'namespace App\\ValueObject\\Discovery;')) {
+            $valueObjectTaxonomyFindings[] = 'value_object_namespace_mismatch:' . $valueObjectRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'value_object_namespace_mismatch',
+                'path' => $valueObjectRelative,
+                'message' => 'Discovering value objects should use App\\ValueObject\\Discovery namespace.',
+            ];
+        }
+
+        $declaresClass = preg_match('/\\b(?:final\\s+)?(?:readonly\\s+)?class\\s+' . preg_quote($valueObjectClassName, '/') . '\\b/', $valueObjectContents) === 1
+            || preg_match('/\\breadonly\\s+final\\s+class\\s+' . preg_quote($valueObjectClassName, '/') . '\\b/', $valueObjectContents) === 1;
+
+        if (!$declaresClass) {
+            $valueObjectTaxonomyFindings[] = 'value_object_file_without_class_declaration:' . $valueObjectRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'value_object_file_without_class_declaration',
+                'path' => $valueObjectRelative,
+                'message' => 'Discovering value-object files should declare a class matching the file name.',
+            ];
+        }
+
+        $isReadonlyClass = preg_match('/\\bfinal\\s+readonly\\s+class\\s+' . preg_quote($valueObjectClassName, '/') . '\\b/', $valueObjectContents) === 1
+            || preg_match('/\\breadonly\\s+final\\s+class\\s+' . preg_quote($valueObjectClassName, '/') . '\\b/', $valueObjectContents) === 1
+            || preg_match('/\\breadonly\\s+class\\s+' . preg_quote($valueObjectClassName, '/') . '\\b/', $valueObjectContents) === 1;
+
+        if (!$isReadonlyClass) {
+            $valueObjectTaxonomyFindings[] = 'value_object_not_readonly:' . $valueObjectRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'value_object_not_readonly',
+                'path' => $valueObjectRelative,
+                'message' => 'Discovering value objects should be readonly immutable semantic values.',
+            ];
+        }
+
+        $forbiddenValueObjectInfrastructureMarkers = [
+            '#[ORM\\Entity',
+            'extends AbstractController',
+            'extends AbstractType',
+            'Symfony\\Component\\Form\\AbstractType',
+            'Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController',
+            'ServiceEntityRepository',
+        ];
+
+        foreach ($forbiddenValueObjectInfrastructureMarkers as $forbiddenValueObjectInfrastructureMarker) {
+            if (str_contains($valueObjectContents, $forbiddenValueObjectInfrastructureMarker)) {
+                $valueObjectTaxonomyFindings[] = 'value_object_contains_infrastructure_marker:' . $valueObjectRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'value_object_contains_infrastructure_marker',
+                    'path' => $valueObjectRelative,
+                    'message' => 'Value objects must not declare Symfony controller/form or Doctrine persistence infrastructure.',
+                ];
+                break;
+            }
+        }
+    }
+}
+
+
+
+// Wave 22 attribute/event/subscriber taxonomy posture.
+$attributeEventTaxonomyFindings = [];
+$requiredSubscriberTaxonomyFiles = [
+    'src/Subscriber/MANIFEST.md',
+    'src/Subscriber/Discovery/MANIFEST.md',
+];
+
+foreach ($requiredSubscriberTaxonomyFiles as $requiredSubscriberTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredSubscriberTaxonomyFile))) {
+        $attributeEventTaxonomyFindings[] = 'missing_subscriber_taxonomy_file:' . $requiredSubscriberTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_subscriber_taxonomy_file',
+            'path' => $requiredSubscriberTaxonomyFile,
+            'message' => 'Subscriber taxonomy manifest is required for event/subscriber posture.',
+        ];
+    }
+}
+
+$legacyEventSubscriberRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'EventSubscriber';
+if (is_dir($legacyEventSubscriberRoot)) {
+    $legacyEventSubscriberIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($legacyEventSubscriberRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($legacyEventSubscriberIterator as $legacyEventSubscriberFile) {
+        if (!$legacyEventSubscriberFile instanceof SplFileInfo || !$legacyEventSubscriberFile->isFile() || $legacyEventSubscriberFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $legacyEventSubscriberRelative = relativePath($root, $legacyEventSubscriberFile->getPathname());
+        $attributeEventTaxonomyFindings[] = 'legacy_event_subscriber_file:' . $legacyEventSubscriberRelative;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'legacy_event_subscriber_file',
+            'path' => $legacyEventSubscriberRelative,
+            'message' => 'Symfony event subscribers should live under src/Subscriber, not src/EventSubscriber.',
+        ];
+    }
+}
+
+$subscriberDiscoveryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Subscriber' . DIRECTORY_SEPARATOR . 'Discovery';
+if (is_dir($subscriberDiscoveryRoot)) {
+    $subscriberIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($subscriberDiscoveryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($subscriberIterator as $subscriberFile) {
+        if (!$subscriberFile instanceof SplFileInfo || !$subscriberFile->isFile() || $subscriberFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $subscriberRelative = relativePath($root, $subscriberFile->getPathname());
+        $subscriberContents = (string) file_get_contents($subscriberFile->getPathname());
+        $subscriberClassName = basename($subscriberFile->getFilename(), '.php');
+
+        if (!str_contains($subscriberContents, 'namespace App\\Subscriber\\Discovery;')) {
+            $attributeEventTaxonomyFindings[] = 'subscriber_namespace_mismatch:' . $subscriberRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'subscriber_namespace_mismatch',
+                'path' => $subscriberRelative,
+                'message' => 'Discovery subscribers should use App\\Subscriber\\Discovery namespace.',
+            ];
+        }
+
+        if (!str_ends_with($subscriberClassName, 'Subscriber')) {
+            $attributeEventTaxonomyFindings[] = 'subscriber_missing_suffix:' . $subscriberRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'subscriber_missing_suffix',
+                'path' => $subscriberRelative,
+                'message' => 'Symfony event subscriber classes should keep the Subscriber suffix.',
+            ];
+        }
+
+        if (!str_contains($subscriberContents, 'EventSubscriberInterface')) {
+            $attributeEventTaxonomyFindings[] = 'subscriber_missing_event_subscriber_interface:' . $subscriberRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'subscriber_missing_event_subscriber_interface',
+                'path' => $subscriberRelative,
+                'message' => 'Discovery subscriber classes should implement EventSubscriberInterface.',
+            ];
+        }
+    }
+}
+
+$eventRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Event';
+if (is_dir($eventRoot)) {
+    $eventIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($eventRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($eventIterator as $eventFile) {
+        if (!$eventFile instanceof SplFileInfo || !$eventFile->isFile() || $eventFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $eventRelative = relativePath($root, $eventFile->getPathname());
+        $eventContents = (string) file_get_contents($eventFile->getPathname());
+
+        if (!str_contains($eventContents, 'namespace App\\Event\\Discovery')) {
+            $attributeEventTaxonomyFindings[] = 'event_namespace_unclassified:' . $eventRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'event_namespace_unclassified',
+                'path' => $eventRelative,
+                'message' => 'Future Discovering event classes should be classified under App\\Event\\Discovery.',
+            ];
+        }
+    }
+}
+
+$attributeRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Attribute';
+if (is_dir($attributeRoot)) {
+    $attributeIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($attributeRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($attributeIterator as $attributeFile) {
+        if (!$attributeFile instanceof SplFileInfo || !$attributeFile->isFile() || $attributeFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $attributeRelative = relativePath($root, $attributeFile->getPathname());
+        $attributeContents = (string) file_get_contents($attributeFile->getPathname());
+
+        if (!str_contains($attributeContents, 'namespace App\\Attribute\\Discovery')) {
+            $attributeEventTaxonomyFindings[] = 'attribute_namespace_unclassified:' . $attributeRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'attribute_namespace_unclassified',
+                'path' => $attributeRelative,
+                'message' => 'Future Discovering attributes should be classified under App\\Attribute\\Discovery.',
+            ];
+        }
+    }
+}
+
+
+
+// Wave 23 command taxonomy posture.
+$commandTaxonomyFindings = [];
+$requiredCommandTaxonomyFiles = [
+    'src/Command/MANIFEST.md',
+    'src/Command/Discovery/MANIFEST.md',
+];
+
+foreach ($requiredCommandTaxonomyFiles as $requiredCommandTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredCommandTaxonomyFile))) {
+        $commandTaxonomyFindings[] = 'missing_command_taxonomy_file:' . $requiredCommandTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_command_taxonomy_file',
+            'path' => $requiredCommandTaxonomyFile,
+            'message' => 'Command taxonomy manifest is required for CLI surface posture.',
+        ];
+    }
+}
+
+$allowedLegacyCommandAliases = [
+    'discovering:rebuild',
+    'discovering:rollback:plan',
+    'discovering:rollback:execute',
+];
+
+$commandDiscoveryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Command' . DIRECTORY_SEPARATOR . 'Discovery';
+if (is_dir($commandDiscoveryRoot)) {
+    $commandIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($commandDiscoveryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($commandIterator as $commandFile) {
+        if (!$commandFile instanceof SplFileInfo || !$commandFile->isFile() || $commandFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $commandRelative = relativePath($root, $commandFile->getPathname());
+        $commandContents = (string) file_get_contents($commandFile->getPathname());
+        $commandClassName = basename($commandFile->getFilename(), '.php');
+
+        if (!str_contains($commandContents, 'namespace App\\Command\\Discovery;')) {
+            $commandTaxonomyFindings[] = 'command_namespace_mismatch:' . $commandRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'command_namespace_mismatch',
+                'path' => $commandRelative,
+                'message' => 'Discovery commands should use App\\Command\\Discovery namespace.',
+            ];
+        }
+
+        if (!str_ends_with($commandClassName, 'Command')) {
+            $commandTaxonomyFindings[] = 'command_missing_suffix:' . $commandRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'command_missing_suffix',
+                'path' => $commandRelative,
+                'message' => 'Discovery command classes should keep the Command suffix.',
+            ];
+        }
+
+        if (!str_contains($commandContents, 'extends Command')) {
+            $commandTaxonomyFindings[] = 'command_missing_base_class:' . $commandRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'command_missing_base_class',
+                'path' => $commandRelative,
+                'message' => 'Discovery command classes should extend Symfony Console Command.',
+            ];
+        }
+
+        if (preg_match("/#\\[AsCommand\\([^\\]]*name:\\s*'([^']+)'/s", $commandContents, $nameMatch) !== 1) {
+            $commandTaxonomyFindings[] = 'command_missing_as_command_name:' . $commandRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'command_missing_as_command_name',
+                'path' => $commandRelative,
+                'message' => 'Discovery command classes should declare an AsCommand primary name.',
+            ];
+        } else {
+            $commandName = $nameMatch[1];
+            if (!str_starts_with($commandName, 'app:discovery:')) {
+                $commandTaxonomyFindings[] = 'command_primary_name_prefix_mismatch:' . $commandRelative . ':' . $commandName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'command_primary_name_prefix_mismatch',
+                    'path' => $commandRelative,
+                    'message' => sprintf('Discovery command primary name "%s" should use app:discovery:* prefix.', $commandName),
+                ];
+            }
+
+            if (str_starts_with($commandName, 'discovering:')) {
+                $commandTaxonomyFindings[] = 'legacy_command_used_as_primary_name:' . $commandRelative . ':' . $commandName;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'legacy_command_used_as_primary_name',
+                    'path' => $commandRelative,
+                    'message' => 'discovering:* command names are allowed only as compatibility aliases, not primary names.',
+                ];
+            }
+        }
+
+        if (preg_match("/aliases:\\s*\\[([^\\]]*)\\]/s", $commandContents, $aliasMatch) === 1) {
+            if (preg_match_all("/'([^']+)'/", $aliasMatch[1], $aliasMatches) > 0) {
+                foreach ($aliasMatches[1] as $aliasName) {
+                    if (str_starts_with($aliasName, 'discovering:') && !in_array($aliasName, $allowedLegacyCommandAliases, true)) {
+                        $commandTaxonomyFindings[] = 'unapproved_legacy_command_alias:' . $commandRelative . ':' . $aliasName;
+                        $findings[] = [
+                            'severity' => 'warning',
+                            'code' => 'unapproved_legacy_command_alias',
+                            'path' => $commandRelative,
+                            'message' => sprintf('Legacy command alias "%s" is not in the approved compatibility alias list.', $aliasName),
+                        ];
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+// Wave 24 form taxonomy posture.
+$formTaxonomyFindings = [];
+$requiredFormTaxonomyFiles = [
+    'src/Form/MANIFEST.md',
+    'src/Form/Discovery/MANIFEST.md',
+];
+
+foreach ($requiredFormTaxonomyFiles as $requiredFormTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredFormTaxonomyFile))) {
+        $formTaxonomyFindings[] = 'missing_form_taxonomy_file:' . $requiredFormTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_form_taxonomy_file',
+            'path' => $requiredFormTaxonomyFile,
+            'message' => 'Form taxonomy manifest is required for Symfony form layer posture.',
+        ];
+    }
+}
+
+$formDiscoveryRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Form' . DIRECTORY_SEPARATOR . 'Discovery';
+if (is_dir($formDiscoveryRoot)) {
+    $formIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($formDiscoveryRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($formIterator as $formFile) {
+        if (!$formFile instanceof SplFileInfo || !$formFile->isFile() || $formFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $formRelative = relativePath($root, $formFile->getPathname());
+        $formContents = (string) file_get_contents($formFile->getPathname());
+        $formClassName = basename($formFile->getFilename(), '.php');
+
+        if (!str_contains($formContents, 'namespace App\\Form\\Discovery;')) {
+            $formTaxonomyFindings[] = 'form_namespace_mismatch:' . $formRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'form_namespace_mismatch',
+                'path' => $formRelative,
+                'message' => 'Discovering form types should use App\\Form\\Discovery namespace.',
+            ];
+        }
+
+        if (!str_ends_with($formClassName, 'Type')) {
+            $formTaxonomyFindings[] = 'form_missing_type_suffix:' . $formRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'form_missing_type_suffix',
+                'path' => $formRelative,
+                'message' => 'Symfony form type classes should keep the Type suffix.',
+            ];
+        }
+
+        if (!str_contains($formContents, 'extends AbstractType')) {
+            $formTaxonomyFindings[] = 'form_missing_abstract_type_base:' . $formRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'form_missing_abstract_type_base',
+                'path' => $formRelative,
+                'message' => 'Discovering form types should extend Symfony AbstractType.',
+            ];
+        }
+
+        if ($formClassName === 'DiscoverySearchType') {
+            $requiredUnmappedMarkers = [
+                "'query', SearchType::class",
+                "'mode', ChoiceType::class",
+                "'resource', ChoiceType::class",
+                "'status', ChoiceType::class",
+                "'limit', IntegerType::class",
+                "'offset', IntegerType::class",
+                'mapped: false',
+            ];
+
+            foreach ($requiredUnmappedMarkers as $requiredUnmappedMarker) {
+                if (!str_contains($formContents, $requiredUnmappedMarker)) {
+                    $formTaxonomyFindings[] = 'discovery_search_type_missing_unmapped_boundary:' . $formRelative . ':' . $requiredUnmappedMarker;
+                    $findings[] = [
+                        'severity' => 'warning',
+                        'code' => 'discovery_search_type_missing_unmapped_boundary',
+                        'path' => $formRelative,
+                        'message' => 'DiscoverySearchType should keep explicit unmapped query fields because DiscoveryQuery is readonly.',
+                    ];
+                    break;
+                }
+            }
+
+            if (substr_count($formContents, "'mapped' => false") + substr_count($formContents, '"mapped" => false') < 6) {
+                $formTaxonomyFindings[] = 'discovery_search_type_has_too_few_unmapped_fields:' . $formRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'discovery_search_type_has_too_few_unmapped_fields',
+                    'path' => $formRelative,
+                    'message' => 'DiscoverySearchType should keep its core query fields mapped=false because DiscoveryQuery is readonly.',
+                ];
+            }
+
+            if (!str_contains($formContents, 'DiscoveryQuery')) {
+                $formTaxonomyFindings[] = 'discovery_search_type_missing_query_boundary:' . $formRelative;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'discovery_search_type_missing_query_boundary',
+                    'path' => $formRelative,
+                    'message' => 'DiscoverySearchType should document/declare the DiscoveryQuery boundary.',
+                ];
+            }
+        }
+    }
+}
+
+
+
+// Wave 25 config taxonomy posture.
+$configTaxonomyFindings = [];
+$requiredConfigTaxonomyFiles = [
+    'config/MANIFEST.md',
+    'config/services/MANIFEST.md',
+    'config/routes/MANIFEST.md',
+    'config/packages/MANIFEST.md',
+    'config/services.yaml',
+    'config/services/discovery.yaml',
+    'config/routes/discovery.yaml',
+    'config/routes/discovery_public.yaml',
+    'config/routes/discovery_management.yaml',
+    'config/bundles.php',
+];
+
+foreach ($requiredConfigTaxonomyFiles as $requiredConfigTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredConfigTaxonomyFile))) {
+        $configTaxonomyFindings[] = 'missing_config_taxonomy_file:' . $requiredConfigTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_config_taxonomy_file',
+            'path' => $requiredConfigTaxonomyFile,
+            'message' => 'Config taxonomy file is required for Symfony configuration posture.',
+        ];
+    }
+}
+
+$rootServicesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'services.yaml';
+if (is_file($rootServicesFile)) {
+    $rootServicesContents = (string) file_get_contents($rootServicesFile);
+
+    if (!str_contains($rootServicesContents, 'services/discovery.yaml')) {
+        $configTaxonomyFindings[] = 'root_services_missing_discovery_import';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'root_services_missing_discovery_import',
+            'path' => 'config/services.yaml',
+            'message' => 'Root services.yaml should import config/services/discovery.yaml.',
+        ];
+    }
+
+    if (str_contains($rootServicesContents, 'app.discovery.')) {
+        $configTaxonomyFindings[] = 'root_services_contains_component_parameters';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'root_services_contains_component_parameters',
+            'path' => 'config/services.yaml',
+            'message' => 'Discovering-specific app.discovery.* parameters should live in config/services/discovery.yaml.',
+        ];
+    }
+}
+
+$discoveryServicesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'services' . DIRECTORY_SEPARATOR . 'discovery.yaml';
+if (is_file($discoveryServicesFile)) {
+    $discoveryServicesContents = (string) file_get_contents($discoveryServicesFile);
+
+    foreach (['app.discovery.', 'App\\ServiceInterface\\Discovery\\', 'App\\Service\\Discovery\\'] as $expectedDiscoveryServiceMarker) {
+        if (!str_contains($discoveryServicesContents, $expectedDiscoveryServiceMarker)) {
+            $configTaxonomyFindings[] = 'discovery_services_missing_marker:' . $expectedDiscoveryServiceMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'discovery_services_missing_marker',
+                'path' => 'config/services/discovery.yaml',
+                'message' => sprintf('Discovering services config should contain marker "%s".', $expectedDiscoveryServiceMarker),
+            ];
+        }
+    }
+}
+
+$discoveryRoutesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'discovery.yaml';
+if (is_file($discoveryRoutesFile)) {
+    $discoveryRoutesContents = (string) file_get_contents($discoveryRoutesFile);
+
+    foreach (['discovery_public.yaml', 'discovery_management.yaml'] as $expectedDiscoveryRouteImport) {
+        if (!str_contains($discoveryRoutesContents, $expectedDiscoveryRouteImport)) {
+            $configTaxonomyFindings[] = 'discovery_routes_missing_import:' . $expectedDiscoveryRouteImport;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'discovery_routes_missing_import',
+                'path' => 'config/routes/discovery.yaml',
+                'message' => sprintf('Discovering route aggregator should import %s.', $expectedDiscoveryRouteImport),
+            ];
+        }
+    }
+}
+
+$publicRoutesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'discovery_public.yaml';
+if (is_file($publicRoutesFile)) {
+    $publicRoutesContents = (string) file_get_contents($publicRoutesFile);
+
+    if (str_contains($publicRoutesContents, 'app_management_discovery_') || str_contains($publicRoutesContents, '/management/discovery')) {
+        $configTaxonomyFindings[] = 'public_routes_contain_management_surface';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'public_routes_contain_management_surface',
+            'path' => 'config/routes/discovery_public.yaml',
+            'message' => 'Public discovery routes should not contain management route names or paths.',
+        ];
+    }
+}
+
+$managementRoutesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'discovery_management.yaml';
+if (is_file($managementRoutesFile)) {
+    $managementRoutesContents = (string) file_get_contents($managementRoutesFile);
+
+    if (!str_contains($managementRoutesContents, 'src/Controller/Management') && !str_contains($managementRoutesContents, '/management/discovery') && !str_contains($managementRoutesContents, 'app_management_discovery_')) {
+        $configTaxonomyFindings[] = 'management_routes_missing_management_surface';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'management_routes_missing_management_surface',
+            'path' => 'config/routes/discovery_management.yaml',
+            'message' => 'Management discovery routes should reference the management controller resource or explicit management route names/paths.',
+        ];
+    }
+}
+
+$bundlesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'bundles.php';
+$composerFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($bundlesFile) && is_file($composerFile)) {
+    $bundlesContents = (string) file_get_contents($bundlesFile);
+    $composerContents = (string) file_get_contents($composerFile);
+
+    if (str_contains($bundlesContents, 'DoctrineMigrationsBundle') && !str_contains($composerContents, 'doctrine/doctrine-migrations-bundle')) {
+        $configTaxonomyFindings[] = 'migrations_bundle_enabled_without_dependency';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'migrations_bundle_enabled_without_dependency',
+            'path' => 'config/bundles.php',
+            'message' => 'Doctrine Migrations bundle should not be enabled unless composer.json declares doctrine/doctrine-migrations-bundle.',
+        ];
+    }
+}
+
+
+
+// Wave 26 OpenAPI/API taxonomy posture.
+$openApiApiTaxonomyFindings = [];
+$requiredOpenApiApiTaxonomyFiles = [
+    'docs/generated/openapi/MANIFEST.md',
+    'docs/generated/openapi/README.md',
+    'src/Service/Discovery/Http/MANIFEST.md',
+    'src/Service/Discovery/Http/DiscoveryApiContract.php',
+    'src/Service/Discovery/Http/DiscoveryJsonResponseFactory.php',
+    'src/Service/Discovery/Http/DiscoveryRequestSurfacePolicy.php',
+    'config/routes/nelmio_api_doc.php',
+    'config/packages/nelmio_api_doc.php',
+];
+
+foreach ($requiredOpenApiApiTaxonomyFiles as $requiredOpenApiApiTaxonomyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredOpenApiApiTaxonomyFile))) {
+        $openApiApiTaxonomyFindings[] = 'missing_openapi_api_taxonomy_file:' . $requiredOpenApiApiTaxonomyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_openapi_api_taxonomy_file',
+            'path' => $requiredOpenApiApiTaxonomyFile,
+            'message' => 'OpenAPI/API taxonomy file is required for generated documentation and API posture.',
+        ];
+    }
+}
+
+$nelmioRoutesFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'routes' . DIRECTORY_SEPARATOR . 'nelmio_api_doc.php';
+if (is_file($nelmioRoutesFile)) {
+    $nelmioRoutesContents = (string) file_get_contents($nelmioRoutesFile);
+
+    foreach (['class_exists(NelmioApiDocBundle::class)', 'public_discovery', 'management_discovery', '/api/doc/public-discovery', '/api/doc/management-discovery'] as $expectedNelmioRouteMarker) {
+        if (!str_contains($nelmioRoutesContents, $expectedNelmioRouteMarker)) {
+            $openApiApiTaxonomyFindings[] = 'nelmio_routes_missing_marker:' . $expectedNelmioRouteMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'nelmio_routes_missing_marker',
+                'path' => 'config/routes/nelmio_api_doc.php',
+                'message' => sprintf('Nelmio routes should contain marker "%s".', $expectedNelmioRouteMarker),
+            ];
+        }
+    }
+}
+
+$nelmioPackageFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'nelmio_api_doc.php';
+if (is_file($nelmioPackageFile)) {
+    $nelmioPackageContents = (string) file_get_contents($nelmioPackageFile);
+
+    foreach (['class_exists(NelmioApiDocBundle::class)', 'public_discovery', 'management_discovery', '^/api/discovery', '^/api/discovery', '^/management/discovery'] as $expectedNelmioPackageMarker) {
+        if (!str_contains($nelmioPackageContents, $expectedNelmioPackageMarker)) {
+            $openApiApiTaxonomyFindings[] = 'nelmio_package_missing_marker:' . $expectedNelmioPackageMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'nelmio_package_missing_marker',
+                'path' => 'config/packages/nelmio_api_doc.php',
+                'message' => sprintf('Nelmio package config should contain marker "%s".', $expectedNelmioPackageMarker),
+            ];
+        }
+    }
+}
+
+$httpServiceRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Service' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'Http';
+if (is_dir($httpServiceRoot)) {
+    $httpServiceIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($httpServiceRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($httpServiceIterator as $httpServiceFile) {
+        if (!$httpServiceFile instanceof SplFileInfo || !$httpServiceFile->isFile() || $httpServiceFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $httpServiceRelative = relativePath($root, $httpServiceFile->getPathname());
+        $httpServiceContents = (string) file_get_contents($httpServiceFile->getPathname());
+
+        if (!str_contains($httpServiceContents, 'namespace App\\Service\\Discovery\\Http;')) {
+            $openApiApiTaxonomyFindings[] = 'http_service_namespace_mismatch:' . $httpServiceRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'http_service_namespace_mismatch',
+                'path' => $httpServiceRelative,
+                'message' => 'Discovering HTTP/API services should use App\\Service\\Discovery\\Http namespace.',
+            ];
+        }
+    }
+}
+
+$jsonResponseFactoryFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Service' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'Http' . DIRECTORY_SEPARATOR . 'DiscoveryJsonResponseFactory.php';
+if (is_file($jsonResponseFactoryFile)) {
+    $jsonResponseFactoryContents = (string) file_get_contents($jsonResponseFactoryFile);
+
+    foreach (['JsonResponse', 'success(', 'error('] as $expectedJsonFactoryMarker) {
+        if (!str_contains($jsonResponseFactoryContents, $expectedJsonFactoryMarker)) {
+            $openApiApiTaxonomyFindings[] = 'json_response_factory_missing_marker:' . $expectedJsonFactoryMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'json_response_factory_missing_marker',
+                'path' => 'src/Service/Discovery/Http/DiscoveryJsonResponseFactory.php',
+                'message' => sprintf('DiscoveryJsonResponseFactory should contain marker "%s".', $expectedJsonFactoryMarker),
+            ];
+        }
+    }
+}
+
+$discoveryControllerFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Controller' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryController.php';
+if (is_file($discoveryControllerFile)) {
+    $discoveryControllerContents = (string) file_get_contents($discoveryControllerFile);
+
+    foreach (['/api/discovery', '/api/discovery', 'DiscoveryJsonResponseFactory'] as $expectedApiControllerMarker) {
+        if (!str_contains($discoveryControllerContents, $expectedApiControllerMarker)) {
+            $openApiApiTaxonomyFindings[] = 'discovery_controller_missing_api_marker:' . $expectedApiControllerMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'discovery_controller_missing_api_marker',
+                'path' => 'src/Controller/Discovery/DiscoveryController.php',
+                'message' => sprintf('DiscoveryController should contain API marker "%s".', $expectedApiControllerMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 27 runtime/quality entrypoint taxonomy posture.
+$runtimeQualityEntrypointTaxonomyFindings = [];
+$requiredRuntimeQualityEntrypointFiles = [
+    'composer.json',
+    'tools/MANIFEST.md',
+    'tools/discovering_canon_audit.php',
+    'tools/runtime_preflight.php',
+    'tools/qa_guard.php',
+    'tools/security_preflight.php',
+    'tools/docblock_policy_check.php',
+    'tools/lint_php.php',
+    'phpunit.xml.dist',
+    'phpstan.neon.dist',
+    '.php-cs-fixer.dist.php',
+];
+
+foreach ($requiredRuntimeQualityEntrypointFiles as $requiredRuntimeQualityEntrypointFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredRuntimeQualityEntrypointFile))) {
+        $runtimeQualityEntrypointTaxonomyFindings[] = 'missing_runtime_quality_entrypoint_file:' . $requiredRuntimeQualityEntrypointFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_runtime_quality_entrypoint_file',
+            'path' => $requiredRuntimeQualityEntrypointFile,
+            'message' => 'Runtime/quality entrypoint file is required for repository-local verification posture.',
+        ];
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJsonContents = (string) file_get_contents($composerJsonFile);
+    $composerJson = json_decode($composerJsonContents, true);
+    if (!is_array($composerJson)) {
+        $runtimeQualityEntrypointTaxonomyFindings[] = 'composer_json_invalid';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'composer_json_invalid',
+            'path' => 'composer.json',
+            'message' => 'composer.json should be valid JSON.',
+        ];
+    } else {
+        $scripts = $composerJson['scripts'] ?? [];
+        foreach (['test', 'lint:php', 'validate:composer', 'verify:runtime-preflight', 'verify:console', 'verify:security', 'verify:docblocks', 'test:all', 'ci', 'analyse', 'lint:cs'] as $expectedComposerScript) {
+            if (!is_array($scripts) || !array_key_exists($expectedComposerScript, $scripts)) {
+                $runtimeQualityEntrypointTaxonomyFindings[] = 'composer_missing_quality_script:' . $expectedComposerScript;
+                $findings[] = [
+                    'severity' => 'warning',
+                    'code' => 'composer_missing_quality_script',
+                    'path' => 'composer.json',
+                    'message' => sprintf('composer.json should expose the "%s" quality/runtime script.', $expectedComposerScript),
+                ];
+            }
+        }
+    }
+}
+
+$securityPreflightFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'security_preflight.php';
+if (is_file($securityPreflightFile)) {
+    $securityPreflightContents = (string) file_get_contents($securityPreflightFile);
+
+    if (str_contains($securityPreflightContents, '/src/EventSubscriber/')) {
+        $runtimeQualityEntrypointTaxonomyFindings[] = 'security_preflight_uses_legacy_event_subscriber_path';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'security_preflight_uses_legacy_event_subscriber_path',
+            'path' => 'tools/security_preflight.php',
+            'message' => 'security_preflight.php should use canonical src/Subscriber/Discovery paths, not legacy src/EventSubscriber paths.',
+        ];
+    }
+
+    foreach ([
+        '/src/Subscriber/Discovery/DiscoveryResponseSecurityHeadersSubscriber.php',
+        '/src/Subscriber/Discovery/DiscoveryEndpointSecuritySubscriber.php',
+        '/src/Subscriber/Discovery/DiscoveryRateLimitSubscriber.php',
+        '/src/Subscriber/Discovery/DiscoveryRequestCorrelationSubscriber.php',
+        '/config/packages/nelmio_api_doc.php',
+        '/config/routes/nelmio_api_doc.php',
+    ] as $expectedSecurityPreflightMarker) {
+        if (!str_contains($securityPreflightContents, $expectedSecurityPreflightMarker)) {
+            $runtimeQualityEntrypointTaxonomyFindings[] = 'security_preflight_missing_marker:' . $expectedSecurityPreflightMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'security_preflight_missing_marker',
+                'path' => 'tools/security_preflight.php',
+                'message' => sprintf('security_preflight.php should check marker "%s".', $expectedSecurityPreflightMarker),
+            ];
+        }
+    }
+}
+
+$qaGuardFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'qa_guard.php';
+if (is_file($qaGuardFile)) {
+    $qaGuardContents = (string) file_get_contents($qaGuardFile);
+
+    foreach (['analyse', 'lint:cs', 'lint:cs:fix', 'docs:openapi:dump:public', 'docs:openapi:dump:management'] as $expectedQaGuardCommand) {
+        if (!str_contains($qaGuardContents, "'" . $expectedQaGuardCommand . "'")) {
+            $runtimeQualityEntrypointTaxonomyFindings[] = 'qa_guard_missing_command:' . $expectedQaGuardCommand;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'qa_guard_missing_command',
+                'path' => 'tools/qa_guard.php',
+                'message' => sprintf('qa_guard.php should expose command "%s".', $expectedQaGuardCommand),
+            ];
+        }
+    }
+}
+
+$runtimePreflightFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'runtime_preflight.php';
+if (is_file($runtimePreflightFile)) {
+    $runtimePreflightContents = (string) file_get_contents($runtimePreflightFile);
+
+    foreach (['--require-vendor', '--test-runtime', '--json', '8.4.0', 'vendor/autoload.php'] as $expectedRuntimePreflightMarker) {
+        if (!str_contains($runtimePreflightContents, $expectedRuntimePreflightMarker)) {
+            $runtimeQualityEntrypointTaxonomyFindings[] = 'runtime_preflight_missing_marker:' . $expectedRuntimePreflightMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'runtime_preflight_missing_marker',
+                'path' => 'tools/runtime_preflight.php',
+                'message' => sprintf('runtime_preflight.php should contain marker "%s".', $expectedRuntimePreflightMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 28 security posture taxonomy.
+$securityPostureFindings = [];
+$requiredSecurityPostureFiles = [
+    'docs/discovery/SECURITY_POSTURE.md',
+    'tools/security_preflight.php',
+    'src/Service/Discovery/Http/DiscoveryRequestSurfacePolicy.php',
+    'src/Subscriber/Discovery/DiscoveryEndpointSecuritySubscriber.php',
+    'src/Subscriber/Discovery/DiscoveryMutationRequestHardeningSubscriber.php',
+    'src/Subscriber/Discovery/DiscoveryRateLimitSubscriber.php',
+    'src/Subscriber/Discovery/DiscoveryRequestCorrelationSubscriber.php',
+    'src/Subscriber/Discovery/DiscoveryResponseSecurityHeadersSubscriber.php',
+    'src/Service/Discovery/RateLimit/DiscoveryRateLimiter.php',
+    'src/Service/Discovery/RateLimit/ConfigurableDiscoveryRateLimitStore.php',
+    'config/services/discovery.yaml',
+];
+
+foreach ($requiredSecurityPostureFiles as $requiredSecurityPostureFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredSecurityPostureFile))) {
+        $securityPostureFindings[] = 'missing_security_posture_file:' . $requiredSecurityPostureFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_security_posture_file',
+            'path' => $requiredSecurityPostureFile,
+            'message' => 'Security posture file is required for endpoint/token/rate-limit hardening posture.',
+        ];
+    }
+}
+
+$requestSurfacePolicyFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Service' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'Http' . DIRECTORY_SEPARATOR . 'DiscoveryRequestSurfacePolicy.php';
+if (is_file($requestSurfacePolicyFile)) {
+    $requestSurfacePolicyContents = (string) file_get_contents($requestSurfacePolicyFile);
+    foreach ([
+        'isProtectedManagementPath',
+        'isProtectedManagementMutationPath',
+        'isProtectedApiWritePath',
+        'isProtectedMutationPath',
+        'isQueryPath',
+        'wantsJsonResponse',
+    ] as $expectedRequestSurfacePolicyMarker) {
+        if (!str_contains($requestSurfacePolicyContents, $expectedRequestSurfacePolicyMarker)) {
+            $securityPostureFindings[] = 'request_surface_policy_missing_marker:' . $expectedRequestSurfacePolicyMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'request_surface_policy_missing_marker',
+                'path' => 'src/Service/Discovery/Http/DiscoveryRequestSurfacePolicy.php',
+                'message' => sprintf('Request surface policy should contain marker "%s".', $expectedRequestSurfacePolicyMarker),
+            ];
+        }
+    }
+}
+
+$endpointSecuritySubscriberFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Subscriber' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryEndpointSecuritySubscriber.php';
+if (is_file($endpointSecuritySubscriberFile)) {
+    $endpointSecuritySubscriberContents = (string) file_get_contents($endpointSecuritySubscriberFile);
+    foreach (['managementToken', 'apiWriteToken', 'DiscoveryRequestSurfacePolicy', 'EventSubscriberInterface'] as $expectedEndpointSecurityMarker) {
+        if (!str_contains($endpointSecuritySubscriberContents, $expectedEndpointSecurityMarker)) {
+            $securityPostureFindings[] = 'endpoint_security_subscriber_missing_marker:' . $expectedEndpointSecurityMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'endpoint_security_subscriber_missing_marker',
+                'path' => 'src/Subscriber/Discovery/DiscoveryEndpointSecuritySubscriber.php',
+                'message' => sprintf('Endpoint security subscriber should contain marker "%s".', $expectedEndpointSecurityMarker),
+            ];
+        }
+    }
+}
+
+$rateLimitSubscriberFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Subscriber' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryRateLimitSubscriber.php';
+if (is_file($rateLimitSubscriberFile)) {
+    $rateLimitSubscriberContents = (string) file_get_contents($rateLimitSubscriberFile);
+    foreach (['DiscoveryRateLimiter', 'DiscoveryRateLimitDecision', 'EventSubscriberInterface', 'X-RateLimit-Limit', 'Retry-After'] as $expectedRateLimitSubscriberMarker) {
+        if (!str_contains($rateLimitSubscriberContents, $expectedRateLimitSubscriberMarker)) {
+            $securityPostureFindings[] = 'rate_limit_subscriber_missing_marker:' . $expectedRateLimitSubscriberMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'rate_limit_subscriber_missing_marker',
+                'path' => 'src/Subscriber/Discovery/DiscoveryRateLimitSubscriber.php',
+                'message' => sprintf('Rate-limit subscriber should contain marker "%s".', $expectedRateLimitSubscriberMarker),
+            ];
+        }
+    }
+}
+
+$responseHeadersSubscriberFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Subscriber' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryResponseSecurityHeadersSubscriber.php';
+if (is_file($responseHeadersSubscriberFile)) {
+    $responseHeadersSubscriberContents = (string) file_get_contents($responseHeadersSubscriberFile);
+    foreach (['X-Content-Type-Options', 'X-Frame-Options', 'Referrer-Policy'] as $expectedSecurityHeaderMarker) {
+        if (!str_contains($responseHeadersSubscriberContents, $expectedSecurityHeaderMarker)) {
+            $securityPostureFindings[] = 'response_headers_subscriber_missing_marker:' . $expectedSecurityHeaderMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'response_headers_subscriber_missing_marker',
+                'path' => 'src/Subscriber/Discovery/DiscoveryResponseSecurityHeadersSubscriber.php',
+                'message' => sprintf('Response security headers subscriber should contain marker "%s".', $expectedSecurityHeaderMarker),
+            ];
+        }
+    }
+}
+
+$discoveryServicesConfigFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'services' . DIRECTORY_SEPARATOR . 'discovery.yaml';
+if (is_file($discoveryServicesConfigFile)) {
+    $discoveryServicesConfigContents = (string) file_get_contents($discoveryServicesConfigFile);
+    foreach ([
+        'APP_DISCOVERY_MANAGEMENT_TOKEN',
+        'APP_DISCOVERY_API_WRITE_TOKEN',
+        'app.discovery.default_query_rate_limit',
+        'app.discovery.default_write_rate_limit',
+        'app.discovery.default_management_mutation_rate_limit',
+        'App\\Service\\Discovery\\RateLimit\\DiscoveryRateLimiter',
+    ] as $expectedSecurityConfigMarker) {
+        if (!str_contains($discoveryServicesConfigContents, $expectedSecurityConfigMarker)) {
+            $securityPostureFindings[] = 'security_config_missing_marker:' . $expectedSecurityConfigMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'security_config_missing_marker',
+                'path' => 'config/services/discovery.yaml',
+                'message' => sprintf('Discovering services config should contain security marker "%s".', $expectedSecurityConfigMarker),
+            ];
+        }
+    }
+}
+
+$securityPreflightFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'security_preflight.php';
+if (is_file($securityPreflightFile)) {
+    $securityPreflightContents = (string) file_get_contents($securityPreflightFile);
+    if (str_contains($securityPreflightContents, '/src/EventSubscriber/')) {
+        $securityPostureFindings[] = 'security_preflight_uses_legacy_event_subscriber_path';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'security_preflight_uses_legacy_event_subscriber_path',
+            'path' => 'tools/security_preflight.php',
+            'message' => 'Security preflight should use canonical src/Subscriber/Discovery paths.',
+        ];
+    }
+
+    foreach ([
+        '/src/Subscriber/Discovery/DiscoveryResponseSecurityHeadersSubscriber.php',
+        '/src/Subscriber/Discovery/DiscoveryEndpointSecuritySubscriber.php',
+        '/src/Subscriber/Discovery/DiscoveryRateLimitSubscriber.php',
+        '/src/Subscriber/Discovery/DiscoveryRequestCorrelationSubscriber.php',
+    ] as $expectedSecurityPreflightPath) {
+        if (!str_contains($securityPreflightContents, $expectedSecurityPreflightPath)) {
+            $securityPostureFindings[] = 'security_preflight_missing_canonical_path:' . $expectedSecurityPreflightPath;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'security_preflight_missing_canonical_path',
+                'path' => 'tools/security_preflight.php',
+                'message' => sprintf('Security preflight should check canonical path "%s".', $expectedSecurityPreflightPath),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 29 observability/operations posture.
+$observabilityOperationsFindings = [];
+$requiredObservabilityOperationsFiles = [
+    'docs/discovery/OBSERVABILITY_POSTURE.md',
+    'src/Subscriber/Discovery/DiscoveryRequestCorrelationSubscriber.php',
+    'src/Service/Discovery/Operations/DiscoveryOperationLogger.php',
+    'src/Service/Discovery/Operations/ConfigurableDiscoveryOperationEventLogStore.php',
+    'src/Service/Discovery/Operations/DoctrineDiscoveryOperationEventLogStore.php',
+    'src/Service/Discovery/Operations/FileDiscoveryOperationEventLogStore.php',
+    'src/Service/Discovery/Operations/DiscoveryOperationEventJsonSerializer.php',
+    'src/Dto/Discovery/DiscoveryOperationEvent.php',
+    'src/Entity/Discovery/DiscoveryOperationEventEntity.php',
+    'src/ServiceInterface/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php',
+    'config/services/discovery.yaml',
+];
+
+foreach ($requiredObservabilityOperationsFiles as $requiredObservabilityOperationsFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredObservabilityOperationsFile))) {
+        $observabilityOperationsFindings[] = 'missing_observability_operations_file:' . $requiredObservabilityOperationsFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_observability_operations_file',
+            'path' => $requiredObservabilityOperationsFile,
+            'message' => 'Observability/operations file is required for operation-event posture.',
+        ];
+    }
+}
+
+$operationLoggerFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Service' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'Operations' . DIRECTORY_SEPARATOR . 'DiscoveryOperationLogger.php';
+if (is_file($operationLoggerFile)) {
+    $operationLoggerContents = (string) file_get_contents($operationLoggerFile);
+    foreach ([
+        'REQUEST_ID_HEADER',
+        'REQUEST_ID_ATTRIBUTE',
+        'recordHttp',
+        'DiscoveryOperationEvent',
+        'DiscoveryOperationEventLogStoreInterface',
+    ] as $expectedOperationLoggerMarker) {
+        if (!str_contains($operationLoggerContents, $expectedOperationLoggerMarker)) {
+            $observabilityOperationsFindings[] = 'operation_logger_missing_marker:' . $expectedOperationLoggerMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'operation_logger_missing_marker',
+                'path' => 'src/Service/Discovery/Operations/DiscoveryOperationLogger.php',
+                'message' => sprintf('Operation logger should contain marker "%s".', $expectedOperationLoggerMarker),
+            ];
+        }
+    }
+}
+
+$correlationSubscriberFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Subscriber' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryRequestCorrelationSubscriber.php';
+if (is_file($correlationSubscriberFile)) {
+    $correlationSubscriberContents = (string) file_get_contents($correlationSubscriberFile);
+    foreach ([
+        'DiscoveryOperationLogger::REQUEST_ID_HEADER',
+        'DiscoveryOperationLogger::REQUEST_ID_ATTRIBUTE',
+        'KernelEvents::REQUEST',
+        'KernelEvents::RESPONSE',
+        'API_VERSION_HEADER',
+    ] as $expectedCorrelationMarker) {
+        if (!str_contains($correlationSubscriberContents, $expectedCorrelationMarker)) {
+            $observabilityOperationsFindings[] = 'correlation_subscriber_missing_marker:' . $expectedCorrelationMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'correlation_subscriber_missing_marker',
+                'path' => 'src/Subscriber/Discovery/DiscoveryRequestCorrelationSubscriber.php',
+                'message' => sprintf('Request correlation subscriber should contain marker "%s".', $expectedCorrelationMarker),
+            ];
+        }
+    }
+}
+
+$operationEventDtoFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryOperationEvent.php';
+if (is_file($operationEventDtoFile)) {
+    $operationEventDtoContents = (string) file_get_contents($operationEventDtoFile);
+    foreach (['final readonly class DiscoveryOperationEvent', 'requestId', 'channel', 'operation', 'status', 'occurredAt', 'context'] as $expectedOperationEventDtoMarker) {
+        if (!str_contains($operationEventDtoContents, $expectedOperationEventDtoMarker)) {
+            $observabilityOperationsFindings[] = 'operation_event_dto_missing_marker:' . $expectedOperationEventDtoMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'operation_event_dto_missing_marker',
+                'path' => 'src/Dto/Discovery/DiscoveryOperationEvent.php',
+                'message' => sprintf('Operation event DTO should contain marker "%s".', $expectedOperationEventDtoMarker),
+            ];
+        }
+    }
+}
+
+$operationEventEntityFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Entity' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryOperationEventEntity.php';
+if (is_file($operationEventEntityFile)) {
+    $operationEventEntityContents = (string) file_get_contents($operationEventEntityFile);
+    foreach (['discovery_operation_event_log', 'event_id', 'request_id', 'context_json'] as $expectedOperationEventEntityMarker) {
+        if (!str_contains($operationEventEntityContents, $expectedOperationEventEntityMarker)) {
+            $observabilityOperationsFindings[] = 'operation_event_entity_missing_marker:' . $expectedOperationEventEntityMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'operation_event_entity_missing_marker',
+                'path' => 'src/Entity/Discovery/DiscoveryOperationEventEntity.php',
+                'message' => sprintf('Operation event entity should contain marker "%s".', $expectedOperationEventEntityMarker),
+            ];
+        }
+    }
+}
+
+$operationStoreInterfaceFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'ServiceInterface' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'Operations' . DIRECTORY_SEPARATOR . 'DiscoveryOperationEventLogStoreInterface.php';
+if (is_file($operationStoreInterfaceFile)) {
+    $operationStoreInterfaceContents = (string) file_get_contents($operationStoreInterfaceFile);
+    foreach (['append', 'all', 'latest', 'clear', 'DiscoveryOperationEvent'] as $expectedOperationStoreInterfaceMarker) {
+        if (!str_contains($operationStoreInterfaceContents, $expectedOperationStoreInterfaceMarker)) {
+            $observabilityOperationsFindings[] = 'operation_store_interface_missing_marker:' . $expectedOperationStoreInterfaceMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'operation_store_interface_missing_marker',
+                'path' => 'src/ServiceInterface/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php',
+                'message' => sprintf('Operation event store interface should contain marker "%s".', $expectedOperationStoreInterfaceMarker),
+            ];
+        }
+    }
+}
+
+$operationsServiceRoot = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Service' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'Operations';
+if (is_dir($operationsServiceRoot)) {
+    $operationsIterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($operationsServiceRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($operationsIterator as $operationsFile) {
+        if (!$operationsFile instanceof SplFileInfo || !$operationsFile->isFile() || $operationsFile->getExtension() !== 'php') {
+            continue;
+        }
+
+        $operationsRelative = relativePath($root, $operationsFile->getPathname());
+        $operationsContents = (string) file_get_contents($operationsFile->getPathname());
+        if (!str_contains($operationsContents, 'namespace App\\Service\\Discovery\\Operations;')) {
+            $observabilityOperationsFindings[] = 'operations_service_namespace_mismatch:' . $operationsRelative;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'operations_service_namespace_mismatch',
+                'path' => $operationsRelative,
+                'message' => 'Operation/observability services should use App\\Service\\Discovery\\Operations namespace.',
+            ];
+        }
+    }
+}
+
+$discoveryServicesConfigFile = $root . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'services' . DIRECTORY_SEPARATOR . 'discovery.yaml';
+if (is_file($discoveryServicesConfigFile)) {
+    $discoveryServicesConfigContents = (string) file_get_contents($discoveryServicesConfigFile);
+    foreach ([
+        'app.discovery.default_operation_log_path',
+        'app.discovery.default_operation_log_backend',
+        'APP_DISCOVERY_OPERATION_LOG_PATH',
+        'APP_DISCOVERY_OPERATION_LOG_BACKEND',
+        'App\\ServiceInterface\\Discovery\\Operations\\DiscoveryOperationEventLogStoreInterface',
+        'App\\Service\\Discovery\\Operations\\ConfigurableDiscoveryOperationEventLogStore',
+    ] as $expectedObservabilityConfigMarker) {
+        if (!str_contains($discoveryServicesConfigContents, $expectedObservabilityConfigMarker)) {
+            $observabilityOperationsFindings[] = 'observability_config_missing_marker:' . $expectedObservabilityConfigMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'observability_config_missing_marker',
+                'path' => 'config/services/discovery.yaml',
+                'message' => sprintf('Discovering services config should contain observability marker "%s".', $expectedObservabilityConfigMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 30 release/readiness documentation taxonomy.
+$releaseReadinessFindings = [];
+$requiredReleaseReadinessFiles = [
+    'docs/discovery/RC_READINESS.md',
+    'docs/discovery/SUPPORT_MATRIX.md',
+    'docs/discovery/KNOWN_LIMITATIONS.md',
+    'docs/discovery/SECURITY_POSTURE.md',
+    'docs/discovery/OBSERVABILITY_POSTURE.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+    'tools/runtime_preflight.php',
+    'tools/security_preflight.php',
+    'tools/discovering_canon_audit.php',
+    'composer.json',
+];
+
+foreach ($requiredReleaseReadinessFiles as $requiredReleaseReadinessFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredReleaseReadinessFile))) {
+        $releaseReadinessFindings[] = 'missing_release_readiness_file:' . $requiredReleaseReadinessFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_release_readiness_file',
+            'path' => $requiredReleaseReadinessFile,
+            'message' => 'Release/readiness file is required for RC gate posture.',
+        ];
+    }
+}
+
+$rcReadinessFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RC_READINESS.md';
+if (is_file($rcReadinessFile)) {
+    $rcReadinessContents = (string) file_get_contents($rcReadinessFile);
+    foreach (['Ecosystem RC candidate', 'Remaining RC gates', 'phpstan', 'php-cs-fixer', 'PHPUnit', 'Nelmio'] as $expectedRcReadinessMarker) {
+        if (!str_contains($rcReadinessContents, $expectedRcReadinessMarker)) {
+            $releaseReadinessFindings[] = 'rc_readiness_missing_marker:' . $expectedRcReadinessMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'rc_readiness_missing_marker',
+                'path' => 'docs/discovery/RC_READINESS.md',
+                'message' => sprintf('RC readiness doc should contain marker "%s".', $expectedRcReadinessMarker),
+            ];
+        }
+    }
+}
+
+$supportMatrixFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'SUPPORT_MATRIX.md';
+if (is_file($supportMatrixFile)) {
+    $supportMatrixContents = (string) file_get_contents($supportMatrixFile);
+    foreach (['PHP: `>= 8.4`', 'pdo_sqlite', 'Composer v2', 'PHPUnit 11', 'PHPStan 2', 'PHP CS Fixer 3'] as $expectedSupportMatrixMarker) {
+        if (!str_contains($supportMatrixContents, $expectedSupportMatrixMarker)) {
+            $releaseReadinessFindings[] = 'support_matrix_missing_marker:' . $expectedSupportMatrixMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'support_matrix_missing_marker',
+                'path' => 'docs/discovery/SUPPORT_MATRIX.md',
+                'message' => sprintf('Support matrix should contain marker "%s".', $expectedSupportMatrixMarker),
+            ];
+        }
+    }
+}
+
+$knownLimitationsFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'KNOWN_LIMITATIONS.md';
+if (is_file($knownLimitationsFile)) {
+    $knownLimitationsContents = (string) file_get_contents($knownLimitationsFile);
+    foreach (['Current limitations', 'Intentionally deferred', 'OpenAPI', 'token-based protection'] as $expectedKnownLimitationsMarker) {
+        if (!str_contains($knownLimitationsContents, $expectedKnownLimitationsMarker)) {
+            $releaseReadinessFindings[] = 'known_limitations_missing_marker:' . $expectedKnownLimitationsMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'known_limitations_missing_marker',
+                'path' => 'docs/discovery/KNOWN_LIMITATIONS.md',
+                'message' => sprintf('Known limitations doc should contain marker "%s".', $expectedKnownLimitationsMarker),
+            ];
+        }
+    }
+}
+
+$releaseReadinessGatesFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RELEASE_READINESS_GATES.md';
+if (is_file($releaseReadinessGatesFile)) {
+    $releaseReadinessGatesContents = (string) file_get_contents($releaseReadinessGatesFile);
+    foreach ([
+        'runtime_preflight.php',
+        'security_preflight.php',
+        'discovering_canon_audit.php',
+        'composer validate --strict',
+        'composer test:all',
+        'composer analyse',
+        'Runtime proof separation',
+    ] as $expectedReleaseReadinessGatesMarker) {
+        if (!str_contains($releaseReadinessGatesContents, $expectedReleaseReadinessGatesMarker)) {
+            $releaseReadinessFindings[] = 'release_readiness_gates_missing_marker:' . $expectedReleaseReadinessGatesMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'release_readiness_gates_missing_marker',
+                'path' => 'docs/discovery/RELEASE_READINESS_GATES.md',
+                'message' => sprintf('Release readiness gates doc should contain marker "%s".', $expectedReleaseReadinessGatesMarker),
+            ];
+        }
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    foreach ([
+        'test',
+        'test:all',
+        'validate:composer',
+        'verify:runtime-preflight',
+        'verify:security',
+        'verify:docblocks',
+        'lint:php',
+        'analyse',
+        'lint:cs',
+        'ci',
+    ] as $expectedReleaseComposerScript) {
+        if (!is_array($scripts) || !array_key_exists($expectedReleaseComposerScript, $scripts)) {
+            $releaseReadinessFindings[] = 'release_composer_script_missing:' . $expectedReleaseComposerScript;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'release_composer_script_missing',
+                'path' => 'composer.json',
+                'message' => sprintf('Release readiness expects Composer script "%s".', $expectedReleaseComposerScript),
+            ];
+        }
+    }
+}
+
+$securityPreflightFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'security_preflight.php';
+if (is_file($securityPreflightFile)) {
+    $securityPreflightContents = (string) file_get_contents($securityPreflightFile);
+    foreach (['RC_READINESS.md', 'SUPPORT_MATRIX.md', 'KNOWN_LIMITATIONS.md'] as $expectedSecurityPreflightReadinessMarker) {
+        if (!str_contains($securityPreflightContents, $expectedSecurityPreflightReadinessMarker)) {
+            $releaseReadinessFindings[] = 'security_preflight_missing_readiness_doc_marker:' . $expectedSecurityPreflightReadinessMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'security_preflight_missing_readiness_doc_marker',
+                'path' => 'tools/security_preflight.php',
+                'message' => sprintf('Security preflight should check readiness doc "%s".', $expectedSecurityPreflightReadinessMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 31 HTTP front-controller runtime entrypoint posture.
+$httpFrontControllerFindings = [];
+$requiredHttpFrontControllerFiles = [
+    'public/index.php',
+    'src/Kernel.php',
+    'bin/console',
+    'docs/discovery/CANONIZATION_WAVE31_HTTP_FRONT_CONTROLLER_RUNTIME_ENTRYPOINT.md',
+];
+
+foreach ($requiredHttpFrontControllerFiles as $requiredHttpFrontControllerFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredHttpFrontControllerFile))) {
+        $httpFrontControllerFindings[] = 'missing_http_front_controller_file:' . $requiredHttpFrontControllerFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_http_front_controller_file',
+            'path' => $requiredHttpFrontControllerFile,
+            'message' => 'HTTP/runtime entrypoint file is required for Symfony front-controller posture.',
+        ];
+    }
+}
+
+$publicIndexFile = $root . DIRECTORY_SEPARATOR . 'public' . DIRECTORY_SEPARATOR . 'index.php';
+if (is_file($publicIndexFile)) {
+    $publicIndexContents = (string) file_get_contents($publicIndexFile);
+    foreach ([
+        'use App\\Kernel;',
+        'Request::createFromGlobals',
+        '$kernel->handle($request)',
+        '$response->send()',
+        '$kernel->terminate($request, $response)',
+        "vendor/autoload.php",
+    ] as $expectedPublicIndexMarker) {
+        if (!str_contains($publicIndexContents, $expectedPublicIndexMarker)) {
+            $httpFrontControllerFindings[] = 'public_index_missing_marker:' . $expectedPublicIndexMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'public_index_missing_marker',
+                'path' => 'public/index.php',
+                'message' => sprintf('HTTP front controller should contain marker "%s".', $expectedPublicIndexMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 32 runtime-preflight environment split posture.
+$runtimePreflightEnvironmentSplitFindings = [];
+$requiredRuntimePreflightEnvironmentSplitFiles = [
+    'tools/runtime_preflight.php',
+    'docs/discovery/CANONIZATION_WAVE32_RUNTIME_PREFLIGHT_ENVIRONMENT_SPLIT.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredRuntimePreflightEnvironmentSplitFiles as $requiredRuntimePreflightEnvironmentSplitFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredRuntimePreflightEnvironmentSplitFile))) {
+        $runtimePreflightEnvironmentSplitFindings[] = 'missing_runtime_preflight_environment_split_file:' . $requiredRuntimePreflightEnvironmentSplitFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_runtime_preflight_environment_split_file',
+            'path' => $requiredRuntimePreflightEnvironmentSplitFile,
+            'message' => 'Runtime preflight environment split file is required for repository/environment gate separation.',
+        ];
+    }
+}
+
+$runtimePreflightFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'runtime_preflight.php';
+if (is_file($runtimePreflightFile)) {
+    $runtimePreflightContents = (string) file_get_contents($runtimePreflightFile);
+    foreach ([
+        '--check-runtime-extensions',
+        '--require-composer',
+        '--require-vendor',
+        '--test-runtime',
+        '$checkRuntimeExtensions',
+        '$requireComposer',
+        'vendor_autoload',
+        'public/index.php',
+    ] as $expectedRuntimePreflightSplitMarker) {
+        if (!str_contains($runtimePreflightContents, $expectedRuntimePreflightSplitMarker)) {
+            $runtimePreflightEnvironmentSplitFindings[] = 'runtime_preflight_split_missing_marker:' . $expectedRuntimePreflightSplitMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'runtime_preflight_split_missing_marker',
+                'path' => 'tools/runtime_preflight.php',
+                'message' => sprintf('Runtime preflight should contain split marker "%s".', $expectedRuntimePreflightSplitMarker),
+            ];
+        }
+    }
+
+    if (str_contains($runtimePreflightContents, 'foreach ([\'json\', \'pdo\', \'pdo_sqlite\'] as $extension)') && !str_contains($runtimePreflightContents, 'if ($checkRuntimeExtensions)')) {
+        $runtimePreflightEnvironmentSplitFindings[] = 'runtime_extensions_not_gated';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'runtime_extensions_not_gated',
+            'path' => 'tools/runtime_preflight.php',
+            'message' => 'Runtime extension checks should be gated by --check-runtime-extensions or stricter modes.',
+        ];
+    }
+}
+
+$releaseReadinessGatesFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RELEASE_READINESS_GATES.md';
+if (is_file($releaseReadinessGatesFile)) {
+    $releaseReadinessGatesContents = (string) file_get_contents($releaseReadinessGatesFile);
+    foreach (['--check-runtime-extensions', '--require-composer', '--require-vendor'] as $expectedReleaseGateSplitMarker) {
+        if (!str_contains($releaseReadinessGatesContents, $expectedReleaseGateSplitMarker)) {
+            $runtimePreflightEnvironmentSplitFindings[] = 'release_gates_missing_runtime_split_marker:' . $expectedReleaseGateSplitMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'release_gates_missing_runtime_split_marker',
+                'path' => 'docs/discovery/RELEASE_READINESS_GATES.md',
+                'message' => sprintf('Release readiness gates should document runtime split marker "%s".', $expectedReleaseGateSplitMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 33 Composer runtime script alignment.
+$composerRuntimeScriptFindings = [];
+$requiredComposerRuntimeScriptFiles = [
+    'composer.json',
+    'docs/discovery/CANONIZATION_WAVE33_COMPOSER_RUNTIME_SCRIPT_ALIGNMENT.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredComposerRuntimeScriptFiles as $requiredComposerRuntimeScriptFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredComposerRuntimeScriptFile))) {
+        $composerRuntimeScriptFindings[] = 'missing_composer_runtime_script_file:' . $requiredComposerRuntimeScriptFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_composer_runtime_script_file',
+            'path' => $requiredComposerRuntimeScriptFile,
+            'message' => 'Composer runtime script alignment file is required for preflight script posture.',
+        ];
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+
+    $expectedRuntimeScripts = [
+        'verify:runtime-preflight' => 'php tools/runtime_preflight.php',
+        'verify:runtime-extensions' => 'php tools/runtime_preflight.php --check-runtime-extensions',
+        'verify:composer-runtime' => 'php tools/runtime_preflight.php --require-composer',
+        'verify:vendor-runtime' => 'php tools/runtime_preflight.php --require-vendor',
+        'verify:test-runtime' => 'php tools/runtime_preflight.php --test-runtime',
+    ];
+
+    foreach ($expectedRuntimeScripts as $scriptName => $expectedCommand) {
+        if (!is_array($scripts) || ($scripts[$scriptName] ?? null) !== $expectedCommand) {
+            $composerRuntimeScriptFindings[] = 'composer_runtime_script_mismatch:' . $scriptName;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'composer_runtime_script_mismatch',
+                'path' => 'composer.json',
+                'message' => sprintf('Composer script "%s" should be "%s".', $scriptName, $expectedCommand),
+            ];
+        }
+    }
+}
+
+$releaseReadinessGatesFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RELEASE_READINESS_GATES.md';
+if (is_file($releaseReadinessGatesFile)) {
+    $releaseReadinessGatesContents = (string) file_get_contents($releaseReadinessGatesFile);
+    foreach ([
+        'composer verify:runtime-preflight',
+        'composer verify:runtime-extensions',
+        'composer verify:composer-runtime',
+        'composer verify:vendor-runtime',
+        'composer verify:test-runtime',
+    ] as $expectedComposerRuntimeGateMarker) {
+        if (!str_contains($releaseReadinessGatesContents, $expectedComposerRuntimeGateMarker)) {
+            $composerRuntimeScriptFindings[] = 'release_gates_missing_composer_runtime_marker:' . $expectedComposerRuntimeGateMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'release_gates_missing_composer_runtime_marker',
+                'path' => 'docs/discovery/RELEASE_READINESS_GATES.md',
+                'message' => sprintf('Release readiness gates should document "%s".', $expectedComposerRuntimeGateMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 34 CI script profile split.
+$ciScriptProfileFindings = [];
+$requiredCiScriptProfileFiles = [
+    'composer.json',
+    'docs/discovery/CANONIZATION_WAVE34_CI_SCRIPT_PROFILE_SPLIT.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredCiScriptProfileFiles as $requiredCiScriptProfileFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredCiScriptProfileFile))) {
+        $ciScriptProfileFindings[] = 'missing_ci_script_profile_file:' . $requiredCiScriptProfileFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_ci_script_profile_file',
+            'path' => $requiredCiScriptProfileFile,
+            'message' => 'CI script profile file is required for structural/runtime/quality gate split.',
+        ];
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+
+    $expectedCiProfiles = [
+        'ci:local' => ['@validate:composer', '@verify:runtime-preflight', '@verify:security', '@verify:docblocks', '@lint:php'],
+        'ci:runtime' => ['@verify:composer-runtime', '@verify:vendor-runtime', '@verify:runtime-extensions', '@verify:test-runtime', '@verify:console', '@test:all'],
+        'ci:quality' => ['@analyse', '@lint:cs'],
+        'ci' => ['@ci:local', '@ci:runtime', '@ci:quality'],
+    ];
+
+    foreach ($expectedCiProfiles as $scriptName => $expectedSteps) {
+        $actualSteps = is_array($scripts) ? ($scripts[$scriptName] ?? null) : null;
+        if ($actualSteps !== $expectedSteps) {
+            $ciScriptProfileFindings[] = 'ci_script_profile_mismatch:' . $scriptName;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'ci_script_profile_mismatch',
+                'path' => 'composer.json',
+                'message' => sprintf('Composer CI profile "%s" should match the canonical structural/runtime/quality split.', $scriptName),
+            ];
+        }
+    }
+}
+
+$releaseReadinessGatesFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RELEASE_READINESS_GATES.md';
+if (is_file($releaseReadinessGatesFile)) {
+    $releaseReadinessGatesContents = (string) file_get_contents($releaseReadinessGatesFile);
+    foreach (['composer ci:local', 'composer ci:runtime', 'composer ci:quality', 'composer ci'] as $expectedCiProfileGateMarker) {
+        if (!str_contains($releaseReadinessGatesContents, $expectedCiProfileGateMarker)) {
+            $ciScriptProfileFindings[] = 'release_gates_missing_ci_profile_marker:' . $expectedCiProfileGateMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'release_gates_missing_ci_profile_marker',
+                'path' => 'docs/discovery/RELEASE_READINESS_GATES.md',
+                'message' => sprintf('Release readiness gates should document "%s".', $expectedCiProfileGateMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 35 local CI entrypoint posture.
+$localCiEntrypointFindings = [];
+$requiredLocalCiEntrypointFiles = [
+    'tools/local_ci.php',
+    'tools/MANIFEST.md',
+    'composer.json',
+    'docs/discovery/CANONIZATION_WAVE35_LOCAL_CI_ENTRYPOINT.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredLocalCiEntrypointFiles as $requiredLocalCiEntrypointFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredLocalCiEntrypointFile))) {
+        $localCiEntrypointFindings[] = 'missing_local_ci_entrypoint_file:' . $requiredLocalCiEntrypointFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_local_ci_entrypoint_file',
+            'path' => $requiredLocalCiEntrypointFile,
+            'message' => 'Local CI entrypoint file is required for Composer-free structural gate posture.',
+        ];
+    }
+}
+
+$localCiFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'local_ci.php';
+if (is_file($localCiFile)) {
+    $localCiContents = (string) file_get_contents($localCiFile);
+    foreach ([
+        'runtime_preflight.php',
+        'security_preflight.php',
+        'discovering_canon_audit.php',
+        'lint_php.php',
+        'docblock_policy_check.php',
+        'proc_open',
+        'Discovering local CI result',
+    ] as $expectedLocalCiMarker) {
+        if (!str_contains($localCiContents, $expectedLocalCiMarker)) {
+            $localCiEntrypointFindings[] = 'local_ci_missing_marker:' . $expectedLocalCiMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'local_ci_missing_marker',
+                'path' => 'tools/local_ci.php',
+                'message' => sprintf('Local CI wrapper should contain marker "%s".', $expectedLocalCiMarker),
+            ];
+        }
+    }
+
+    if (str_contains($localCiContents, 'vendor/autoload.php')) {
+        $localCiEntrypointFindings[] = 'local_ci_requires_vendor';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'local_ci_requires_vendor',
+            'path' => 'tools/local_ci.php',
+            'message' => 'Local CI wrapper should not require vendor/autoload.php.',
+        ];
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    if (!is_array($scripts) || ($scripts['ci:local:direct'] ?? null) !== 'php tools/local_ci.php') {
+        $localCiEntrypointFindings[] = 'composer_local_ci_direct_script_mismatch';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'composer_local_ci_direct_script_mismatch',
+            'path' => 'composer.json',
+            'message' => 'Composer script ci:local:direct should run php tools/local_ci.php.',
+        ];
+    }
+}
+
+$releaseReadinessGatesFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RELEASE_READINESS_GATES.md';
+if (is_file($releaseReadinessGatesFile)) {
+    $releaseReadinessGatesContents = (string) file_get_contents($releaseReadinessGatesFile);
+    foreach (['php tools/local_ci.php', 'composer ci:local:direct'] as $expectedLocalCiGateMarker) {
+        if (!str_contains($releaseReadinessGatesContents, $expectedLocalCiGateMarker)) {
+            $localCiEntrypointFindings[] = 'release_gates_missing_local_ci_marker:' . $expectedLocalCiGateMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'release_gates_missing_local_ci_marker',
+                'path' => 'docs/discovery/RELEASE_READINESS_GATES.md',
+                'message' => sprintf('Release readiness gates should document "%s".', $expectedLocalCiGateMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 36 docblock policy closure.
+$docblockPolicyFindings = [];
+$requiredDocblockPolicyFiles = [
+    'docs/discovery/CANONIZATION_WAVE36_DOCBLOCK_POLICY_CLOSURE.md',
+    'tools/docblock_policy_check.php',
+];
+
+foreach ($requiredDocblockPolicyFiles as $requiredDocblockPolicyFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredDocblockPolicyFile))) {
+        $docblockPolicyFindings[] = 'missing_docblock_policy_file:' . $requiredDocblockPolicyFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_docblock_policy_file',
+            'path' => $requiredDocblockPolicyFile,
+            'message' => 'Docblock policy closure file is required for documentation-grade class posture.',
+        ];
+    }
+}
+
+$docblockPolicyTargets = [
+    'src/Entity/Discovery/DiscoveryFeedbackEntity.php',
+    'src/Entity/Discovery/DiscoveryIndexAliasEntity.php',
+    'src/Entity/Discovery/DiscoveryIndexDocumentEntity.php',
+    'src/Entity/Discovery/DiscoveryOperationEventEntity.php',
+    'src/Entity/Discovery/DiscoveryRateLimitBucketEntity.php',
+    'src/Entity/Discovery/DiscoveryRebuildEvidenceEntity.php',
+    'src/Entity/Discovery/LibsourceOperatorEventEntity.php',
+    'src/Service/Discovery/DoctrineDiscoveryFeedbackStore.php',
+    'src/Service/Discovery/Libsource/Log/DoctrineLibsourceOperatorEventLogStore.php',
+    'src/Service/Discovery/Operations/DoctrineDiscoveryOperationEventLogStore.php',
+    'src/Service/Discovery/RateLimit/DoctrineDiscoveryRateLimitStore.php',
+    'src/Service/Discovery/Rebuild/DoctrineDiscoveryRebuildEvidenceStore.php',
+    'tests/Support/DiscoveryDoctrineEntityManagerFactory.php',
+];
+
+foreach ($docblockPolicyTargets as $docblockPolicyTarget) {
+    $docblockPolicyTargetFile = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $docblockPolicyTarget);
+    if (!is_file($docblockPolicyTargetFile)) {
+        $docblockPolicyFindings[] = 'missing_docblock_policy_target:' . $docblockPolicyTarget;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_docblock_policy_target',
+            'path' => $docblockPolicyTarget,
+            'message' => 'Docblock policy target file is missing.',
+        ];
+        continue;
+    }
+
+    $docblockPolicyTargetContents = (string) file_get_contents($docblockPolicyTargetFile);
+    if (preg_match('/\/\*\*[\s\S]*?\*\/\s*(?:final\s+)?class\s+/', $docblockPolicyTargetContents) !== 1) {
+        $docblockPolicyFindings[] = 'missing_class_level_semantic_docblock:' . $docblockPolicyTarget;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_class_level_semantic_docblock',
+            'path' => $docblockPolicyTarget,
+            'message' => 'Class should have a semantic class-level docblock.',
+        ];
+    }
+}
+
+
+
+// Wave 37 explicit legacy retirement closure.
+$legacyRetirementFindings = [];
+$legacyRetirementFiles = [
+    'src/Service/Discovery/Diagnostics/DiscoveryProbeTransportInterface.php',
+    'src/Service/Discovery/DiscoveryFeedbackStoreInterface.php',
+    'src/Service/Discovery/Libsource/Log/LibsourceOperatorEventLogStoreInterface.php',
+    'src/Service/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php',
+    'src/Service/Discovery/RateLimit/DiscoveryRateLimitStoreInterface.php',
+    'src/Service/Discovery/Rebuild/DiscoveryRebuildEvidenceStoreInterface.php',
+    'src/Service/Discovery/Source/Repository/DiscoverySourceRecordRepositoryInterface.php',
+    'src/Service/Discovery/Support/DirectoryBackedFamilyManagementActionServiceInterface.php',
+    'src/EventSubscriber/DiscoveryEndpointSecuritySubscriber.php',
+    'src/EventSubscriber/DiscoveryMutationRequestHardeningSubscriber.php',
+    'src/EventSubscriber/DiscoveryRateLimitSubscriber.php',
+    'src/EventSubscriber/DiscoveryRequestCorrelationSubscriber.php',
+    'src/EventSubscriber/DiscoveryResponseSecurityHeadersSubscriber.php',
+];
+
+$requiredLegacyRetirementFiles = [
+    'docs/discovery/CANONIZATION_WAVE37_LEGACY_RETIREMENT_CLOSURE.md',
+    'docs/discovery/WAVE37_RETIRED_LEGACY_FILES.txt',
+];
+
+foreach ($requiredLegacyRetirementFiles as $requiredLegacyRetirementFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredLegacyRetirementFile))) {
+        $legacyRetirementFindings[] = 'missing_legacy_retirement_file:' . $requiredLegacyRetirementFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_legacy_retirement_file',
+            'path' => $requiredLegacyRetirementFile,
+            'message' => 'Legacy retirement documentation file is required for explicit touched deletion posture.',
+        ];
+    }
+}
+
+foreach ($legacyRetirementFiles as $legacyRetirementFile) {
+    if (is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $legacyRetirementFile))) {
+        $legacyRetirementFindings[] = 'legacy_file_still_present:' . $legacyRetirementFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'legacy_file_still_present',
+            'path' => $legacyRetirementFile,
+            'message' => 'Legacy file should be retired by Wave 37 explicit touched deletion script.',
+        ];
+    }
+}
+
+
+
+// Wave 38 root stale manifest retirement closure.
+$rootStaleManifestRetirementFindings = [];
+$rootStaleManifestRetirementFiles = [
+    'ARCHITECTURE_MANIFEST.md',
+    'BOUNDING_MANIFEST.md',
+    'PRODUCT_MANIFEST.md',
+    'CODEX_CLI_PROMPT.txt',
+    'MANIFEST.txt',
+    'PATCH_MANIFEST.txt',
+];
+
+$requiredRootStaleManifestRetirementFiles = [
+    'docs/discovery/CANONIZATION_WAVE38_ROOT_STALE_MANIFEST_RETIREMENT.md',
+    'docs/discovery/WAVE38_RETIRED_ROOT_STALE_FILES.txt',
+];
+
+foreach ($requiredRootStaleManifestRetirementFiles as $requiredRootStaleManifestRetirementFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredRootStaleManifestRetirementFile))) {
+        $rootStaleManifestRetirementFindings[] = 'missing_root_stale_manifest_retirement_file:' . $requiredRootStaleManifestRetirementFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_root_stale_manifest_retirement_file',
+            'path' => $requiredRootStaleManifestRetirementFile,
+            'message' => 'Root stale manifest retirement documentation file is required for explicit touched deletion posture.',
+        ];
+    }
+}
+
+foreach ($rootStaleManifestRetirementFiles as $rootStaleManifestRetirementFile) {
+    if (is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rootStaleManifestRetirementFile))) {
+        $rootStaleManifestRetirementFindings[] = 'root_stale_manifest_still_present:' . $rootStaleManifestRetirementFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'root_stale_manifest_still_present',
+            'path' => $rootStaleManifestRetirementFile,
+            'message' => 'Root stale manifest/patch metadata file should be retired by Wave 38 explicit touched deletion script.',
+        ];
+    }
+}
+
+
+
+// Wave 39 structural closure evidence posture.
+$structuralClosureEvidenceFindings = [];
+$requiredStructuralClosureEvidenceFiles = [
+    'tools/structural_closure_evidence.php',
+    'tools/MANIFEST.md',
+    'composer.json',
+    'docs/discovery/CANONIZATION_WAVE39_STRUCTURAL_CLOSURE_EVIDENCE.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredStructuralClosureEvidenceFiles as $requiredStructuralClosureEvidenceFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredStructuralClosureEvidenceFile))) {
+        $structuralClosureEvidenceFindings[] = 'missing_structural_closure_evidence_file:' . $requiredStructuralClosureEvidenceFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_structural_closure_evidence_file',
+            'path' => $requiredStructuralClosureEvidenceFile,
+            'message' => 'Structural closure evidence file is required for machine-readable closure reporting.',
+        ];
+    }
+}
+
+$structuralClosureEvidenceFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'structural_closure_evidence.php';
+if (is_file($structuralClosureEvidenceFile)) {
+    $structuralClosureEvidenceContents = (string) file_get_contents($structuralClosureEvidenceFile);
+    foreach ([
+        'runtime_preflight.php',
+        'discovering_canon_audit.php',
+        '--format=json',
+        'local_ci.php',
+        'structural_closure_evidence.json',
+        'var/discovery/evidence',
+    ] as $expectedStructuralClosureMarker) {
+        if (!str_contains($structuralClosureEvidenceContents, $expectedStructuralClosureMarker)) {
+            $structuralClosureEvidenceFindings[] = 'structural_closure_evidence_missing_marker:' . $expectedStructuralClosureMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'structural_closure_evidence_missing_marker',
+                'path' => 'tools/structural_closure_evidence.php',
+                'message' => sprintf('Structural closure evidence tool should contain marker "%s".', $expectedStructuralClosureMarker),
+            ];
+        }
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    if (!is_array($scripts) || ($scripts['verify:structural-closure'] ?? null) !== 'php tools/structural_closure_evidence.php') {
+        $structuralClosureEvidenceFindings[] = 'composer_structural_closure_script_mismatch';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'composer_structural_closure_script_mismatch',
+            'path' => 'composer.json',
+            'message' => 'Composer script verify:structural-closure should run php tools/structural_closure_evidence.php.',
+        ];
+    }
+}
+
+$releaseReadinessGatesFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RELEASE_READINESS_GATES.md';
+if (is_file($releaseReadinessGatesFile)) {
+    $releaseReadinessGatesContents = (string) file_get_contents($releaseReadinessGatesFile);
+    foreach (['php tools/structural_closure_evidence.php', 'composer verify:structural-closure'] as $expectedStructuralClosureGateMarker) {
+        if (!str_contains($releaseReadinessGatesContents, $expectedStructuralClosureGateMarker)) {
+            $structuralClosureEvidenceFindings[] = 'release_gates_missing_structural_closure_marker:' . $expectedStructuralClosureGateMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'release_gates_missing_structural_closure_marker',
+                'path' => 'docs/discovery/RELEASE_READINESS_GATES.md',
+                'message' => sprintf('Release readiness gates should document "%s".', $expectedStructuralClosureGateMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 40 runtime dependency boundary posture.
+$runtimeDependencyBoundaryFindings = [];
+$requiredRuntimeDependencyBoundaryFiles = [
+    'tools/runtime_dependency_evidence.php',
+    'tools/MANIFEST.md',
+    'composer.json',
+    'docs/discovery/RUNTIME_PROOF_BOUNDARY.md',
+    'docs/discovery/CANONIZATION_WAVE40_RUNTIME_DEPENDENCY_BOUNDARY.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredRuntimeDependencyBoundaryFiles as $requiredRuntimeDependencyBoundaryFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredRuntimeDependencyBoundaryFile))) {
+        $runtimeDependencyBoundaryFindings[] = 'missing_runtime_dependency_boundary_file:' . $requiredRuntimeDependencyBoundaryFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_runtime_dependency_boundary_file',
+            'path' => $requiredRuntimeDependencyBoundaryFile,
+            'message' => 'Runtime dependency boundary file is required for strict runtime proof separation.',
+        ];
+    }
+}
+
+$runtimeDependencyEvidenceFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'runtime_dependency_evidence.php';
+if (is_file($runtimeDependencyEvidenceFile)) {
+    $runtimeDependencyEvidenceContents = (string) file_get_contents($runtimeDependencyEvidenceFile);
+    foreach ([
+        '--check-runtime-extensions',
+        '--require-composer',
+        '--require-vendor',
+        '--test-runtime',
+        'runtime_dependency_evidence.json',
+        'runtime_dependency',
+    ] as $expectedRuntimeDependencyMarker) {
+        if (!str_contains($runtimeDependencyEvidenceContents, $expectedRuntimeDependencyMarker)) {
+            $runtimeDependencyBoundaryFindings[] = 'runtime_dependency_evidence_missing_marker:' . $expectedRuntimeDependencyMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'runtime_dependency_evidence_missing_marker',
+                'path' => 'tools/runtime_dependency_evidence.php',
+                'message' => sprintf('Runtime dependency evidence tool should contain marker "%s".', $expectedRuntimeDependencyMarker),
+            ];
+        }
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    if (!is_array($scripts) || ($scripts['verify:runtime-dependency-evidence'] ?? null) !== 'php tools/runtime_dependency_evidence.php') {
+        $runtimeDependencyBoundaryFindings[] = 'composer_runtime_dependency_evidence_script_mismatch';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'composer_runtime_dependency_evidence_script_mismatch',
+            'path' => 'composer.json',
+            'message' => 'Composer script verify:runtime-dependency-evidence should run php tools/runtime_dependency_evidence.php.',
+        ];
+    }
+}
+
+$runtimeProofBoundaryFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RUNTIME_PROOF_BOUNDARY.md';
+if (is_file($runtimeProofBoundaryFile)) {
+    $runtimeProofBoundaryContents = (string) file_get_contents($runtimeProofBoundaryFile);
+    foreach (['Structural closure boundary', 'Runtime dependency boundary', 'runtime_dependency_evidence.json', 'structural_closure_evidence.json'] as $expectedRuntimeProofBoundaryMarker) {
+        if (!str_contains($runtimeProofBoundaryContents, $expectedRuntimeProofBoundaryMarker)) {
+            $runtimeDependencyBoundaryFindings[] = 'runtime_proof_boundary_missing_marker:' . $expectedRuntimeProofBoundaryMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'runtime_proof_boundary_missing_marker',
+                'path' => 'docs/discovery/RUNTIME_PROOF_BOUNDARY.md',
+                'message' => sprintf('Runtime proof boundary doc should contain marker "%s".', $expectedRuntimeProofBoundaryMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 41 console/container proof boundary posture.
+$consoleContainerBoundaryFindings = [];
+$requiredConsoleContainerBoundaryFiles = [
+    'tools/console_container_evidence.php',
+    'tools/MANIFEST.md',
+    'composer.json',
+    'docs/discovery/RUNTIME_PROOF_BOUNDARY.md',
+    'docs/discovery/CANONIZATION_WAVE41_CONSOLE_CONTAINER_PROOF_BOUNDARY.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredConsoleContainerBoundaryFiles as $requiredConsoleContainerBoundaryFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredConsoleContainerBoundaryFile))) {
+        $consoleContainerBoundaryFindings[] = 'missing_console_container_boundary_file:' . $requiredConsoleContainerBoundaryFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_console_container_boundary_file',
+            'path' => $requiredConsoleContainerBoundaryFile,
+            'message' => 'Console/container boundary file is required for Symfony runtime proof separation.',
+        ];
+    }
+}
+
+$consoleContainerEvidenceFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'console_container_evidence.php';
+if (is_file($consoleContainerEvidenceFile)) {
+    $consoleContainerEvidenceContents = (string) file_get_contents($consoleContainerEvidenceFile);
+    foreach ([
+        '--require-vendor',
+        'bin/console',
+        'list',
+        '--raw',
+        'cache:clear',
+        'lint:container',
+        'console_container_evidence.json',
+        'console_container',
+    ] as $expectedConsoleContainerMarker) {
+        if (!str_contains($consoleContainerEvidenceContents, $expectedConsoleContainerMarker)) {
+            $consoleContainerBoundaryFindings[] = 'console_container_evidence_missing_marker:' . $expectedConsoleContainerMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'console_container_evidence_missing_marker',
+                'path' => 'tools/console_container_evidence.php',
+                'message' => sprintf('Console/container evidence tool should contain marker "%s".', $expectedConsoleContainerMarker),
+            ];
+        }
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    if (!is_array($scripts) || ($scripts['verify:console-container-evidence'] ?? null) !== 'php tools/console_container_evidence.php') {
+        $consoleContainerBoundaryFindings[] = 'composer_console_container_evidence_script_mismatch';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'composer_console_container_evidence_script_mismatch',
+            'path' => 'composer.json',
+            'message' => 'Composer script verify:console-container-evidence should run php tools/console_container_evidence.php.',
+        ];
+    }
+}
+
+$runtimeProofBoundaryFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'RUNTIME_PROOF_BOUNDARY.md';
+if (is_file($runtimeProofBoundaryFile)) {
+    $runtimeProofBoundaryContents = (string) file_get_contents($runtimeProofBoundaryFile);
+    foreach (['Console/container proof boundary', 'console_container_evidence.json', 'lint:container'] as $expectedConsoleBoundaryDocMarker) {
+        if (!str_contains($runtimeProofBoundaryContents, $expectedConsoleBoundaryDocMarker)) {
+            $consoleContainerBoundaryFindings[] = 'runtime_proof_boundary_missing_console_marker:' . $expectedConsoleBoundaryDocMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'runtime_proof_boundary_missing_console_marker',
+                'path' => 'docs/discovery/RUNTIME_PROOF_BOUNDARY.md',
+                'message' => sprintf('Runtime proof boundary doc should contain console/container marker "%s".', $expectedConsoleBoundaryDocMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 42 evidence index/gate registry posture.
+$evidenceIndexFindings = [];
+$requiredEvidenceIndexFiles = [
+    'tools/evidence_index.php',
+    'tools/MANIFEST.md',
+    'composer.json',
+    'docs/discovery/EVIDENCE_INDEX.md',
+    'docs/discovery/CANONIZATION_WAVE42_EVIDENCE_INDEX_GATE_REGISTRY.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredEvidenceIndexFiles as $requiredEvidenceIndexFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredEvidenceIndexFile))) {
+        $evidenceIndexFindings[] = 'missing_evidence_index_file:' . $requiredEvidenceIndexFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_evidence_index_file',
+            'path' => $requiredEvidenceIndexFile,
+            'message' => 'Evidence index file is required for generated proof artifact registry.',
+        ];
+    }
+}
+
+$evidenceIndexToolFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'evidence_index.php';
+if (is_file($evidenceIndexToolFile)) {
+    $evidenceIndexToolContents = (string) file_get_contents($evidenceIndexToolFile);
+    foreach ([
+        'structural_closure_evidence.json',
+        'runtime_dependency_evidence.json',
+        'console_container_evidence.json',
+        'evidence_index.json',
+        'var/discovery/evidence',
+    ] as $expectedEvidenceIndexMarker) {
+        if (!str_contains($evidenceIndexToolContents, $expectedEvidenceIndexMarker)) {
+            $evidenceIndexFindings[] = 'evidence_index_tool_missing_marker:' . $expectedEvidenceIndexMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'evidence_index_tool_missing_marker',
+                'path' => 'tools/evidence_index.php',
+                'message' => sprintf('Evidence index tool should contain marker "%s".', $expectedEvidenceIndexMarker),
+            ];
+        }
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    if (!is_array($scripts) || ($scripts['verify:evidence-index'] ?? null) !== 'php tools/evidence_index.php') {
+        $evidenceIndexFindings[] = 'composer_evidence_index_script_mismatch';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'composer_evidence_index_script_mismatch',
+            'path' => 'composer.json',
+            'message' => 'Composer script verify:evidence-index should run php tools/evidence_index.php.',
+        ];
+    }
+}
+
+
+
+// Wave 43 provisioned runtime checklist posture.
+$provisionedRuntimeChecklistFindings = [];
+$requiredProvisionedRuntimeChecklistFiles = [
+    'docs/discovery/PROVISIONED_RUNTIME_CHECKLIST.md',
+    'docs/discovery/CANONIZATION_WAVE43_PROVISIONED_RUNTIME_CHECKLIST.md',
+    'tools/provisioned_runtime_evidence.ps1',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredProvisionedRuntimeChecklistFiles as $requiredProvisionedRuntimeChecklistFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredProvisionedRuntimeChecklistFile))) {
+        $provisionedRuntimeChecklistFindings[] = 'missing_provisioned_runtime_checklist_file:' . $requiredProvisionedRuntimeChecklistFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_provisioned_runtime_checklist_file',
+            'path' => $requiredProvisionedRuntimeChecklistFile,
+            'message' => 'Provisioned runtime checklist file is required for strict runtime proof guidance.',
+        ];
+    }
+}
+
+$provisionedRunnerFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'provisioned_runtime_evidence.ps1';
+if (is_file($provisionedRunnerFile)) {
+    $provisionedRunnerContents = (string) file_get_contents($provisionedRunnerFile);
+    foreach ([
+        'structural_closure_evidence.php',
+        'runtime_dependency_evidence.php',
+        'console_container_evidence.php',
+        'evidence_index.php',
+        'Invoke-ProvisionedEvidenceCommand',
+    ] as $expectedProvisionedRunnerMarker) {
+        if (!str_contains($provisionedRunnerContents, $expectedProvisionedRunnerMarker)) {
+            $provisionedRuntimeChecklistFindings[] = 'provisioned_runner_missing_marker:' . $expectedProvisionedRunnerMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'provisioned_runner_missing_marker',
+                'path' => 'tools/provisioned_runtime_evidence.ps1',
+                'message' => sprintf('Provisioned runtime runner should contain marker "%s".', $expectedProvisionedRunnerMarker),
+            ];
+        }
+    }
+}
+
+$provisionedChecklistFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'PROVISIONED_RUNTIME_CHECKLIST.md';
+if (is_file($provisionedChecklistFile)) {
+    $provisionedChecklistContents = (string) file_get_contents($provisionedChecklistFile);
+    foreach ([
+        'composer install',
+        'Runtime dependency proof',
+        'Console/container proof',
+        'Evidence index',
+        'tools/provisioned_runtime_evidence.ps1',
+    ] as $expectedProvisionedChecklistMarker) {
+        if (!str_contains($provisionedChecklistContents, $expectedProvisionedChecklistMarker)) {
+            $provisionedRuntimeChecklistFindings[] = 'provisioned_checklist_missing_marker:' . $expectedProvisionedChecklistMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'provisioned_checklist_missing_marker',
+                'path' => 'docs/discovery/PROVISIONED_RUNTIME_CHECKLIST.md',
+                'message' => sprintf('Provisioned runtime checklist should contain marker "%s".', $expectedProvisionedChecklistMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 44 provisioned runtime runner hardening posture.
+$provisionedRuntimeRunnerFindings = [];
+$requiredProvisionedRuntimeRunnerFiles = [
+    'tools/provisioned_runtime_evidence.ps1',
+    'docs/discovery/PROVISIONED_RUNTIME_CHECKLIST.md',
+    'docs/discovery/CANONIZATION_WAVE44_PROVISIONED_RUNTIME_RUNNER_HARDENING.md',
+];
+
+foreach ($requiredProvisionedRuntimeRunnerFiles as $requiredProvisionedRuntimeRunnerFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredProvisionedRuntimeRunnerFile))) {
+        $provisionedRuntimeRunnerFindings[] = 'missing_provisioned_runtime_runner_file:' . $requiredProvisionedRuntimeRunnerFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_provisioned_runtime_runner_file',
+            'path' => $requiredProvisionedRuntimeRunnerFile,
+            'message' => 'Provisioned runtime runner hardening file is required for strict/partial evidence collection.',
+        ];
+    }
+}
+
+$provisionedRunnerFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'provisioned_runtime_evidence.ps1';
+if (is_file($provisionedRunnerFile)) {
+    $provisionedRunnerContents = (string) file_get_contents($provisionedRunnerFile);
+    foreach ([
+        'ContinueOnFailure',
+        'Invoke-ProvisionedEvidenceCommand',
+        'AlwaysRun',
+        'ProvisionedRuntimeFailures',
+        'evidence_index.php',
+    ] as $expectedProvisionedRunnerMarker) {
+        if (!str_contains($provisionedRunnerContents, $expectedProvisionedRunnerMarker)) {
+            $provisionedRuntimeRunnerFindings[] = 'provisioned_runner_hardening_missing_marker:' . $expectedProvisionedRunnerMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'provisioned_runner_hardening_missing_marker',
+                'path' => 'tools/provisioned_runtime_evidence.ps1',
+                'message' => sprintf('Provisioned runtime runner should contain hardening marker "%s".', $expectedProvisionedRunnerMarker),
+            ];
+        }
+    }
+}
+
+$provisionedChecklistFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'PROVISIONED_RUNTIME_CHECKLIST.md';
+if (is_file($provisionedChecklistFile)) {
+    $provisionedChecklistContents = (string) file_get_contents($provisionedChecklistFile);
+    foreach (['-ContinueOnFailure', 'partial evidence', 'evidence index'] as $expectedProvisionedChecklistHardeningMarker) {
+        if (!str_contains($provisionedChecklistContents, $expectedProvisionedChecklistHardeningMarker)) {
+            $provisionedRuntimeRunnerFindings[] = 'provisioned_checklist_hardening_missing_marker:' . $expectedProvisionedChecklistHardeningMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'provisioned_checklist_hardening_missing_marker',
+                'path' => 'docs/discovery/PROVISIONED_RUNTIME_CHECKLIST.md',
+                'message' => sprintf('Provisioned runtime checklist should contain runner hardening marker "%s".', $expectedProvisionedChecklistHardeningMarker),
+            ];
+        }
+    }
+}
+
+
+
+// Wave 45 evidence summary Markdown posture.
+$evidenceSummaryFindings = [];
+$requiredEvidenceSummaryFiles = [
+    'tools/evidence_summary.php',
+    'tools/MANIFEST.md',
+    'composer.json',
+    'docs/discovery/EVIDENCE_INDEX.md',
+    'docs/discovery/CANONIZATION_WAVE45_EVIDENCE_SUMMARY_MARKDOWN.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredEvidenceSummaryFiles as $requiredEvidenceSummaryFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredEvidenceSummaryFile))) {
+        $evidenceSummaryFindings[] = 'missing_evidence_summary_file:' . $requiredEvidenceSummaryFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_evidence_summary_file',
+            'path' => $requiredEvidenceSummaryFile,
+            'message' => 'Evidence summary file is required for human-readable evidence reporting.',
+        ];
+    }
+}
+
+$evidenceSummaryToolFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'evidence_summary.php';
+if (is_file($evidenceSummaryToolFile)) {
+    $evidenceSummaryToolContents = (string) file_get_contents($evidenceSummaryToolFile);
+    foreach ([
+        'evidence_index.json',
+        'evidence_summary.md',
+        'Discovering Evidence Summary',
+        '## Boundaries',
+        '## Interpretation',
+    ] as $expectedEvidenceSummaryMarker) {
+        if (!str_contains($evidenceSummaryToolContents, $expectedEvidenceSummaryMarker)) {
+            $evidenceSummaryFindings[] = 'evidence_summary_tool_missing_marker:' . $expectedEvidenceSummaryMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'evidence_summary_tool_missing_marker',
+                'path' => 'tools/evidence_summary.php',
+                'message' => sprintf('Evidence summary tool should contain marker "%s".', $expectedEvidenceSummaryMarker),
+            ];
+        }
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    if (!is_array($scripts) || ($scripts['verify:evidence-summary'] ?? null) !== 'php tools/evidence_summary.php') {
+        $evidenceSummaryFindings[] = 'composer_evidence_summary_script_mismatch';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'composer_evidence_summary_script_mismatch',
+            'path' => 'composer.json',
+            'message' => 'Composer script verify:evidence-summary should run php tools/evidence_summary.php.',
+        ];
+    }
+}
+
+
+
+// Wave 46 evidence bundle export posture.
+$evidenceBundleFindings = [];
+$requiredEvidenceBundleFiles = [
+    'tools/evidence_bundle.php',
+    'tools/MANIFEST.md',
+    'composer.json',
+    'docs/discovery/EVIDENCE_INDEX.md',
+    'docs/discovery/CANONIZATION_WAVE46_EVIDENCE_BUNDLE_EXPORT.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredEvidenceBundleFiles as $requiredEvidenceBundleFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredEvidenceBundleFile))) {
+        $evidenceBundleFindings[] = 'missing_evidence_bundle_file:' . $requiredEvidenceBundleFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_evidence_bundle_file',
+            'path' => $requiredEvidenceBundleFile,
+            'message' => 'Evidence bundle file is required for evidence handoff export.',
+        ];
+    }
+}
+
+$evidenceBundleToolFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'evidence_bundle.php';
+if (is_file($evidenceBundleToolFile)) {
+    $evidenceBundleToolContents = (string) file_get_contents($evidenceBundleToolFile);
+    foreach ([
+        'discovering_evidence_bundle.zip',
+        'bundle_manifest.json',
+        'writeStoreZip',
+        'STORE method',
+        'structural_closure_evidence.json',
+        'runtime_dependency_evidence.json',
+        'console_container_evidence.json',
+        'evidence_index.json',
+        'evidence_summary.md',
+    ] as $expectedEvidenceBundleMarker) {
+        if (!str_contains($evidenceBundleToolContents, $expectedEvidenceBundleMarker)) {
+            $evidenceBundleFindings[] = 'evidence_bundle_tool_missing_marker:' . $expectedEvidenceBundleMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'evidence_bundle_tool_missing_marker',
+                'path' => 'tools/evidence_bundle.php',
+                'message' => sprintf('Evidence bundle tool should contain marker "%s".', $expectedEvidenceBundleMarker),
+            ];
+        }
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    if (!is_array($scripts) || ($scripts['verify:evidence-bundle'] ?? null) !== 'php tools/evidence_bundle.php') {
+        $evidenceBundleFindings[] = 'composer_evidence_bundle_script_mismatch';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'composer_evidence_bundle_script_mismatch',
+            'path' => 'composer.json',
+            'message' => 'Composer script verify:evidence-bundle should run php tools/evidence_bundle.php.',
+        ];
+    }
+}
+
+
+
+// Wave 47 evidence handoff README posture.
+$evidenceHandoffFindings = [];
+$requiredEvidenceHandoffFiles = [
+    'docs/discovery/EVIDENCE_HANDOFF.md',
+    'docs/discovery/CANONIZATION_WAVE47_EVIDENCE_HANDOFF_README.md',
+    'docs/discovery/EVIDENCE_INDEX.md',
+    'docs/discovery/RELEASE_READINESS_GATES.md',
+];
+
+foreach ($requiredEvidenceHandoffFiles as $requiredEvidenceHandoffFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredEvidenceHandoffFile))) {
+        $evidenceHandoffFindings[] = 'missing_evidence_handoff_file:' . $requiredEvidenceHandoffFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_evidence_handoff_file',
+            'path' => $requiredEvidenceHandoffFile,
+            'message' => 'Evidence handoff file is required for review/release evidence interpretation.',
+        ];
+    }
+}
+
+$evidenceHandoffFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'EVIDENCE_HANDOFF.md';
+if (is_file($evidenceHandoffFile)) {
+    $evidenceHandoffContents = (string) file_get_contents($evidenceHandoffFile);
+    foreach ([
+        'Structural closure handoff',
+        'Provisioned runtime handoff',
+        'discovering_evidence_bundle.zip',
+        'evidence_summary.md',
+        'Runtime/container failures do not invalidate structural closure',
+    ] as $expectedEvidenceHandoffMarker) {
+        if (!str_contains($evidenceHandoffContents, $expectedEvidenceHandoffMarker)) {
+            $evidenceHandoffFindings[] = 'evidence_handoff_missing_marker:' . $expectedEvidenceHandoffMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'evidence_handoff_missing_marker',
+                'path' => 'docs/discovery/EVIDENCE_HANDOFF.md',
+                'message' => sprintf('Evidence handoff guide should contain marker "%s".', $expectedEvidenceHandoffMarker),
+            ];
+        }
+    }
+}
+
+$evidenceIndexDocFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'EVIDENCE_INDEX.md';
+if (is_file($evidenceIndexDocFile)) {
+    $evidenceIndexDocContents = (string) file_get_contents($evidenceIndexDocFile);
+    if (!str_contains($evidenceIndexDocContents, 'docs/discovery/EVIDENCE_HANDOFF.md')) {
+        $evidenceHandoffFindings[] = 'evidence_index_missing_handoff_reference';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'evidence_index_missing_handoff_reference',
+            'path' => 'docs/discovery/EVIDENCE_INDEX.md',
+            'message' => 'Evidence index documentation should link to the evidence handoff guide.',
+        ];
+    }
+}
+
+
+
+// Wave 48 evidence artifact retention posture.
+$evidenceArtifactRetentionFindings = [];
+$requiredEvidenceArtifactRetentionFiles = [
+    'docs/discovery/EVIDENCE_ARTIFACT_RETENTION.md',
+    'tools/evidence_artifact_cleanup.php',
+    'tools/MANIFEST.md',
+    'composer.json',
+    'docs/discovery/EVIDENCE_INDEX.md',
+    'docs/discovery/EVIDENCE_HANDOFF.md',
+    'docs/discovery/CANONIZATION_WAVE48_EVIDENCE_ARTIFACT_RETENTION.md',
+];
+
+foreach ($requiredEvidenceArtifactRetentionFiles as $requiredEvidenceArtifactRetentionFile) {
+    if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $requiredEvidenceArtifactRetentionFile))) {
+        $evidenceArtifactRetentionFindings[] = 'missing_evidence_artifact_retention_file:' . $requiredEvidenceArtifactRetentionFile;
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'missing_evidence_artifact_retention_file',
+            'path' => $requiredEvidenceArtifactRetentionFile,
+            'message' => 'Evidence artifact retention file is required for generated evidence lifecycle posture.',
+        ];
+    }
+}
+
+$evidenceArtifactCleanupFile = $root . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'evidence_artifact_cleanup.php';
+if (is_file($evidenceArtifactCleanupFile)) {
+    $evidenceArtifactCleanupContents = (string) file_get_contents($evidenceArtifactCleanupFile);
+    foreach ([
+        '--dry-run',
+        'var/discovery/evidence',
+        'structural_closure_evidence.json',
+        'runtime_dependency_evidence.json',
+        'console_container_evidence.json',
+        'discovering_evidence_bundle.zip',
+    ] as $expectedEvidenceCleanupMarker) {
+        if (!str_contains($evidenceArtifactCleanupContents, $expectedEvidenceCleanupMarker)) {
+            $evidenceArtifactRetentionFindings[] = 'evidence_artifact_cleanup_missing_marker:' . $expectedEvidenceCleanupMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'evidence_artifact_cleanup_missing_marker',
+                'path' => 'tools/evidence_artifact_cleanup.php',
+                'message' => sprintf('Evidence artifact cleanup tool should contain marker "%s".', $expectedEvidenceCleanupMarker),
+            ];
+        }
+    }
+
+    if (str_contains($evidenceArtifactCleanupContents, 'RecursiveDirectoryIterator') || str_contains($evidenceArtifactCleanupContents, 'Remove-Item')) {
+        $evidenceArtifactRetentionFindings[] = 'evidence_artifact_cleanup_uses_recursive_delete';
+        $findings[] = [
+            'severity' => 'warning',
+            'code' => 'evidence_artifact_cleanup_uses_recursive_delete',
+            'path' => 'tools/evidence_artifact_cleanup.php',
+            'message' => 'Evidence artifact cleanup should not use recursive repository deletion.',
+        ];
+    }
+}
+
+$composerJsonFile = $root . DIRECTORY_SEPARATOR . 'composer.json';
+if (is_file($composerJsonFile)) {
+    $composerJson = json_decode((string) file_get_contents($composerJsonFile), true);
+    $scripts = is_array($composerJson) ? ($composerJson['scripts'] ?? []) : [];
+    foreach ([
+        'evidence:cleanup' => 'php tools/evidence_artifact_cleanup.php',
+        'evidence:cleanup:dry-run' => 'php tools/evidence_artifact_cleanup.php --dry-run',
+    ] as $expectedEvidenceCleanupScript => $expectedEvidenceCleanupCommand) {
+        if (!is_array($scripts) || ($scripts[$expectedEvidenceCleanupScript] ?? null) !== $expectedEvidenceCleanupCommand) {
+            $evidenceArtifactRetentionFindings[] = 'composer_evidence_cleanup_script_mismatch:' . $expectedEvidenceCleanupScript;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'composer_evidence_cleanup_script_mismatch',
+                'path' => 'composer.json',
+                'message' => sprintf('Composer script "%s" should run "%s".', $expectedEvidenceCleanupScript, $expectedEvidenceCleanupCommand),
+            ];
+        }
+    }
+}
+
+$evidenceArtifactRetentionFile = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'discovery' . DIRECTORY_SEPARATOR . 'EVIDENCE_ARTIFACT_RETENTION.md';
+if (is_file($evidenceArtifactRetentionFile)) {
+    $evidenceArtifactRetentionContents = (string) file_get_contents($evidenceArtifactRetentionFile);
+    foreach (['Generated evidence directory', 'Retention rule', 'Cleanup rule', 'Structural closure remains independently provable'] as $expectedEvidenceRetentionMarker) {
+        if (!str_contains($evidenceArtifactRetentionContents, $expectedEvidenceRetentionMarker)) {
+            $evidenceArtifactRetentionFindings[] = 'evidence_artifact_retention_missing_marker:' . $expectedEvidenceRetentionMarker;
+            $findings[] = [
+                'severity' => 'warning',
+                'code' => 'evidence_artifact_retention_missing_marker',
+                'path' => 'docs/discovery/EVIDENCE_ARTIFACT_RETENTION.md',
+                'message' => sprintf('Evidence artifact retention doc should contain marker "%s".', $expectedEvidenceRetentionMarker),
+            ];
+        }
+    }
+}
+
+$report = [
+    'component' => 'Discovering',
+    'root' => $root,
+    'summary' => [
+        'src_php_files' => count($srcFiles),
+        'test_php_files' => count($testFiles),
+        'entity_files' => count($entityFiles),
+        'migration_files' => count($migrationCandidates),
+        'root_manifest_files' => count($rootManifestFiles),
+        'stale_patch_manifest_files' => count($stalePatchManifestFiles),
+        'wave8_legacy_service_interface_files' => count($legacyServiceInterfaceFiles),
+        'wave8_legacy_event_subscriber_files' => count($legacyEventSubscriberFiles),
+        'wave10_service_config_findings' => count($serviceConfigFindings),
+        'wave11_command_name_findings' => count($commandNameFindings),
+        'wave12_route_taxonomy_findings' => count($routeTaxonomyFindings),
+        'wave13_test_taxonomy_findings' => count($testTaxonomyFindings),
+        'wave14_documentation_taxonomy_findings' => count($documentationTaxonomyFindings),
+        'wave15_template_taxonomy_findings' => count($templateTaxonomyFindings),
+        'wave16_controller_taxonomy_findings' => count($controllerTaxonomyFindings),
+        'wave17_repository_persistence_taxonomy_findings' => count($repositoryPersistenceTaxonomyFindings),
+        'wave18_service_layer_taxonomy_findings' => count($serviceLayerTaxonomyFindings),
+        'wave19_service_interface_mirror_taxonomy_findings' => count($serviceInterfaceMirrorTaxonomyFindings),
+        'wave20_dto_taxonomy_findings' => count($dtoTaxonomyFindings),
+        'wave21_value_object_taxonomy_findings' => count($valueObjectTaxonomyFindings),
+        'wave22_attribute_event_taxonomy_findings' => count($attributeEventTaxonomyFindings),
+        'wave23_command_taxonomy_findings' => count($commandTaxonomyFindings),
+        'wave24_form_taxonomy_findings' => count($formTaxonomyFindings),
+        'wave25_config_taxonomy_findings' => count($configTaxonomyFindings),
+        'wave26_openapi_api_taxonomy_findings' => count($openApiApiTaxonomyFindings),
+        'wave27_runtime_quality_entrypoint_taxonomy_findings' => count($runtimeQualityEntrypointTaxonomyFindings),
+        'wave28_security_posture_findings' => count($securityPostureFindings),
+        'wave29_observability_operations_findings' => count($observabilityOperationsFindings),
+        'wave30_release_readiness_findings' => count($releaseReadinessFindings),
+        'wave31_http_front_controller_findings' => count($httpFrontControllerFindings),
+        'wave32_runtime_preflight_environment_split_findings' => count($runtimePreflightEnvironmentSplitFindings),
+        'wave33_composer_runtime_script_findings' => count($composerRuntimeScriptFindings),
+        'wave34_ci_script_profile_findings' => count($ciScriptProfileFindings),
+        'wave35_local_ci_entrypoint_findings' => count($localCiEntrypointFindings),
+        'wave36_docblock_policy_findings' => count($docblockPolicyFindings),
+        'wave37_legacy_retirement_findings' => count($legacyRetirementFindings),
+        'wave38_root_stale_manifest_findings' => count($rootStaleManifestRetirementFindings),
+        'wave39_structural_closure_evidence_findings' => count($structuralClosureEvidenceFindings),
+        'wave40_runtime_dependency_boundary_findings' => count($runtimeDependencyBoundaryFindings),
+        'wave41_console_container_boundary_findings' => count($consoleContainerBoundaryFindings),
+        'wave42_evidence_index_findings' => count($evidenceIndexFindings),
+        'wave43_provisioned_runtime_checklist_findings' => count($provisionedRuntimeChecklistFindings),
+        'wave44_provisioned_runtime_runner_findings' => count($provisionedRuntimeRunnerFindings),
+        'wave45_evidence_summary_findings' => count($evidenceSummaryFindings),
+        'wave46_evidence_bundle_findings' => count($evidenceBundleFindings),
+        'wave47_evidence_handoff_findings' => count($evidenceHandoffFindings),
+        'wave48_evidence_artifact_retention_findings' => count($evidenceArtifactRetentionFindings),
+        'findings' => count($findings),
+    ],
+    'findings' => $findings,
+];
+
+if ($format === 'json') {
+    echo json_encode($report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    exit(0);
+}
+
+echo "Discovering canonicalization audit\n";
+echo "=================================\n";
+echo sprintf("src PHP files: %d\n", $report['summary']['src_php_files']);
+echo sprintf("test PHP files: %d\n", $report['summary']['test_php_files']);
+echo sprintf("entity files: %d\n", $report['summary']['entity_files']);
+echo sprintf("migration files: %d\n", $report['summary']['migration_files']);
+echo sprintf("root manifest files: %d\n", $report['summary']['root_manifest_files']);
+echo sprintf("stale patch manifest files: %d\n", $report['summary']['stale_patch_manifest_files']);
+echo sprintf("wave8 legacy service interface files: %d\n", $report['summary']['wave8_legacy_service_interface_files']);
+echo sprintf("wave8 legacy event subscriber files: %d\n", $report['summary']['wave8_legacy_event_subscriber_files']);
+echo sprintf("wave10 service config findings: %d\n", $report['summary']['wave10_service_config_findings']);
+echo sprintf("wave11 command name findings: %d\n", $report['summary']['wave11_command_name_findings']);
+echo sprintf("wave12 route taxonomy findings: %d\n", $report['summary']['wave12_route_taxonomy_findings']);
+echo sprintf("wave13 test taxonomy findings: %d\n", $report['summary']['wave13_test_taxonomy_findings']);
+echo sprintf("wave14 documentation taxonomy findings: %d\n", $report['summary']['wave14_documentation_taxonomy_findings']);
+echo sprintf("wave15 template taxonomy findings: %d\n", $report['summary']['wave15_template_taxonomy_findings']);
+echo sprintf("wave16 controller taxonomy findings: %d\n", $report['summary']['wave16_controller_taxonomy_findings']);
+echo sprintf("wave17 repository persistence taxonomy findings: %d\n", $report['summary']['wave17_repository_persistence_taxonomy_findings']);
+echo sprintf("wave18 service layer taxonomy findings: %d\n", $report['summary']['wave18_service_layer_taxonomy_findings']);
+echo sprintf("wave19 service interface mirror taxonomy findings: %d\n", $report['summary']['wave19_service_interface_mirror_taxonomy_findings']);
+echo sprintf("wave20 dto taxonomy findings: %d\n", $report['summary']['wave20_dto_taxonomy_findings']);
+echo sprintf("wave21 value object taxonomy findings: %d\n", $report['summary']['wave21_value_object_taxonomy_findings']);
+echo sprintf("wave22 attribute event taxonomy findings: %d\n", $report['summary']['wave22_attribute_event_taxonomy_findings']);
+echo sprintf("wave23 command taxonomy findings: %d\n", $report['summary']['wave23_command_taxonomy_findings']);
+echo sprintf("wave24 form taxonomy findings: %d\n", $report['summary']['wave24_form_taxonomy_findings']);
+echo sprintf("wave25 config taxonomy findings: %d\n", $report['summary']['wave25_config_taxonomy_findings']);
+echo sprintf("wave26 openapi api taxonomy findings: %d\n", $report['summary']['wave26_openapi_api_taxonomy_findings']);
+echo sprintf("wave27 runtime quality entrypoint taxonomy findings: %d\n", $report['summary']['wave27_runtime_quality_entrypoint_taxonomy_findings']);
+echo sprintf("wave28 security posture findings: %d\n", $report['summary']['wave28_security_posture_findings']);
+echo sprintf("wave29 observability operations findings: %d\n", $report['summary']['wave29_observability_operations_findings']);
+echo sprintf("wave30 release readiness findings: %d\n", $report['summary']['wave30_release_readiness_findings']);
+echo sprintf("wave31 http front controller findings: %d\n", $report['summary']['wave31_http_front_controller_findings']);
+echo sprintf("wave32 runtime preflight environment split findings: %d\n", $report['summary']['wave32_runtime_preflight_environment_split_findings']);
+echo sprintf("wave33 composer runtime script findings: %d\n", $report['summary']['wave33_composer_runtime_script_findings']);
+echo sprintf("wave34 ci script profile findings: %d\n", $report['summary']['wave34_ci_script_profile_findings']);
+echo sprintf("wave35 local ci entrypoint findings: %d\n", $report['summary']['wave35_local_ci_entrypoint_findings']);
+echo sprintf("wave36 docblock policy findings: %d\n", $report['summary']['wave36_docblock_policy_findings']);
+echo sprintf("wave37 legacy retirement findings: %d\n", $report['summary']['wave37_legacy_retirement_findings']);
+echo sprintf("wave38 root stale manifest findings: %d\n", $report['summary']['wave38_root_stale_manifest_findings']);
+echo sprintf("wave39 structural closure evidence findings: %d\n", $report['summary']['wave39_structural_closure_evidence_findings']);
+echo sprintf("wave40 runtime dependency boundary findings: %d\n", $report['summary']['wave40_runtime_dependency_boundary_findings']);
+echo sprintf("wave41 console container boundary findings: %d\n", $report['summary']['wave41_console_container_boundary_findings']);
+echo sprintf("wave42 evidence index findings: %d\n", $report['summary']['wave42_evidence_index_findings']);
+echo sprintf("wave43 provisioned runtime checklist findings: %d\n", $report['summary']['wave43_provisioned_runtime_checklist_findings']);
+echo sprintf("wave44 provisioned runtime runner findings: %d\n", $report['summary']['wave44_provisioned_runtime_runner_findings']);
+echo sprintf("wave45 evidence summary findings: %d\n", $report['summary']['wave45_evidence_summary_findings']);
+echo sprintf("wave46 evidence bundle findings: %d\n", $report['summary']['wave46_evidence_bundle_findings']);
+echo sprintf("wave47 evidence handoff findings: %d\n", $report['summary']['wave47_evidence_handoff_findings']);
+echo sprintf("wave48 evidence artifact retention findings: %d\n", $report['summary']['wave48_evidence_artifact_retention_findings']);
+echo sprintf("findings: %d\n\n", $report['summary']['findings']);
+
+foreach ($findings as $finding) {
+    echo sprintf(
+        "[%s] %s: %s — %s\n",
+        strtoupper($finding['severity']),
+        $finding['code'],
+        $finding['path'],
+        $finding['message']
+    );
+}
+

@@ -1,13 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery hit contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryHit
+final readonly class DiscoveryHit
 {
     /**
      * @param list<string> $matchReasons
@@ -35,7 +35,7 @@ final class DiscoveryHit
     /** @param array<string, mixed> $payload */
     public static function fromArray(array $payload): self
     {
-        $title = (string) ($payload['title'] ?? $payload['name'] ?? '');
+        $title = (string) ($payload['title'] ?? $payload['nameEntity'] ?? '');
         $reference = (string) ($payload['reference'] ?? $payload['metaCode'] ?? '');
         $content = (string) ($payload['content'] ?? '');
 
@@ -59,7 +59,6 @@ final class DiscoveryHit
     }
 
     /**
-     * @param mixed $payload
      * @return list<string>
      */
     private static function normalizeStrings(mixed $payload): array

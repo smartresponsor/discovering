@@ -6,8 +6,8 @@ namespace App\Command\Discovery;
 
 use App\Dto\Discovery\ReindexRequest;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
+use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -19,7 +19,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Provides a CLI entry point for the discovery rebuild workflow.
  */
-#[AsCommand(name: 'discovering:rebuild', description: 'Rebuilds discovery indexes.')]
+#[AsCommand(name: 'app:discovery:rebuild', description: 'Rebuilds discovery indexes.', aliases: ['discovering:rebuild'])]
 final class DiscoveryRebuildCommand extends Command
 {
     public function __construct(

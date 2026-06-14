@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Controller\Discovery;
@@ -10,24 +11,28 @@ use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use App\Service\Discovery\Operations\DiscoveryOperationLogger;
 use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Handles public discovery HTTP endpoints for the discovery surface.
  */
-final class DiscoveryController extends AbstractController
+final class DiscoveryController
 {
     public function __construct(
         private readonly DiscoveryServiceInterface $discoveryService,
         private readonly DiscoveryLearningService $learningService,
         private readonly DiscoveryOperationLogger $operationLogger,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
+        private readonly FormFactoryInterface $formFactory,
+        private readonly RequestStack $requestStack,
+        private readonly UrlGeneratorInterface $urlGenerator,
     ) {
     }
 
@@ -35,11 +40,11 @@ final class DiscoveryController extends AbstractController
      * Handles the index endpoint for the discovery HTTP surface.
      */
     #[Route('/discovery', name: 'app_discovery_index', methods: ['GET', 'POST'])]
-    public function index(Request $request): Response
+    public function index(Request $request): Response|array
     {
         $query = $this->buildDiscoveryQuery($request, true);
 
-        $form = $this->createForm(DiscoverySearchType::class, $query);
+        $form = $this->formFactory->create(DiscoverySearchType::class, $query);
         $form->handleRequest($request);
         $result = $this->discoveryService->discover($query);
         $this->operationLogger->recordHttp('discovery.ui.query', context: [
@@ -49,11 +54,25 @@ final class DiscoveryController extends AbstractController
             'total' => $result->total,
         ]);
 
-        return $this->render('discovery/index.html.twig', [
-            'form' => $form->createView(),
-            'query' => $result->query,
-            'result' => $result,
-        ]);
+        return [
+            '_view' => [
+                'surface' => 'discovery',
+                'operation' => 'index',
+                'component' => 'Discovering',
+                'intent' => 'surface',
+            ],
+            'locations' => [
+                'body' => ['discovery.index'],
+            ],
+            'data' => [
+                'form' => $form->createView(),
+                'query' => $result->query,
+                'result' => $result,
+            ],
+            'meta' => [
+                'title' => 'Discovery',
+            ],
+        ];
     }
 
     /**
@@ -75,18 +94,20 @@ final class DiscoveryController extends AbstractController
             'feedbackCount' => $count,
         ]);
 
-        $this->addFlash('success', sprintf('Recorded useful click (%d total).', $count));
+        $session = $this->requestStack->getSession();
+        if ($session) {
+            $session->getFlashBag()->add('success', sprintf('Recorded useful click (%d total).', $count));
+        }
 
-        $returnTo = (string) $request->request->get('return_to', $this->generateUrl('app_discovery_index'));
+        $returnTo = (string) $request->request->get('return_to', $this->urlGenerator->generate('app_discovery_index'));
 
-        return $this->redirect($returnTo);
+        return new RedirectResponse($returnTo);
     }
 
     #[Route('/api/discovery', name: 'app_discovery_api', methods: ['GET'])]
     /**
      * Handles the api endpoint for the discovery HTTP surface.
      */
-    #[Route('/api/v1/discovery', name: 'app_discovery_api_v1', methods: ['GET'])]
     public function api(Request $request): JsonResponse
     {
         $query = $this->buildDiscoveryQuery($request, false);
@@ -105,7 +126,6 @@ final class DiscoveryController extends AbstractController
     /**
      * Handles the click endpoint for the discovery HTTP surface.
      */
-    #[Route('/api/v1/discovery/click', name: 'app_discovery_api_click_v1', methods: ['POST'])]
     public function click(Request $request): JsonResponse
     {
         $payload = json_decode($request->getContent(), true);
@@ -140,7 +160,7 @@ final class DiscoveryController extends AbstractController
         $status = $this->stringOrNull($source->get('status', $fallback->get('status')));
 
         $filters = [];
-        if ($status !== null) {
+        if (null !== $status) {
             $filters['status'] = $status;
         }
 
@@ -188,6 +208,6 @@ final class DiscoveryController extends AbstractController
 
         $trimmed = trim($value);
 
-        return $trimmed === '' ? null : $trimmed;
+        return '' === $trimmed ? null : $trimmed;
     }
 }

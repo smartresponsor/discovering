@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery rollback plan contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryRollbackPlan
+final readonly class DiscoveryRollbackPlan
 {
     /**
      * @param list<string> $notes

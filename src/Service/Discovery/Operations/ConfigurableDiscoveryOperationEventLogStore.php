@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Operations;
 
 use App\Dto\Discovery\DiscoveryOperationEvent;
-
+use App\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 
 /**
  * Provides the configurable discovery operation event log store capability within the discovery component.
@@ -14,9 +14,8 @@ final class ConfigurableDiscoveryOperationEventLogStore implements DiscoveryOper
 {
     public function __construct(
         private readonly FileDiscoveryOperationEventLogStore $fileStore,
-        private readonly PdoDiscoveryOperationEventLogStore $pdoStore,
+        private readonly DoctrineDiscoveryOperationEventLogStore $doctrineStore,
         private readonly string $backend,
-        private readonly string $pdoDsn,
     ) {
     }
 
@@ -56,8 +55,8 @@ final class ConfigurableDiscoveryOperationEventLogStore implements DiscoveryOper
     {
         return match (strtolower(trim($this->backend))) {
             '', 'file' => $this->fileStore,
-            'pdo' => trim($this->pdoDsn) !== '' ? $this->pdoStore : $this->fileStore,
-            default => throw new \RuntimeException(sprintf('Unsupported discovery operation log backend "%s". Expected "file" or "pdo".', $this->backend)),
+            'doctrine' => $this->doctrineStore,
+            default => throw new \RuntimeException(sprintf('Unsupported discovery operation log backend "%s". Expected "file" or "doctrine".', $this->backend)),
         };
     }
 }

@@ -9,17 +9,15 @@ use App\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
 use App\Service\Discovery\Libsource\LibsourceManagementSurfaceActionResolver;
 use App\Service\Discovery\Libsource\LibsourceOperatorEventTrailBuilder;
 use App\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-
 /**
  * Handles management HTTP endpoints for the discovery libsource management surface.
  */
-final class DiscoveryLibsourceManagementController extends AbstractController
+final class DiscoveryLibsourceManagementController
 {
     public function __construct(
         private readonly LibsourceDiagnosticSurfaceBuilder $diagnosticSurfaceBuilder,
@@ -34,15 +32,30 @@ final class DiscoveryLibsourceManagementController extends AbstractController
      * Handles the index endpoint for the discovery libsource management HTTP surface.
      */
     #[Route('/management/discovery/libsource', name: 'app_management_discovery_libsource', methods: ['GET'])]
-    public function index(Request $request): Response
+    /**
+     * @return Response|array<string, mixed>
+     */
+    public function index(Request $request): Response|array
     {
         $lastActionResult = $this->actionResolver->resolve($request);
 
-        return $this->render('management/discovery/libsource.html.twig', [
-            'surface' => $this->diagnosticSurfaceBuilder->build(),
-            'lastActionResult' => $lastActionResult,
-            'operatorEventTrail' => $this->eventTrailBuilder->build($lastActionResult),
-        ]);
+        return [
+            '_view' => [
+                'surface' => 'discovery',
+                'operation' => 'libsource',
+                'component' => 'Discovering',
+                'intent' => 'management',
+            ],
+            'data' => [
+                'surface' => $this->diagnosticSurfaceBuilder->build(),
+                'lastActionResult' => $lastActionResult,
+                'operatorEventTrail' => $this->eventTrailBuilder->build($lastActionResult),
+            ],
+            'meta' => [
+                'source_controller' => self::class,
+                'legacy_template' => 'management/discovery/libsource.html.twig',
+            ],
+        ];
     }
 
     /**

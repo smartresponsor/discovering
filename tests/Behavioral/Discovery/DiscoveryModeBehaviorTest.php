@@ -6,15 +6,15 @@ namespace App\Tests\Behavioral\Discovery;
 
 use App\Dto\Discovery\DiscoveryMode;
 use App\Dto\Discovery\DiscoveryQuery;
-use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryHighlightingService;
 use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\DiscoveryModePresetService;
 use App\Service\Discovery\DiscoveryScoringService;
 use App\Service\Discovery\DiscoveryService;
+use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the discovery mode behavior test case for the Discovering component.
@@ -107,8 +107,8 @@ final class DiscoveryModeBehaviorTest extends DiscoveryTempFilesystemTestCase
      */
     private function createService(array $rows): DiscoveryService
     {
-        $feedbackPath = $this->createTempFilePath('discovering-mode-behavior-', '.sqlite');
-        $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($feedbackPath));
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
+        $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
 
         return new DiscoveryService(
             new class($rows) implements DiscoveryAdapterInterface {

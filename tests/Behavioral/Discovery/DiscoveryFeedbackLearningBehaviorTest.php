@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace App\Tests\Behavioral\Discovery;
 
 use App\Dto\Discovery\DiscoveryQuery;
-use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryHighlightingService;
 use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\DiscoveryModePresetService;
 use App\Service\Discovery\DiscoveryScoringService;
 use App\Service\Discovery\DiscoveryService;
+use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
 use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the discovery feedback learning behavior test case for the Discovering component.
@@ -22,8 +22,8 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
 {
     public function testRecordedClicksCanPromoteTrustedOperationalHitAbovePureFtsLeader(): void
     {
-        $feedbackPath = $this->createTempFilePath('discovering-feedback-behavior-', '.sqlite');
-        $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($feedbackPath));
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
+        $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
         $service = new DiscoveryService(
             $this->createAdapter([
                 [
@@ -70,8 +70,6 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
         self::assertGreaterThan(9.0, $afterLearning->hits[0]->feedbackBoost);
         self::assertContains('feedback boost 9.51', $afterLearning->hits[0]->matchReasons);
         self::assertSame('project-recovery', $afterLearning->hits[1]->id);
-
-        @unlink($feedbackPath);
     }
 
     /**

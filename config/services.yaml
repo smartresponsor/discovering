@@ -1,46 +1,3 @@
-parameters:
-  app.discovery.default_sqlite_path: '%kernel.project_dir%/var/discovery/discovering.sqlite'
-  app.discovery.default_index_backend: 'sqlite'
-  app.discovery.default_meili_url: ''
-  app.discovery.default_meili_api_key: ''
-  app.discovery.default_meili_index_prefix: 'discovering'
-  app.discovery.default_feedback_path: '%kernel.project_dir%/var/discovery/discovering-feedback.sqlite'
-  app.discovery.default_feedback_backend: 'sqlite_path'
-  app.discovery.default_feedback_pdo_dsn: ''
-  app.discovery.default_feedback_pdo_user: ''
-  app.discovery.default_feedback_pdo_password: ''
-  app.discovery.default_feedback_pdo_table: 'discovery_feedback'
-  app.discovery.default_operation_log_path: '%kernel.project_dir%/var/discovery/discovery_operation_event_log.json'
-  app.discovery.default_operation_log_backend: 'file'
-  app.discovery.default_operation_log_pdo_dsn: ''
-  app.discovery.default_operation_log_pdo_user: ''
-  app.discovery.default_operation_log_pdo_password: ''
-  app.discovery.default_operation_log_pdo_table: 'discovery_operation_event_log'
-  app.discovery.default_rebuild_evidence_path: '%kernel.project_dir%/var/discovery/discovery_rebuild_evidence.json'
-  app.discovery.default_rebuild_evidence_backend: 'file'
-  app.discovery.default_rebuild_evidence_pdo_dsn: ''
-  app.discovery.default_rebuild_evidence_pdo_user: ''
-  app.discovery.default_rebuild_evidence_pdo_password: ''
-  app.discovery.default_rebuild_evidence_pdo_table: 'discovery_rebuild_evidence'
-  app.discovery.default_libsource_event_log_path: '%kernel.project_dir%/var/discovery/libsource_operator_event_log.json'
-  app.discovery.default_libsource_event_log_backend: 'file'
-  app.discovery.default_libsource_event_log_pdo_dsn: ''
-  app.discovery.default_libsource_event_log_pdo_user: ''
-  app.discovery.default_libsource_event_log_pdo_password: ''
-  app.discovery.default_libsource_event_log_pdo_table: 'discovery_libsource_operator_event_log'
-  app.discovery.default_rate_limit_store_path: '%kernel.project_dir%/var/discovery/discovery_rate_limit_store.json'
-  app.discovery.default_rate_limit_backend: 'file'
-  app.discovery.default_rate_limit_pdo_dsn: ''
-  app.discovery.default_rate_limit_pdo_user: ''
-  app.discovery.default_rate_limit_pdo_password: ''
-  app.discovery.default_rate_limit_pdo_table: 'discovery_rate_limit_bucket'
-  app.discovery.default_query_rate_limit: 60
-  app.discovery.default_query_rate_limit_window_seconds: 60
-  app.discovery.default_write_rate_limit: 20
-  app.discovery.default_write_rate_limit_window_seconds: 60
-  app.discovery.default_management_mutation_rate_limit: 10
-  app.discovery.default_management_mutation_rate_limit_window_seconds: 300
-
 services:
   _defaults:
     autowire: true
@@ -53,54 +10,13 @@ services:
     resource: '../src/Controller/'
     tags: ['controller.service_arguments']
 
-  App\Service\Discovery\Source\ProjectDiscoverySourceProvider:
-    tags: ['app.discovery_source_provider']
-
-  App\Service\Discovery\Source\OfferingDiscoverySourceProvider:
-    tags: ['app.discovery_source_provider']
-
-  App\Service\Discovery\Source\DocumentDiscoverySourceProvider:
-    tags: ['app.discovery_source_provider']
-
-  App\Service\Discovery\Source\CategoryDiscoverySourceProvider:
-    tags: ['app.discovery_source_provider']
-
-  App\Service\Discovery\Source\PlaybookDiscoverySourceProvider:
-    tags: ['app.discovery_source_provider']
-
-  App\Service\Discovery\Source\BriefingDiscoverySourceProvider:
-    tags: ['app.discovery_source_provider']
-
-  App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository:
-    tags: ['app.discovery_source_repository']
-
-  App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository:
-    tags: ['app.discovery_source_repository']
-
-  App\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository:
-    tags: ['app.discovery_source_repository']
-
-  App\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository:
-    tags: ['app.discovery_source_repository']
-
   App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository:
-    tags: ['app.discovery_source_repository']
     arguments:
       $projectDir: '%kernel.project_dir%'
 
   App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository:
-    tags: ['app.discovery_source_repository']
     arguments:
       $projectDir: '%kernel.project_dir%'
-
-  App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface: '@App\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter'
-  App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface: '@App\Service\Discovery\Indexer\DiscoveryIndexer'
-  App\ServiceInterface\Discovery\DiscoveryServiceInterface: '@App\Service\Discovery\DiscoveryService'
-  App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface: '@App\Service\Discovery\Document\DiscoveryDocumentProvider'
-  App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface: '@App\Service\Discovery\Overview\DiscoveryOverviewService'
-  App\Service\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface: '@App\Service\Discovery\Libsource\Log\ConfigurableLibsourceOperatorEventLogStore'
-  App\Service\Discovery\Operations\DiscoveryOperationEventLogStoreInterface: '@App\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore'
-  App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface: '@App\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore'
 
   App\Service\Discovery\Document\DiscoveryDocumentProvider:
     arguments:
@@ -118,33 +34,16 @@ services:
     arguments:
       $repositories: !tagged_iterator app.discovery_source_repository
 
-  App\Service\Discovery\Diagnostics\DiscoveryProbeTransportInterface: '@App\Service\Discovery\Diagnostics\NetworkDiscoveryProbeTransport'
-
   App\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder:
     arguments:
       $indexBackend: '%env(default:app.discovery.default_index_backend:APP_DISCOVERY_INDEX_BACKEND)%'
       $meiliUrl: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
       $meiliApiKey: '%env(default:app.discovery.default_meili_api_key:APP_DISCOVERY_MEILI_API_KEY)%'
       $feedbackBackend: '%env(default:app.discovery.default_feedback_backend:APP_DISCOVERY_FEEDBACK_BACKEND)%'
-      $feedbackPdoDsn: '%env(default:app.discovery.default_feedback_pdo_dsn:APP_DISCOVERY_FEEDBACK_PDO_DSN)%'
-      $feedbackPdoUser: '%env(default:app.discovery.default_feedback_pdo_user:APP_DISCOVERY_FEEDBACK_PDO_USER)%'
-      $feedbackPdoPassword: '%env(default:app.discovery.default_feedback_pdo_password:APP_DISCOVERY_FEEDBACK_PDO_PASSWORD)%'
       $operationLogBackend: '%env(default:app.discovery.default_operation_log_backend:APP_DISCOVERY_OPERATION_LOG_BACKEND)%'
-      $operationLogPdoDsn: '%env(default:app.discovery.default_operation_log_pdo_dsn:APP_DISCOVERY_OPERATION_LOG_PDO_DSN)%'
-      $operationLogPdoUser: '%env(default:app.discovery.default_operation_log_pdo_user:APP_DISCOVERY_OPERATION_LOG_PDO_USER)%'
-      $operationLogPdoPassword: '%env(default:app.discovery.default_operation_log_pdo_password:APP_DISCOVERY_OPERATION_LOG_PDO_PASSWORD)%'
       $rebuildEvidenceBackend: '%env(default:app.discovery.default_rebuild_evidence_backend:APP_DISCOVERY_REBUILD_EVIDENCE_BACKEND)%'
-      $rebuildEvidencePdoDsn: '%env(default:app.discovery.default_rebuild_evidence_pdo_dsn:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_DSN)%'
-      $rebuildEvidencePdoUser: '%env(default:app.discovery.default_rebuild_evidence_pdo_user:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_USER)%'
-      $rebuildEvidencePdoPassword: '%env(default:app.discovery.default_rebuild_evidence_pdo_password:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_PASSWORD)%'
       $libsourceEventLogBackend: '%env(default:app.discovery.default_libsource_event_log_backend:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_BACKEND)%'
-      $libsourceEventLogPdoDsn: '%env(default:app.discovery.default_libsource_event_log_pdo_dsn:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_DSN)%'
-      $libsourceEventLogPdoUser: '%env(default:app.discovery.default_libsource_event_log_pdo_user:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_USER)%'
-      $libsourceEventLogPdoPassword: '%env(default:app.discovery.default_libsource_event_log_pdo_password:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_PASSWORD)%'
       $rateLimitBackend: '%env(default:app.discovery.default_rate_limit_backend:APP_DISCOVERY_RATE_LIMIT_BACKEND)%'
-      $rateLimitPdoDsn: '%env(default:app.discovery.default_rate_limit_pdo_dsn:APP_DISCOVERY_RATE_LIMIT_PDO_DSN)%'
-      $rateLimitPdoUser: '%env(default:app.discovery.default_rate_limit_pdo_user:APP_DISCOVERY_RATE_LIMIT_PDO_USER)%'
-      $rateLimitPdoPassword: '%env(default:app.discovery.default_rate_limit_pdo_password:APP_DISCOVERY_RATE_LIMIT_PDO_PASSWORD)%'
 
   App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder:
     arguments:
@@ -153,91 +52,53 @@ services:
       $indexBackend: '%env(default:app.discovery.default_index_backend:APP_DISCOVERY_INDEX_BACKEND)%'
       $meiliUrl: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
       $meiliIndexPrefix: '%env(default:app.discovery.default_meili_index_prefix:APP_DISCOVERY_MEILI_INDEX_PREFIX)%'
-      $feedbackPath: '%env(default:app.discovery.default_feedback_path:APP_DISCOVERY_FEEDBACK_SQLITE_PATH)%'
-      $feedbackBackend: '%env(default:app.discovery.default_feedback_backend:APP_DISCOVERY_FEEDBACK_BACKEND)%'
-      $feedbackPdoDsn: '%env(default:app.discovery.default_feedback_pdo_dsn:APP_DISCOVERY_FEEDBACK_PDO_DSN)%'
-      $feedbackPdoTable: '%env(default:app.discovery.default_feedback_pdo_table:APP_DISCOVERY_FEEDBACK_PDO_TABLE)%'
       $operationLogPath: '%env(default:app.discovery.default_operation_log_path:APP_DISCOVERY_OPERATION_LOG_PATH)%'
       $operationLogBackend: '%env(default:app.discovery.default_operation_log_backend:APP_DISCOVERY_OPERATION_LOG_BACKEND)%'
-      $operationLogPdoDsn: '%env(default:app.discovery.default_operation_log_pdo_dsn:APP_DISCOVERY_OPERATION_LOG_PDO_DSN)%'
-      $operationLogPdoTable: '%env(default:app.discovery.default_operation_log_pdo_table:APP_DISCOVERY_OPERATION_LOG_PDO_TABLE)%'
       $rebuildEvidencePath: '%env(default:app.discovery.default_rebuild_evidence_path:APP_DISCOVERY_REBUILD_EVIDENCE_PATH)%'
       $rebuildEvidenceBackend: '%env(default:app.discovery.default_rebuild_evidence_backend:APP_DISCOVERY_REBUILD_EVIDENCE_BACKEND)%'
-      $rebuildEvidencePdoDsn: '%env(default:app.discovery.default_rebuild_evidence_pdo_dsn:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_DSN)%'
-      $rebuildEvidencePdoTable: '%env(default:app.discovery.default_rebuild_evidence_pdo_table:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_TABLE)%'
       $libsourceEventLogPath: '%env(default:app.discovery.default_libsource_event_log_path:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PATH)%'
       $libsourceEventLogBackend: '%env(default:app.discovery.default_libsource_event_log_backend:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_BACKEND)%'
-      $libsourceEventLogPdoDsn: '%env(default:app.discovery.default_libsource_event_log_pdo_dsn:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_DSN)%'
-      $libsourceEventLogPdoTable: '%env(default:app.discovery.default_libsource_event_log_pdo_table:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_TABLE)%'
       $rateLimitBackend: '%env(default:app.discovery.default_rate_limit_backend:APP_DISCOVERY_RATE_LIMIT_BACKEND)%'
       $rateLimitStorePath: '%env(default:app.discovery.default_rate_limit_store_path:APP_DISCOVERY_RATE_LIMIT_STORE_PATH)%'
-      $rateLimitPdoDsn: '%env(default:app.discovery.default_rate_limit_pdo_dsn:APP_DISCOVERY_RATE_LIMIT_PDO_DSN)%'
-      $rateLimitPdoTable: '%env(default:app.discovery.default_rate_limit_pdo_table:APP_DISCOVERY_RATE_LIMIT_PDO_TABLE)%'
 
   App\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore:
     arguments:
       $path: '%env(default:app.discovery.default_libsource_event_log_path:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PATH)%'
 
-  App\Service\Discovery\Libsource\Log\PdoLibsourceOperatorEventLogStore:
-    arguments:
-      $dsn: '%env(default:app.discovery.default_libsource_event_log_pdo_dsn:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_DSN)%'
-      $user: '%env(default:app.discovery.default_libsource_event_log_pdo_user:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_USER)%'
-      $password: '%env(default:app.discovery.default_libsource_event_log_pdo_password:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_PASSWORD)%'
-      $tableName: '%env(default:app.discovery.default_libsource_event_log_pdo_table:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_TABLE)%'
-
   App\Service\Discovery\Libsource\Log\ConfigurableLibsourceOperatorEventLogStore:
     arguments:
       $backend: '%env(default:app.discovery.default_libsource_event_log_backend:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_BACKEND)%'
-      $pdoDsn: '%env(default:app.discovery.default_libsource_event_log_pdo_dsn:APP_DISCOVERY_LIBSOURCE_EVENT_LOG_PDO_DSN)%'
+
+  App\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore:
+    arguments:
+      $backend: '%env(default:app.discovery.default_operation_log_backend:APP_DISCOVERY_OPERATION_LOG_BACKEND)%'
 
   App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore:
     arguments:
       $path: '%env(default:app.discovery.default_operation_log_path:APP_DISCOVERY_OPERATION_LOG_PATH)%'
 
-  App\Service\Discovery\Operations\PdoDiscoveryOperationEventLogStore:
+  App\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore:
     arguments:
-      $dsn: '%env(default:app.discovery.default_operation_log_pdo_dsn:APP_DISCOVERY_OPERATION_LOG_PDO_DSN)%'
-      $user: '%env(default:app.discovery.default_operation_log_pdo_user:APP_DISCOVERY_OPERATION_LOG_PDO_USER)%'
-      $password: '%env(default:app.discovery.default_operation_log_pdo_password:APP_DISCOVERY_OPERATION_LOG_PDO_PASSWORD)%'
-      $tableName: '%env(default:app.discovery.default_operation_log_pdo_table:APP_DISCOVERY_OPERATION_LOG_PDO_TABLE)%'
-
-  App\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore:
-    arguments:
-      $backend: '%env(default:app.discovery.default_operation_log_backend:APP_DISCOVERY_OPERATION_LOG_BACKEND)%'
-      $pdoDsn: '%env(default:app.discovery.default_operation_log_pdo_dsn:APP_DISCOVERY_OPERATION_LOG_PDO_DSN)%'
+      $backend: '%env(default:app.discovery.default_rebuild_evidence_backend:APP_DISCOVERY_REBUILD_EVIDENCE_BACKEND)%'
 
   App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore:
     arguments:
       $path: '%env(default:app.discovery.default_rebuild_evidence_path:APP_DISCOVERY_REBUILD_EVIDENCE_PATH)%'
 
-  App\Service\Discovery\Rebuild\PdoDiscoveryRebuildEvidenceStore:
+  App\Service\Discovery\RateLimit\ConfigurableDiscoveryRateLimitStore:
     arguments:
-      $dsn: '%env(default:app.discovery.default_rebuild_evidence_pdo_dsn:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_DSN)%'
-      $user: '%env(default:app.discovery.default_rebuild_evidence_pdo_user:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_USER)%'
-      $password: '%env(default:app.discovery.default_rebuild_evidence_pdo_password:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_PASSWORD)%'
-      $tableName: '%env(default:app.discovery.default_rebuild_evidence_pdo_table:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_TABLE)%'
-
-  App\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore:
-    arguments:
-      $backend: '%env(default:app.discovery.default_rebuild_evidence_backend:APP_DISCOVERY_REBUILD_EVIDENCE_BACKEND)%'
-      $pdoDsn: '%env(default:app.discovery.default_rebuild_evidence_pdo_dsn:APP_DISCOVERY_REBUILD_EVIDENCE_PDO_DSN)%'
-
-  App\Service\Discovery\RateLimit\DiscoveryRateLimitStoreInterface: '@App\Service\Discovery\RateLimit\ConfigurableDiscoveryRateLimitStore'
+      $backend: '%env(default:app.discovery.default_rate_limit_backend:APP_DISCOVERY_RATE_LIMIT_BACKEND)%'
 
   App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore:
     arguments:
       $path: '%env(default:app.discovery.default_rate_limit_store_path:APP_DISCOVERY_RATE_LIMIT_STORE_PATH)%'
 
-  App\Service\Discovery\RateLimit\PdoDiscoveryRateLimitStore:
-    arguments:
-      $dsn: '%env(default:app.discovery.default_rate_limit_pdo_dsn:APP_DISCOVERY_RATE_LIMIT_PDO_DSN)%'
-      $user: '%env(default:app.discovery.default_rate_limit_pdo_user:APP_DISCOVERY_RATE_LIMIT_PDO_USER)%'
-      $password: '%env(default:app.discovery.default_rate_limit_pdo_password:APP_DISCOVERY_RATE_LIMIT_PDO_PASSWORD)%'
-      $tableName: '%env(default:app.discovery.default_rate_limit_pdo_table:APP_DISCOVERY_RATE_LIMIT_PDO_TABLE)%'
+  App\Service\Discovery\ConfigurableDiscoveryFeedbackStore: ~
 
-  App\Service\Discovery\RateLimit\ConfigurableDiscoveryRateLimitStore:
+  App\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter:
     arguments:
-      $backend: '%env(default:app.discovery.default_rate_limit_backend:APP_DISCOVERY_RATE_LIMIT_BACKEND)%'
+      $backend: '%env(default:app.discovery.default_index_backend:APP_DISCOVERY_INDEX_BACKEND)%'
+      $meiliBase: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
 
   App\Service\Discovery\RateLimit\DiscoveryRateLimiter:
     arguments:
@@ -248,42 +109,12 @@ services:
       $managementMutationLimit: '%env(int:default:app.discovery.default_management_mutation_rate_limit:APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT)%'
       $managementMutationWindowSeconds: '%env(int:default:app.discovery.default_management_mutation_rate_limit_window_seconds:APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT_WINDOW_SECONDS)%'
 
-  App\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter:
-    arguments:
-      $backend: '%env(default:app.discovery.default_index_backend:APP_DISCOVERY_INDEX_BACKEND)%'
-      $meiliBase: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
-
-  App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter:
-    arguments:
-      $path: '%env(default:app.discovery.default_sqlite_path:APP_DISCOVERY_SQLITE_PATH)%'
-
-  App\Service\Discovery\Adapter\MeiliDiscoveryAdapter:
-    arguments:
-      $base: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
-      $key: '%env(default:app.discovery.default_meili_api_key:APP_DISCOVERY_MEILI_API_KEY)%'
-      $indexPrefix: '%env(default:app.discovery.default_meili_index_prefix:APP_DISCOVERY_MEILI_INDEX_PREFIX)%'
-
-  App\Service\Discovery\DiscoveryFeedbackStoreInterface: '@App\Service\Discovery\ConfigurableDiscoveryFeedbackStore'
-
-  App\Service\Discovery\DiscoveryFeedbackStore:
-    arguments:
-      $path: '%env(default:app.discovery.default_feedback_path:APP_DISCOVERY_FEEDBACK_SQLITE_PATH)%'
-
-  App\Service\Discovery\PdoDiscoveryFeedbackStore:
-    arguments:
-      $dsn: '%env(default:app.discovery.default_feedback_pdo_dsn:APP_DISCOVERY_FEEDBACK_PDO_DSN)%'
-      $user: '%env(default:app.discovery.default_feedback_pdo_user:APP_DISCOVERY_FEEDBACK_PDO_USER)%'
-      $password: '%env(default:app.discovery.default_feedback_pdo_password:APP_DISCOVERY_FEEDBACK_PDO_PASSWORD)%'
-      $tableName: '%env(default:app.discovery.default_feedback_pdo_table:APP_DISCOVERY_FEEDBACK_PDO_TABLE)%'
-
-  App\Service\Discovery\ConfigurableDiscoveryFeedbackStore:
-    arguments:
-      $backend: '%env(default:app.discovery.default_feedback_backend:APP_DISCOVERY_FEEDBACK_BACKEND)%'
-      $pdoDsn: '%env(default:app.discovery.default_feedback_pdo_dsn:APP_DISCOVERY_FEEDBACK_PDO_DSN)%'
-
-  App\EventSubscriber\DiscoveryEndpointSecuritySubscriber:
+  App\Subscriber\Discovery\DiscoveryEndpointSecuritySubscriber:
     arguments:
       $requestSurfacePolicy: '@App\Service\Discovery\Http\DiscoveryRequestSurfacePolicy'
       $managementToken: '%env(APP_DISCOVERY_MANAGEMENT_TOKEN)%'
       $apiWriteToken: '%env(APP_DISCOVERY_API_WRITE_TOKEN)%'
       $jsonResponseFactory: '@App\Service\Discovery\Http\DiscoveryJsonResponseFactory'
+
+imports:
+  - { resource: services/discovery.yaml }

@@ -8,8 +8,9 @@ This Antora surface is intentionally minimal and exists only so the repository c
 This repository keeps documentation separated by role:
 
 * Antora narrative entry surface lives under `docs/modules/ROOT/pages/`.
-* Hand-written operational and narrative Markdown remains under `docs/discovery/` and root manifest files.
-* GitHub-facing repository materials remain at repository root, such as `README.md` and producer-facing manifest files.
+* Hand-written operational and narrative Markdown remains under `docs/discovery/`.
+* Canonical producer-facing manifests live under `docs/manifests/`.
+* GitHub-facing repository materials remain at repository root, such as `README.md`.
 * Generated API artifacts belong under `docs/generated/openapi/` and should not be hand-maintained.
 
 No central site assembly, Antora playbook, UI customization, or publishing logic is included here.
@@ -36,14 +37,14 @@ The repository already contains hand-written Markdown documentation, including:
 * `docs/discovery/THREAT_MODEL_V1.md`
 * `docs/discovery/OPENAPI_BASELINE.md`
 
-=== Repository-facing root documents
+=== Repository-facing documents
 
-Useful repository-facing documents already present at root include:
+Useful repository-facing documents already present include:
 
 * `README.md`
-* `PRODUCT_MANIFEST.md`
-* `ARCHITECTURE_MANIFEST.md`
-* `BOUNDING_MANIFEST.md`
+* `docs/manifests/PRODUCT_MANIFEST.md`
+* `docs/manifests/ARCHITECTURE_MANIFEST.md`
+* `docs/manifests/BOUNDING_MANIFEST.md`
 
 There is currently no root `CHANGELOG.md` in this slice.
 

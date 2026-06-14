@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery rate limit decision contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryRateLimitDecision
+final readonly class DiscoveryRateLimitDecision
 {
     public function __construct(
         public string $scope,

@@ -7,8 +7,7 @@ namespace App\Service\Discovery\Playbook;
 use App\Dto\Discovery\PlaybookManagementActionResult;
 use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
-
+use App\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 
 /**
  * Provides the playbook management action capability within the discovery component.

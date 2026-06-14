@@ -1,16 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Tests\Unit\Discovery;
 
 use App\Dto\Discovery\DiscoveryHit;
 use App\Dto\Discovery\DiscoveryQuery;
-use App\Service\Discovery\DiscoveryFeedbackStore;
 use App\Service\Discovery\DiscoveryHighlightingService;
 use App\Service\Discovery\DiscoveryLearningService;
 use App\Service\Discovery\DiscoveryScoringService;
+use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
 
 /**
  * Exercises the discovery scoring service test case for the Discovering component.
@@ -19,8 +20,8 @@ final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItRanksHitsAndAppliesFeedbackBoost(): void
     {
-        $path = $this->createTempSqlitePath('discovering-scoring-feedback-');
-        $learningService = new DiscoveryLearningService(new DiscoveryFeedbackStore($path));
+        $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
+        $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
         $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
         $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
 
@@ -53,6 +54,5 @@ final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
         self::assertSame(2, $rankedHits[0]->feedbackCount);
         self::assertGreaterThan(0.0, $rankedHits[0]->feedbackBoost);
         self::assertContains('feedback boost 4.75', $rankedHits[0]->matchReasons);
-
     }
 }

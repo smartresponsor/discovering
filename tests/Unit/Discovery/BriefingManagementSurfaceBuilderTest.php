@@ -8,7 +8,6 @@ use App\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
 use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
 use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
 use App\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -45,7 +44,7 @@ final class BriefingManagementSurfaceBuilderTest extends DiscoveryTempFilesystem
             new DiscoverySourceRecordJsonFileEncoder(),
         );
 
-        $surface = (new BriefingManagementSurfaceBuilder($repository, new DirectoryBackedFamilyManagementSurfaceBuilder()))->build();
+        $surface = (new BriefingManagementSurfaceBuilder($repository))->build();
 
         self::assertSame('briefing-file-source-provider', $surface->sourceName);
         self::assertSame($repository->getStorageDirectoryPath(), $surface->storageDirectoryPath);

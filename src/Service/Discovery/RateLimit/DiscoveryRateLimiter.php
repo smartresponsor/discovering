@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Service\Discovery\RateLimit;
 
 use App\Dto\Discovery\DiscoveryRateLimitDecision;
+use App\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface;
 use Symfony\Component\HttpFoundation\Request;
-
 
 /**
  * Provides the discovery rate limiter capability within the discovery component.
@@ -30,7 +30,7 @@ final class DiscoveryRateLimiter
     public function consumeForRequest(Request $request): ?DiscoveryRateLimitDecision
     {
         $scope = $this->resolveScope($request);
-        if ($scope === null) {
+        if (null === $scope) {
             return null;
         }
 
@@ -76,18 +76,18 @@ final class DiscoveryRateLimiter
 
     private function isQueryPath(Request $request, string $path): bool
     {
-        if ($request->isMethod(Request::METHOD_GET) && ($path === '/api/discovery' || $path === '/api/v1/discovery')) {
+        if ($request->isMethod(Request::METHOD_GET) && ('/api/discovery' === $path || '/api/discovery' === $path)) {
             return true;
         }
 
         return ($request->isMethod(Request::METHOD_GET) || $request->isMethod(Request::METHOD_POST))
-            && $path === '/discovery';
+            && '/discovery' === $path;
     }
 
     private function isWritePath(Request $request, string $path): bool
     {
         return $request->isMethod(Request::METHOD_POST)
-            && ($path === '/discovery/feedback' || $path === '/api/discovery/click' || $path === '/api/v1/discovery/click');
+            && ('/discovery/feedback' === $path || '/api/discovery/click' === $path || '/api/discovery/click' === $path);
     }
 
     private function isManagementMutationPath(Request $request, string $path): bool
@@ -102,13 +102,13 @@ final class DiscoveryRateLimiter
 
         $action = $request->query->get('action');
 
-        return is_string($action) && trim($action) !== '';
+        return is_string($action) && '' !== trim($action);
     }
 
     private function actorKey(Request $request, string $scope): string
     {
         $clientIp = trim((string) ($request->getClientIp() ?? 'unknown'));
-        if ($clientIp === '') {
+        if ('' === $clientIp) {
             $clientIp = 'unknown';
         }
 
@@ -118,15 +118,15 @@ final class DiscoveryRateLimiter
             default => '',
         };
 
-        if ($tokenHeader === '') {
-            return 'ip:' . $clientIp;
+        if ('' === $tokenHeader) {
+            return 'ip:'.$clientIp;
         }
 
         $token = trim((string) $request->headers->get($tokenHeader, ''));
-        if ($token === '') {
-            return 'ip:' . $clientIp;
+        if ('' === $token) {
+            return 'ip:'.$clientIp;
         }
 
-        return 'ip:' . $clientIp . '|token:' . substr(hash('sha256', $token), 0, 16);
+        return 'ip:'.$clientIp.'|token:'.substr(hash('sha256', $token), 0, 16);
     }
 }

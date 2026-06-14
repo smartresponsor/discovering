@@ -15,7 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Provides a CLI entry point for the discovery rollback plan workflow.
  */
-#[AsCommand(name: 'discovering:rollback:plan', description: 'Builds the current discovery rollback plan from rebuild evidence.')]
+#[AsCommand(name: 'app:discovery:rollback:plan', description: 'Builds the current discovery rollback plan from rebuild evidence.', aliases: ['discovering:rollback:plan'])]
 final class DiscoveryRollbackPlanCommand extends Command
 {
     public function __construct(
@@ -46,7 +46,7 @@ final class DiscoveryRollbackPlanCommand extends Command
 
         $this->operationLogger->recordConsole('discovering.rollback.plan', context: $plan->toArray());
 
-        if ($plan->notes !== []) {
+        if ([] !== $plan->notes) {
             $io->section('Operator notes');
             $io->listing($plan->notes);
         }

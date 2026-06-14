@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Discovery\Libsource\Log;
 
 use App\Dto\Discovery\LibsourceOperatorEvent;
-
+use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
 /**
  * Provides the configurable libsource operator event log store capability within the discovery component.
@@ -14,9 +14,8 @@ final class ConfigurableLibsourceOperatorEventLogStore implements LibsourceOpera
 {
     public function __construct(
         private readonly FileLibsourceOperatorEventLogStore $fileStore,
-        private readonly PdoLibsourceOperatorEventLogStore $pdoStore,
+        private readonly DoctrineLibsourceOperatorEventLogStore $doctrineStore,
         private readonly string $backend,
-        private readonly string $pdoDsn,
     ) {
     }
 
@@ -48,8 +47,8 @@ final class ConfigurableLibsourceOperatorEventLogStore implements LibsourceOpera
     {
         return match (strtolower(trim($this->backend))) {
             '', 'file' => $this->fileStore,
-            'pdo' => trim($this->pdoDsn) !== '' ? $this->pdoStore : $this->fileStore,
-            default => throw new \RuntimeException(sprintf('Unsupported libsource operator event log backend "%s". Expected "file" or "pdo".', $this->backend)),
+            'doctrine' => $this->doctrineStore,
+            default => throw new \RuntimeException(sprintf('Unsupported libsource operator event log backend "%s". Expected "file" or "doctrine".', $this->backend)),
         };
     }
 }

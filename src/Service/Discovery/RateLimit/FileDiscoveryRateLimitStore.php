@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\RateLimit;
 
-/**
+use App\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface; /**
  * Lightweight fixed-window file-backed store.
- * 
+ *
  * State shape:
  * {
  * "scope|actor": {"count": 1, "resetAt": 1712160000}
  * }
  */
+
 /**
  * Provides the file discovery rate limit store capability within the discovery component.
  */
@@ -29,7 +30,7 @@ final class FileDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterf
         $this->ensureParentDirectory();
 
         $handle = fopen($this->path, 'c+');
-        if ($handle === false) {
+        if (false === $handle) {
             throw new \RuntimeException(sprintf('Unable to open rate limit store at "%s".', $this->path));
         }
 
@@ -50,7 +51,7 @@ final class FileDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterf
                 }
             }
 
-            $bucket = $scope . '|' . $actorKey;
+            $bucket = $scope.'|'.$actorKey;
             $resetAt = $now + max(1, $windowSeconds);
             $count = 0;
 
@@ -88,7 +89,7 @@ final class FileDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterf
      */
     private function decodeState(string $contents): array
     {
-        if (trim($contents) === '') {
+        if ('' === trim($contents)) {
             return [];
         }
 

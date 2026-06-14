@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Discovery\Diagnostics;
 
-use PDO;
-
-/**
+use App\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface; /**
  * Provides the network discovery probe transport capability within the discovery component.
  */
 final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInterface
@@ -49,39 +47,6 @@ final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInt
             'reachable' => false,
             'details' => $details,
         ];
-    }
-
-    /**
-     * Performs the probe pdo operation for this discovery service.
-     */
-    public function probePdo(string $dsn, ?string $user = null, ?string $password = null): array
-    {
-        if ('' === trim($dsn)) {
-            return [
-                'reachable' => false,
-                'details' => ['PDO probe requires a non-empty DSN.'],
-            ];
-        }
-
-        try {
-            $pdo = new \PDO($dsn, $user, $password, [
-                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                \PDO::ATTR_TIMEOUT => 2,
-            ]);
-            $statement = $pdo->query('SELECT 1');
-            $value = false === $statement ? null : $statement->fetchColumn();
-
-            return [
-                'reachable' => true,
-                'details' => [sprintf('PDO probe returned %s.', false === $value || null === $value ? 'no scalar value' : (string) $value)],
-            ];
-        } catch (\Throwable $throwable) {
-            return [
-                'reachable' => false,
-                'details' => [sprintf('%s: %s', $throwable::class, $throwable->getMessage())],
-            ];
-        }
     }
 
     /**

@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace App\Dto\Discovery;
 
-
 /**
  * Represents the discovery backend probe result contract used by discovery application, management, or state coordination flows.
  */
-final class DiscoveryBackendProbeResult
+final readonly class DiscoveryBackendProbeResult
 {
     /**
      * @param list<string> $details
      */
     public function __construct(
-        public string $name,
+        public string $nameEntity,
         public string $backend,
         public string $target,
         public string $status,
@@ -28,7 +27,7 @@ final class DiscoveryBackendProbeResult
     public function toArray(): array
     {
         return [
-            'name' => $this->name,
+            'nameEntity' => $this->nameEntity,
             'backend' => $this->backend,
             'target' => $this->target,
             'status' => $this->status,
