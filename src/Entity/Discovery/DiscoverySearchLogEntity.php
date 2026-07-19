@@ -21,6 +21,11 @@ final class DiscoverySearchLogEntity
     use ObjectIdentityEmbeddableTrait;
     use ObjectAuditEmbeddableTrait;
 
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
+
     #[ORM\Column(type: 'string', length: 128)]
     private string $term;
 
@@ -51,7 +56,7 @@ final class DiscoverySearchLogEntity
     public function setTerm(string $term): void
     {
         $this->term = $term;
-        $this->touchObject();
+        $this->touchModified();
     }
 
     public function getCustomerReference(): ?string
@@ -62,7 +67,7 @@ final class DiscoverySearchLogEntity
     public function setCustomerReference(?string $customerReference): void
     {
         $this->customerReference = $customerReference;
-        $this->touchObject();
+        $this->touchModified();
     }
 
     /**
@@ -79,6 +84,6 @@ final class DiscoverySearchLogEntity
     public function setFilters(?array $filters): void
     {
         $this->filters = $filters;
-        $this->touchObject();
+        $this->touchModified();
     }
 }
