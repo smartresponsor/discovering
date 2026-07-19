@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Functional\Discovery;
+namespace App\Discovering\Tests\Functional\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryApiContract;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\Service\Discovery\Http\DiscoveryApiContract;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Response;
 

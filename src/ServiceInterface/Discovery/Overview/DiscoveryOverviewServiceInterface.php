@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery\Overview;
+namespace App\Discovering\ServiceInterface\Discovery\Overview;
 
-use App\Dto\Discovery\DiscoveryOverview;
-
+use App\Discovering\Dto\Discovery\DiscoveryOverview;
 
 /**
  * Defines the contract for the discovery overview service capability within the discovery component.

@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
-use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
+use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the directory backed family operator event trail builder test case for the Discovering component.
@@ -20,9 +19,9 @@ final class DirectoryBackedFamilyOperatorEventTrailBuilderTest extends Discovery
     public function testItBuildsReusableOperatorTrail(): void
     {
         $projectDir = $this->createTempDirectory('discovering-family-trail-');
-        $storageDirectory = $projectDir . '/resources/discovery/family';
+        $storageDirectory = $projectDir.'/resources/discovery/family';
         mkdir($storageDirectory, 0777, true);
-        file_put_contents($storageDirectory . '/alpha.json', json_encode([
+        file_put_contents($storageDirectory.'/alpha.json', json_encode([
             ['resourceId' => 'family-alpha', 'title' => 'Alpha', 'body' => 'Alpha body'],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
@@ -39,17 +38,17 @@ final class DirectoryBackedFamilyOperatorEventTrailBuilderTest extends Discovery
 
             public function getStorageDirectoryPath(): string
             {
-                return $this->getProjectDir() . '/resources/discovery/family';
+                return $this->getProjectDir().'/resources/discovery/family';
             }
 
             public function getStoragePath(): string
             {
-                return $this->getStorageDirectoryPath() . '/family_source_records.json';
+                return $this->getStorageDirectoryPath().'/family_source_records.json';
             }
 
             public function getLegacyStoragePath(): string
             {
-                return $this->getProjectDir() . '/resources/discovery/family_source_records.json';
+                return $this->getProjectDir().'/resources/discovery/family_source_records.json';
             }
         };
 
@@ -65,10 +64,10 @@ final class DirectoryBackedFamilyOperatorEventTrailBuilderTest extends Discovery
         self::assertSame('action:audit-registry', $events[1]->eventName);
         self::assertSame('registry:file', $events[2]->eventName);
 
-        @unlink($storageDirectory . '/alpha.json');
+        @unlink($storageDirectory.'/alpha.json');
         @rmdir($storageDirectory);
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
+        @rmdir($projectDir.'/resources/discovery');
+        @rmdir($projectDir.'/resources');
         @rmdir($projectDir);
     }
 }

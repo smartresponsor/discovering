@@ -1,13 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryMode;
-use App\Dto\Discovery\DiscoveryQuery;
-use App\Service\Discovery\DiscoveryModePresetService;
+use App\Discovering\Dto\Discovery\DiscoveryMode;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Service\Discovery\DiscoveryModePresetService;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery mode preset service test case for the Discovering component.

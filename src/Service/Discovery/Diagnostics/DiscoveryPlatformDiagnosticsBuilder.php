@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Diagnostics;
+namespace App\Discovering\Service\Discovery\Diagnostics;
 
-use App\Dto\Discovery\DiscoveryPlatformDiagnostics;
-use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\Dto\Discovery\DiscoveryPlatformDiagnostics;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
+use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 
 /**
  * Builds the discovery platform diagnostics output used by discovery management or diagnostics flows.

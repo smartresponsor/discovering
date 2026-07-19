@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Management;
+namespace App\Discovering\Controller\Management;
 
-use App\Service\Discovery\Briefing\BriefingManagementSurfaceActionResolver;
-use App\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
-use App\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Briefing\BriefingManagementSurfaceActionResolver;
+use App\Discovering\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
+use App\Discovering\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

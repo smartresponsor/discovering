@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Form\Discovery;
+namespace App\Discovering\Form\Discovery;
 
-use App\Dto\Discovery\DiscoveryMode;
-use App\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Dto\Discovery\DiscoveryMode;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;

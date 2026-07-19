@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Libsource;
+namespace App\Discovering\Service\Discovery\Libsource;
 
-use App\Dto\Discovery\LibsourceManagementActionResult;
-use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
+use App\Discovering\Dto\Discovery\LibsourceManagementActionResult;
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
+use App\Discovering\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
 /**
  * Builds the libsource operator event trail output used by discovery management or diagnostics flows.

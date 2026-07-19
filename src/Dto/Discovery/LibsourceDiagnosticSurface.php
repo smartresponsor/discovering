@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Dto\Discovery;
+namespace App\Discovering\Dto\Discovery;
 
 /**
  * Represents the libsource diagnostic surface contract used by discovery application, management, or state coordination flows.

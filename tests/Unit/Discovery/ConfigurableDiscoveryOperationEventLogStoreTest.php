@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryOperationEvent;
-use App\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore;
-use App\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
-use App\Service\Discovery\Operations\DoctrineDiscoveryOperationEventLogStore;
-use App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Dto\Discovery\DiscoveryOperationEvent;
+use App\Discovering\Service\Discovery\Operations\ConfigurableDiscoveryOperationEventLogStore;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
+use App\Discovering\Service\Discovery\Operations\DoctrineDiscoveryOperationEventLogStore;
+use App\Discovering\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the configurable discovery operation event log store test case for the Discovering component.

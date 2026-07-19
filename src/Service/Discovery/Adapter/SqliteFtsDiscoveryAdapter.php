@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Adapter;
+namespace App\Discovering\Service\Discovery\Adapter;
 
-use App\Entity\Discovery\DiscoveryIndexAliasEntity;
-use App\Entity\Discovery\DiscoveryIndexDocumentEntity;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\Entity\Discovery\DiscoveryIndexAliasEntity;
+use App\Discovering\Entity\Discovery\DiscoveryIndexDocumentEntity;
+use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 

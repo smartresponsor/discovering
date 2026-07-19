@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Source\Support;
+namespace App\Discovering\Service\Discovery\Source\Support;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
-
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
 
 /**
  * Handles discovery source record json file encoder concerns for discovery state, source, or API payloads.

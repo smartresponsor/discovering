@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\PlaybookManagementActionResult;
-use App\Service\Discovery\Playbook\PlaybookOperatorEventTrailBuilder;
-use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Dto\Discovery\PlaybookManagementActionResult;
+use App\Discovering\Service\Discovery\Playbook\PlaybookOperatorEventTrailBuilder;
+use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the playbook operator event trail builder test case for the Discovering component.

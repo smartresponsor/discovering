@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
+use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Source\Repository;
+namespace App\Discovering\Service\Discovery\Source\Repository;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\ServiceInterface\Discovery\Source\Repository\DiscoverySourceRecordRepositoryInterface;
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\ServiceInterface\Discovery\Source\Repository\DiscoverySourceRecordRepositoryInterface;
 
 /**
  * Provides abstract directory backed discovery source record access for discovery source and management workflows.

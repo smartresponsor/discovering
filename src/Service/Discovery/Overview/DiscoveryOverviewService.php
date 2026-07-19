@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Overview;
+namespace App\Discovering\Service\Discovery\Overview;
 
-use App\Dto\Discovery\DiscoveryOverview;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
-use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
-use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
-
+use App\Discovering\Dto\Discovery\DiscoveryOverview;
+use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
+use App\Discovering\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
+use App\Discovering\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
 /**
  * Provides the discovery overview capability within the discovery component.

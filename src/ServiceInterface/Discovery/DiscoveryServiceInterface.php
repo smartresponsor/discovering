@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery;
+namespace App\Discovering\ServiceInterface\Discovery;
 
-use App\Dto\Discovery\DiscoveryQuery;
-use App\Dto\Discovery\DiscoveryResult;
-
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Dto\Discovery\DiscoveryResult;
 
 /**
  * Defines the contract for the discovery service capability within the discovery component.

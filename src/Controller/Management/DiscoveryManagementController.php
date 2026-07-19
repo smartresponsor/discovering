@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Management;
+namespace App\Discovering\Controller\Management;
 
-use App\Dto\Discovery\ReindexRequest;
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\Dto\Discovery\ReindexRequest;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;

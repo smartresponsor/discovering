@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Operations;
+namespace App\Discovering\Service\Discovery\Operations;
 
-use App\Dto\Discovery\DiscoveryOperationEvent;
-use App\Entity\Discovery\DiscoveryOperationEventEntity;
-use App\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryOperationEvent;
+use App\Discovering\Entity\Discovery\DiscoveryOperationEventEntity;
+use App\Discovering\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 

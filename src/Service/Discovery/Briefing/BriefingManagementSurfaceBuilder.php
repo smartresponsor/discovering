@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Briefing;
+namespace App\Discovering\Service\Discovery\Briefing;
 
-use App\Dto\Discovery\BriefingManagementSurface;
-use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
-
+use App\Discovering\Dto\Discovery\BriefingManagementSurface;
+use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
 
 /**
  * Builds the briefing management surface output used by discovery management or diagnostics flows.

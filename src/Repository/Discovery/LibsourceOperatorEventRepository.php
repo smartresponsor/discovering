@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repository\Discovery;
+namespace App\Discovering\Repository\Discovery;
 
-use App\Entity\Discovery\LibsourceOperatorEventEntity;
-use App\RepositoryInterface\Discovery\LibsourceOperatorEventRepositoryInterface;
+use App\Discovering\Entity\Discovery\LibsourceOperatorEventEntity;
+use App\Discovering\RepositoryInterface\Discovery\LibsourceOperatorEventRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

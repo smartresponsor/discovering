@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Contract\Discovery;
+namespace App\Discovering\Tests\Contract\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryApiContract;
+use App\Discovering\Service\Discovery\Http\DiscoveryApiContract;
 use PHPUnit\Framework\Assert;
-
 
 /**
  * Exercises the discovery api contract assertions test case for the Discovering component.
@@ -30,7 +29,7 @@ trait DiscoveryApiContractAssertions
 
         $schemaFamily = $expectedSchemaFamily ?? DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY;
         $schemaVersion = $expectedSchemaVersion
-            ?? ($expectedSchemaFamily === null ? DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION : 1);
+            ?? (null === $expectedSchemaFamily ? DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION : 1);
 
         Assert::assertSame($schemaFamily, $payload['meta']['schemaFamily'] ?? null);
         Assert::assertSame($schemaVersion, $payload['meta']['schemaVersion'] ?? null);

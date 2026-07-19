@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Entity\Discovery;
+namespace App\Discovering\Entity\Discovery;
 
-use App\Repository\Discovery\DiscoveryOperationEventRepository;
+use App\Discovering\Repository\Discovery\DiscoveryOperationEventRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DiscoveryOperationEventRepository::class)]

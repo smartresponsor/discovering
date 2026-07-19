@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Support;
+namespace App\Discovering\Tests\Support;
 
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repository\Discovery;
+namespace App\Discovering\Repository\Discovery;
 
-use App\Entity\Discovery\DiscoveryIndexAliasEntity;
-use App\RepositoryInterface\Discovery\DiscoveryIndexAliasRepositoryInterface;
+use App\Discovering\Entity\Discovery\DiscoveryIndexAliasEntity;
+use App\Discovering\RepositoryInterface\Discovery\DiscoveryIndexAliasRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

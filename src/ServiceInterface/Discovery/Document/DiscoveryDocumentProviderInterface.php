@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery\Document;
+namespace App\Discovering\ServiceInterface\Discovery\Document;
 
-use App\ValueObject\Discovery\DiscoveryDocument;
-
+use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 
 /**
  * Defines the contract for the discovery document provider capability within the discovery component.

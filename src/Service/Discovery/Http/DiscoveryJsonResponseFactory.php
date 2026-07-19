@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Http;
+namespace App\Discovering\Service\Discovery\Http;
 
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-
 
 /**
  * Provides the discovery json response factory capability within the discovery component.
@@ -68,13 +67,14 @@ final class DiscoveryJsonResponseFactory
 
     /**
      * @param array<string, mixed> $meta
+     *
      * @return array<string, mixed>
      */
     private function buildMeta(array $meta): array
     {
         $request = $this->requestStack->getCurrentRequest();
         $path = $request instanceof Request ? $request->getPathInfo() : null;
-        $canonicalPath = $path !== null ? $this->canonicalPath($path) : null;
+        $canonicalPath = null !== $path ? $this->canonicalPath($path) : null;
 
         $descriptiveMeta = array_replace([
             'schemaFamily' => DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY,
@@ -83,7 +83,7 @@ final class DiscoveryJsonResponseFactory
 
         return [
             'canonicalPath' => $canonicalPath,
-            'deprecatedAlias' => $path !== null && $canonicalPath !== null && $canonicalPath !== $path,
+            'deprecatedAlias' => null !== $path && null !== $canonicalPath && $canonicalPath !== $path,
         ] + $descriptiveMeta;
     }
 
@@ -95,13 +95,13 @@ final class DiscoveryJsonResponseFactory
         }
 
         $requestId = $request->attributes->get(DiscoveryOperationLogger::REQUEST_ID_ATTRIBUTE);
-        if (is_string($requestId) && $requestId !== '') {
+        if (is_string($requestId) && '' !== $requestId) {
             return $requestId;
         }
 
         $headerRequestId = trim((string) $request->headers->get(DiscoveryOperationLogger::REQUEST_ID_HEADER, ''));
 
-        return $headerRequestId === '' ? null : $headerRequestId;
+        return '' === $headerRequestId ? null : $headerRequestId;
     }
 
     private function applyHeaders(JsonResponse $response): JsonResponse
@@ -111,7 +111,7 @@ final class DiscoveryJsonResponseFactory
         $response->headers->set(self::SCHEMA_VERSION_HEADER, DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION);
 
         $requestId = $this->resolveRequestId();
-        if (is_string($requestId) && $requestId !== '') {
+        if (is_string($requestId) && '' !== $requestId) {
             $response->headers->set(DiscoveryOperationLogger::REQUEST_ID_HEADER, $requestId);
         }
 
@@ -120,12 +120,12 @@ final class DiscoveryJsonResponseFactory
 
     private function canonicalPath(string $path): string
     {
-        if ($path === '/api/discovery') {
-            return '/api/' . self::API_VERSION . '/discovery';
+        if ('/api/discovery' === $path) {
+            return '/api/'.self::API_VERSION.'/discovery';
         }
 
-        if ($path === '/api/discovery/click') {
-            return '/api/' . self::API_VERSION . '/discovery/click';
+        if ('/api/discovery/click' === $path) {
+            return '/api/'.self::API_VERSION.'/discovery/click';
         }
 
         return $path;

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Contract\Discovery;
+namespace App\Discovering\Tests\Contract\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryApiContract;
-use App\Tests\Functional\Discovery\AbstractDiscoveryWebTestCase;
+use App\Discovering\Service\Discovery\Http\DiscoveryApiContract;
+use App\Discovering\Tests\Functional\Discovery\AbstractDiscoveryWebTestCase;
 
 /**
  * Exercises the discovery api envelope contract test case for the Discovering component.

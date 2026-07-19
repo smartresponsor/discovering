@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Functional\Discovery;
-
-
+namespace App\Discovering\Tests\Functional\Discovery;
 
 /**
  * Exercises the discovery management ui test case for the Discovering component.
@@ -112,7 +110,6 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertArrayHasKey('notes', $payload['data']);
     }
 
-
     public function testManagementRollbackExportReturnsRollbackPlan(): void
     {
         $this->performManagementRebuilds(2);
@@ -124,7 +121,6 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertNotEmpty($payload['data']['previousEvidenceId']);
         self::assertNotEmpty($payload['data']['recommendedCommand']);
     }
-
 
     public function testManagementRollbackExecutePromotesRollbackTarget(): void
     {
@@ -154,6 +150,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringContainsString('Coverage by resource type', $content);
         self::assertStringContainsString('Coverage by source', $content);
     }
+
     public function testManagementRebuildRejectsUnsupportedMutationContentType(): void
     {
         $client = $this->createManagementClient();
@@ -182,5 +179,4 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertFalse($payload['ok']);
         self::assertSame('discovery_mutation_payload_too_large', $payload['error']['code']);
     }
-
 }

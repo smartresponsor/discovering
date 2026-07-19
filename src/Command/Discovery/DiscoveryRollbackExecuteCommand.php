@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Discovery;
+namespace App\Discovering\Command\Discovery;
 
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

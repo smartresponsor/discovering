@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Playbook;
+namespace App\Discovering\Service\Discovery\Playbook;
 
-use App\Dto\Discovery\PlaybookManagementSurface;
-use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
-
+use App\Discovering\Dto\Discovery\PlaybookManagementSurface;
+use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
 
 /**
  * Builds the playbook management surface output used by discovery management or diagnostics flows.

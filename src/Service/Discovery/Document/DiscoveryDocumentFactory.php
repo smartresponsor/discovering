@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Document;
+namespace App\Discovering\Service\Discovery\Document;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
-use App\ValueObject\Discovery\DiscoveryDocument;
-
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
+use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 
 /**
  * Provides the discovery document factory capability within the discovery component.

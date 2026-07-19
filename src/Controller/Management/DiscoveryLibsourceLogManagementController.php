@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Management;
+namespace App\Discovering\Controller\Management;
 
-use App\Dto\Discovery\LibsourceEventLogQuery;
-use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
+use App\Discovering\Dto\Discovery\LibsourceEventLogQuery;
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

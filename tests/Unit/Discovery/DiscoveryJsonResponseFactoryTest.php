@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryApiContract;
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\Service\Discovery\Http\DiscoveryApiContract;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;

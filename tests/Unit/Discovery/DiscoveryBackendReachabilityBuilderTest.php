@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
-use App\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface;
+use App\Discovering\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
+use App\Discovering\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface;
 use PHPUnit\Framework\TestCase;
 
 /**

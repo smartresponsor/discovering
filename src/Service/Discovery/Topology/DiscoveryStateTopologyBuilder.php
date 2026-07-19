@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Topology;
+namespace App\Discovering\Service\Discovery\Topology;
 
-use App\Dto\Discovery\DiscoveryStateStoreDescriptor;
-use App\Dto\Discovery\DiscoveryStateTopology;
+use App\Discovering\Dto\Discovery\DiscoveryStateStoreDescriptor;
+use App\Discovering\Dto\Discovery\DiscoveryStateTopology;
 
 /**
  * Builds the discovery state topology output used by discovery management or diagnostics flows.

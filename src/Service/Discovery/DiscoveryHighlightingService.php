@@ -1,8 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Service\Discovery;
-
+namespace App\Discovering\Service\Discovery;
 
 /**
  * Provides the discovery highlighting capability within the discovery component.
@@ -17,13 +17,13 @@ final class DiscoveryHighlightingService
         $escapedValue = htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $patterns = $this->buildPatterns($tokens);
 
-        if ($escapedValue === '' || $patterns === []) {
+        if ('' === $escapedValue || [] === $patterns) {
             return $escapedValue;
         }
 
         return (string) preg_replace_callback(
-            '/(' . implode('|', $patterns) . ')/i',
-            static fn (array $matches): string => '<mark>' . $matches[0] . '</mark>',
+            '/('.implode('|', $patterns).')/i',
+            static fn (array $matches): string => '<mark>'.$matches[0].'</mark>',
             $escapedValue,
         );
     }
@@ -34,17 +34,17 @@ final class DiscoveryHighlightingService
     public function buildSnippet(string $content, array $tokens, int $radius = 80): string
     {
         $normalized = trim($content);
-        if ($normalized === '') {
+        if ('' === $normalized) {
             return '';
         }
 
         foreach ($tokens as $token) {
-            if ($token === '') {
+            if ('' === $token) {
                 continue;
             }
 
             $position = mb_stripos($normalized, $token);
-            if ($position === false) {
+            if (false === $position) {
                 continue;
             }
 
@@ -53,11 +53,11 @@ final class DiscoveryHighlightingService
             $snippet = mb_substr($normalized, $start, $length);
 
             if ($start > 0) {
-                $snippet = '…' . ltrim($snippet);
+                $snippet = '…'.ltrim($snippet);
             }
 
             if (($start + $length) < mb_strlen($normalized)) {
-                $snippet = rtrim($snippet) . '…';
+                $snippet = rtrim($snippet).'…';
             }
 
             return $snippet;
@@ -65,18 +65,19 @@ final class DiscoveryHighlightingService
 
         $fallback = mb_substr($normalized, 0, min(180, mb_strlen($normalized)));
 
-        return mb_strlen($normalized) > mb_strlen($fallback) ? rtrim($fallback) . '…' : $fallback;
+        return mb_strlen($normalized) > mb_strlen($fallback) ? rtrim($fallback).'…' : $fallback;
     }
 
     /**
      * @param list<string> $tokens
+     *
      * @return list<string>
      */
     private function buildPatterns(array $tokens): array
     {
         return array_values(array_unique(array_filter(array_map(
             static fn (string $token): string => preg_quote($token, '/'),
-            array_filter($tokens, static fn (string $token): bool => $token !== ''),
+            array_filter($tokens, static fn (string $token): bool => '' !== $token),
         ))));
     }
 }

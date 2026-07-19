@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Entity\Discovery;
+namespace App\Discovering\Entity\Discovery;
 
+use App\Discovering\Repository\Discovery\DiscoverySearchLogRepository;
 use App\Objecting\EntityTrait\Embeddable\ObjectAuditEmbeddableTrait;
 use App\Objecting\EntityTrait\Embeddable\ObjectIdentityEmbeddableTrait;
-use App\Repository\Discovery\DiscoverySearchLogRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DiscoverySearchLogRepository::class)]

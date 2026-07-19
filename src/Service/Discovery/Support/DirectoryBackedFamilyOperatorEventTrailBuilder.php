@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Support;
+namespace App\Discovering\Service\Discovery\Support;
 
-use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
-use App\Dto\Discovery\DirectoryBackedFamilyOperatorEvent;
-use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyOperatorEvent;
+use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
 
 /**
  * Builds the directory backed family operator event trail output used by discovery management or diagnostics flows.
@@ -33,7 +32,7 @@ final class DirectoryBackedFamilyOperatorEventTrailBuilder
         $events = [
             new DirectoryBackedFamilyOperatorEvent(
                 eventName: 'surface:load',
-                level: $files === [] ? 'warning' : 'info',
+                level: [] === $files ? 'warning' : 'info',
                 summary: sprintf('%s surface loaded with %d files and %d records.', ucfirst($this->familyLabel), count($files), count($records)),
                 context: [
                     'storageDirectoryPath' => $this->repository->getStorageDirectoryPath(),
@@ -43,7 +42,7 @@ final class DirectoryBackedFamilyOperatorEventTrailBuilder
             ),
         ];
 
-        if ($lastActionResult !== null) {
+        if (null !== $lastActionResult) {
             $events[] = new DirectoryBackedFamilyOperatorEvent(
                 eventName: sprintf('action:%s', $lastActionResult->actionName),
                 level: $this->inferActionLevel($lastActionResult),
@@ -52,7 +51,7 @@ final class DirectoryBackedFamilyOperatorEventTrailBuilder
             );
         }
 
-        if ($files === []) {
+        if ([] === $files) {
             $events[] = new DirectoryBackedFamilyOperatorEvent(
                 eventName: 'registry:empty',
                 level: 'warning',

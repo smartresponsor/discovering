@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Entity\Discovery;
+namespace App\Discovering\Entity\Discovery;
 
-use App\Repository\Discovery\DiscoveryRebuildEvidenceRepository;
+use App\Discovering\Repository\Discovery\DiscoveryRebuildEvidenceRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DiscoveryRebuildEvidenceRepository::class)]

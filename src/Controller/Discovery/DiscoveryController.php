@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Discovery;
+namespace App\Discovering\Controller\Discovery;
 
-use App\Dto\Discovery\DiscoveryMode;
-use App\Dto\Discovery\DiscoveryQuery;
-use App\Form\Discovery\DiscoverySearchType;
-use App\Service\Discovery\DiscoveryLearningService;
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
+use App\Discovering\Dto\Discovery\DiscoveryMode;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Form\Discovery\DiscoverySearchType;
+use App\Discovering\Service\Discovery\DiscoveryLearningService;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\ServiceInterface\Discovery\DiscoveryServiceInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Functional\Discovery;
+namespace App\Discovering\Tests\Functional\Discovery;
 
-use App\Dto\Discovery\ReindexRequest;
-use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
+use App\Discovering\Dto\Discovery\ReindexRequest;
+use App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

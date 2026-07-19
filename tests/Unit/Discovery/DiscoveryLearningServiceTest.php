@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryHit;
-use App\Service\Discovery\DiscoveryLearningService;
-use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Dto\Discovery\DiscoveryHit;
+use App\Discovering\Service\Discovery\DiscoveryLearningService;
+use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the discovery learning service test case for the Discovering component.

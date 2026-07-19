@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Libsource;
+namespace App\Discovering\Service\Discovery\Libsource;
 
-use App\Dto\Discovery\LibsourceEventLogQuery;
-use App\Dto\Discovery\LibsourceEventLogSurface;
-use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
+use App\Discovering\Dto\Discovery\LibsourceEventLogQuery;
+use App\Discovering\Dto\Discovery\LibsourceEventLogSurface;
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
+use App\Discovering\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 
 /**
  * Builds the libsource event log surface output used by discovery management or diagnostics flows.

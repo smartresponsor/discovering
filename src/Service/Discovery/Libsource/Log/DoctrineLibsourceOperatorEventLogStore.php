@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Libsource\Log;
+namespace App\Discovering\Service\Discovery\Libsource\Log;
 
-use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\Entity\Discovery\LibsourceOperatorEventEntity;
-use App\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
+use App\Discovering\Entity\Discovery\LibsourceOperatorEventEntity;
+use App\Discovering\ServiceInterface\Discovery\Libsource\Log\LibsourceOperatorEventLogStoreInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 

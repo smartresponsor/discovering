@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Functional\Discovery;
+namespace App\Discovering\Tests\Functional\Discovery;
 
 /**
  * Exercises the discovery security posture test case for the Discovering component.

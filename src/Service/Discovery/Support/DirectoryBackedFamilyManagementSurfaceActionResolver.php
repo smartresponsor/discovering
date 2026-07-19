@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Support;
+namespace App\Discovering\Service\Discovery\Support;
 
-use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
-use App\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
+use App\Discovering\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

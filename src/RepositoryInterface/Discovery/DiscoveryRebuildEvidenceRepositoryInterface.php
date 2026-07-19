@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\RepositoryInterface\Discovery;
+namespace App\Discovering\RepositoryInterface\Discovery;
 
-use App\Entity\Discovery\DiscoveryRebuildEvidenceEntity;
+use App\Discovering\Entity\Discovery\DiscoveryRebuildEvidenceEntity;
 
 interface DiscoveryRebuildEvidenceRepositoryInterface
 {

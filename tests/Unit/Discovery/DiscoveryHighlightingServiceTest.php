@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\DiscoveryHighlightingService;
+use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery highlighting service test case for the Discovering component.

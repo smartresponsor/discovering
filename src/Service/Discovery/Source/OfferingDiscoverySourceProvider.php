@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Source;
+namespace App\Discovering\Service\Discovery\Source;
 
-use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
+use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
+use App\Discovering\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
 /**
  * Provides the offering discovery source provider capability within the discovery component.

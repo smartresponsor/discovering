@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the sqlite fts discovery alias swap test case for the Discovering component.

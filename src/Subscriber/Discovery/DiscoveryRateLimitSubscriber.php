@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Subscriber\Discovery;
+namespace App\Discovering\Subscriber\Discovery;
 
-use App\Dto\Discovery\DiscoveryRateLimitDecision;
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\Service\Discovery\RateLimit\DiscoveryRateLimiter;
+use App\Discovering\Dto\Discovery\DiscoveryRateLimitDecision;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\Service\Discovery\RateLimit\DiscoveryRateLimiter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;

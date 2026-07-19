@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Dto\Discovery;
+namespace App\Discovering\Dto\Discovery;
 
-use App\ValueObject\Discovery\DiscoveryDocument;
+use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 
 /**
  * Represents the discovery overview contract used by discovery application, management, or state coordination flows.

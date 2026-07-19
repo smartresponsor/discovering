@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Libsource\Log;
+namespace App\Discovering\Service\Discovery\Libsource\Log;
 
-use App\Dto\Discovery\LibsourceOperatorEvent;
-
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
 
 /**
  * Handles libsource operator event json serializer concerns for discovery state, source, or API payloads.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery\Support;
+namespace App\Discovering\ServiceInterface\Discovery\Support;
 
-use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
 
 /**
  * Defines the contract for the directory backed family management action service capability within the discovery component.

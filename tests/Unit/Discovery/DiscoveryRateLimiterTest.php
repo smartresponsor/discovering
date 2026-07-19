@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryRequestSurfacePolicy;
-use App\Service\Discovery\RateLimit\DiscoveryRateLimiter;
-use App\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Service\Discovery\Http\DiscoveryRequestSurfacePolicy;
+use App\Discovering\Service\Discovery\RateLimit\DiscoveryRateLimiter;
+use App\Discovering\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

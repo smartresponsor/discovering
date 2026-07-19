@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Diagnostics;
+namespace App\Discovering\Service\Discovery\Diagnostics;
 
-use App\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface; /**
+use App\Discovering\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface; /**
  * Provides the network discovery probe transport capability within the discovery component.
  */
 final class NetworkDiscoveryProbeTransport implements DiscoveryProbeTransportInterface

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter;
-use App\Service\Discovery\Adapter\MeiliDiscoveryAdapter;
-use App\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter;
+use App\Discovering\Service\Discovery\Adapter\MeiliDiscoveryAdapter;
+use App\Discovering\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\ReindexRequest;
-use App\Service\Discovery\Indexer\DiscoveryIndexer;
-use App\Service\Discovery\Rebuild\DiscoveryStagedIndexNamer;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
-use App\ValueObject\Discovery\DiscoveryDocument;
+use App\Discovering\Dto\Discovery\ReindexRequest;
+use App\Discovering\Service\Discovery\Indexer\DiscoveryIndexer;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryStagedIndexNamer;
+use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery indexer test case for the Discovering component.

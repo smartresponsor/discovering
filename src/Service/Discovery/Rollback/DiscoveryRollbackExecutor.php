@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Rollback;
+namespace App\Discovering\Service\Discovery\Rollback;
 
-use App\Dto\Discovery\DiscoveryRollbackExecutionResult;
-use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
-
+use App\Discovering\Dto\Discovery\DiscoveryRollbackExecutionResult;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
 
 /**
  * Provides the discovery rollback executor capability within the discovery component.
@@ -42,7 +41,7 @@ final class DiscoveryRollbackExecutor
             );
         }
 
-        if ($expectedCurrentEvidenceId !== null && $expectedCurrentEvidenceId !== $plan->currentEvidenceId) {
+        if (null !== $expectedCurrentEvidenceId && $expectedCurrentEvidenceId !== $plan->currentEvidenceId) {
             return new DiscoveryRollbackExecutionResult(
                 executed: false,
                 status: 'current_evidence_mismatch',
@@ -55,7 +54,7 @@ final class DiscoveryRollbackExecutor
             );
         }
 
-        if ($expectedTargetEvidenceId !== null && $expectedTargetEvidenceId !== $plan->previousEvidenceId) {
+        if (null !== $expectedTargetEvidenceId && $expectedTargetEvidenceId !== $plan->previousEvidenceId) {
             return new DiscoveryRollbackExecutionResult(
                 executed: false,
                 status: 'target_evidence_mismatch',
@@ -81,7 +80,7 @@ final class DiscoveryRollbackExecutor
             );
         }
 
-        if ($plan->rollbackTargetPhysicalIndex === null) {
+        if (null === $plan->rollbackTargetPhysicalIndex) {
             return new DiscoveryRollbackExecutionResult(
                 executed: false,
                 status: 'missing_target_physical_index',

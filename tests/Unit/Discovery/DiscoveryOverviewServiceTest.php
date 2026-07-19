@@ -2,22 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Document\DiscoveryDocumentFactory;
-use App\Service\Discovery\Document\DiscoveryDocumentProvider;
-use App\Service\Discovery\Overview\DiscoveryOverviewService;
-use App\Service\Discovery\Source\CategoryDiscoverySourceProvider;
-use App\Service\Discovery\Source\DocumentDiscoverySourceProvider;
-use App\Service\Discovery\Source\OfferingDiscoverySourceProvider;
-use App\Service\Discovery\Source\ProjectDiscoverySourceProvider;
-use App\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\Service\Discovery\Document\DiscoveryDocumentFactory;
+use App\Discovering\Service\Discovery\Document\DiscoveryDocumentProvider;
+use App\Discovering\Service\Discovery\Overview\DiscoveryOverviewService;
+use App\Discovering\Service\Discovery\Source\CategoryDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\DocumentDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\OfferingDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\ProjectDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery overview service test case for the Discovering component.

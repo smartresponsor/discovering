@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Rebuild;
+namespace App\Discovering\Service\Discovery\Rebuild;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 
 /**
  * Provides the configurable discovery rebuild evidence store capability within the discovery component.

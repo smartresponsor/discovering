@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
-use App\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
+use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery source repository registry test case for the Discovering component.

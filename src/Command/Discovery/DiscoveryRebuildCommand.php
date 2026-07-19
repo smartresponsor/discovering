@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Discovery;
+namespace App\Discovering\Command\Discovery;
 
-use App\Dto\Discovery\ReindexRequest;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\Dto\Discovery\ReindexRequest;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Http;
+namespace App\Discovering\Service\Discovery\Http;
 
 use Symfony\Component\HttpFoundation\Request;
 

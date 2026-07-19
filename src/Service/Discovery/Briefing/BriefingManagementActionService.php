@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Briefing;
+namespace App\Discovering\Service\Discovery\Briefing;
 
-use App\Dto\Discovery\BriefingManagementActionResult;
-use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
-use App\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
+use App\Discovering\Dto\Discovery\BriefingManagementActionResult;
+use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
+use App\Discovering\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 
 /**
  * Provides the briefing management action capability within the discovery component.

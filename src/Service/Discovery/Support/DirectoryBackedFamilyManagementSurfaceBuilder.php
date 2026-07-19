@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Support;
+namespace App\Discovering\Service\Discovery\Support;
 
-use App\Dto\Discovery\DirectoryBackedFamilyManagementEntry;
-use App\Dto\Discovery\DirectoryBackedFamilyManagementFileEntry;
-use App\Dto\Discovery\DirectoryBackedFamilyManagementSurface;
-use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementEntry;
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementFileEntry;
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementSurface;
+use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
 
 /**
  * Builds the directory backed family management surface output used by discovery management or diagnostics flows.

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\RateLimit;
+namespace App\Discovering\Service\Discovery\RateLimit;
 
-use App\Entity\Discovery\DiscoveryRateLimitBucketEntity;
-use App\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface;
+use App\Discovering\Entity\Discovery\DiscoveryRateLimitBucketEntity;
+use App\Discovering\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 

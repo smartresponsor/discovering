@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery\Rebuild;
-
+namespace App\Discovering\ServiceInterface\Discovery\Rebuild;
 
 /**
  * Defines the contract for the discovery staging capable adapter capability within the discovery component.

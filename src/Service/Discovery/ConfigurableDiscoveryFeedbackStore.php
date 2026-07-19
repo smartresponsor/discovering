@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery;
+namespace App\Discovering\Service\Discovery;
 
-use App\ServiceInterface\Discovery\DiscoveryFeedbackStoreInterface; /**
+use App\Discovering\ServiceInterface\Discovery\DiscoveryFeedbackStoreInterface; /**
  * Provides the configurable discovery feedback store capability within the discovery component.
  */
 final class ConfigurableDiscoveryFeedbackStore implements DiscoveryFeedbackStoreInterface

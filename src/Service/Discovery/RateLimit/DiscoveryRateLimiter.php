@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\RateLimit;
+namespace App\Discovering\Service\Discovery\RateLimit;
 
-use App\Dto\Discovery\DiscoveryRateLimitDecision;
-use App\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryRateLimitDecision;
+use App\Discovering\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

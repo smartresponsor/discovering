@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Source\Repository;
+namespace App\Discovering\Service\Discovery\Source\Repository;
 
 /**
  * Provides briefing file discovery source record access for discovery source and management workflows.

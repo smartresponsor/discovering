@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Entity\Discovery\DiscoverySearchLogEntity;
+use App\Discovering\Entity\Discovery\DiscoverySearchLogEntity;
 use App\Objecting\Embeddable\ObjectIdentityEmbeddable;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
@@ -42,7 +42,7 @@ final class DiscoveringObjectIdentityContractTest extends TestCase
             dirname(__DIR__, 3).'/src/Entity',
         ], true)->getMetadataDriverImpl();
         self::assertNotNull($discoveringDriver);
-        $driverChain->addDriver($discoveringDriver, 'App\\Entity');
+        $driverChain->addDriver($discoveringDriver, 'App\\Discovering\\Entity');
 
         $objectingDriver = ORMSetup::createAttributeMetadataConfiguration([
             dirname(__DIR__, 4).'/Objecting/src/Embeddable',

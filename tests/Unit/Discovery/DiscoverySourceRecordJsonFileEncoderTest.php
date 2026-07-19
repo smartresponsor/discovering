@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery source record json file encoder test case for the Discovering component.

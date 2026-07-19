@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Diagnostics;
+namespace App\Discovering\Service\Discovery\Diagnostics;
 
-use App\Dto\Discovery\DiscoveryBackendProbeResult;
-use App\Dto\Discovery\DiscoveryBackendReachabilityReport;
-use App\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface;
+use App\Discovering\Dto\Discovery\DiscoveryBackendProbeResult;
+use App\Discovering\Dto\Discovery\DiscoveryBackendReachabilityReport;
+use App\Discovering\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface;
 
 /**
  * Builds the discovery backend reachability output used by discovery management or diagnostics flows.

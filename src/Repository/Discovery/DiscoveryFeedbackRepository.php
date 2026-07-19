@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repository\Discovery;
+namespace App\Discovering\Repository\Discovery;
 
-use App\Entity\Discovery\DiscoveryFeedbackEntity;
-use App\RepositoryInterface\Discovery\DiscoveryFeedbackRepositoryInterface;
+use App\Discovering\Entity\Discovery\DiscoveryFeedbackEntity;
+use App\Discovering\RepositoryInterface\Discovery\DiscoveryFeedbackRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

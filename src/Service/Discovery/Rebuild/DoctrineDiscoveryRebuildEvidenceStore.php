@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Rebuild;
+namespace App\Discovering\Service\Discovery\Rebuild;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Entity\Discovery\DiscoveryRebuildEvidenceEntity;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Entity\Discovery\DiscoveryRebuildEvidenceEntity;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 

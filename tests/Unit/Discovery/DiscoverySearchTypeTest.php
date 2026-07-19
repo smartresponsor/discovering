@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryMode;
-use App\Dto\Discovery\DiscoveryQuery;
-use App\Form\Discovery\DiscoverySearchType;
+use App\Discovering\Dto\Discovery\DiscoveryMode;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Form\Discovery\DiscoverySearchType;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Forms;
 

@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the directory backed family management action service test case for the Discovering component.
@@ -19,9 +18,9 @@ final class DirectoryBackedFamilyManagementActionServiceTest extends DiscoveryTe
     public function testItAuditsSeedsAndMigratesUsingSharedFamilyActionLogic(): void
     {
         $projectDir = $this->createTempDirectory('discovering-family-actions-');
-        $legacyDirectory = $projectDir . '/resources/discovery';
+        $legacyDirectory = $projectDir.'/resources/discovery';
         mkdir($legacyDirectory, 0777, true);
-        file_put_contents($legacyDirectory . '/family_source_records.json', json_encode([
+        file_put_contents($legacyDirectory.'/family_source_records.json', json_encode([
             ['resourceId' => 'legacy-family', 'title' => 'Legacy', 'body' => 'Legacy body'],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
@@ -38,17 +37,17 @@ final class DirectoryBackedFamilyManagementActionServiceTest extends DiscoveryTe
 
             public function getStorageDirectoryPath(): string
             {
-                return $this->getProjectDir() . '/resources/discovery/family';
+                return $this->getProjectDir().'/resources/discovery/family';
             }
 
             public function getStoragePath(): string
             {
-                return $this->getStorageDirectoryPath() . '/family_source_records.json';
+                return $this->getStorageDirectoryPath().'/family_source_records.json';
             }
 
             public function getLegacyStoragePath(): string
             {
-                return $this->getProjectDir() . '/resources/discovery/family_source_records.json';
+                return $this->getProjectDir().'/resources/discovery/family_source_records.json';
             }
         };
 
@@ -80,8 +79,8 @@ final class DirectoryBackedFamilyManagementActionServiceTest extends DiscoveryTe
 
         @unlink($repository->getStoragePath());
         @rmdir($repository->getStorageDirectoryPath());
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
+        @rmdir($projectDir.'/resources/discovery');
+        @rmdir($projectDir.'/resources');
         @rmdir($projectDir);
     }
 }

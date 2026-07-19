@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Subscriber\Discovery;
+namespace App\Discovering\Subscriber\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;

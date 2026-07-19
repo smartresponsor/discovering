@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore;
-use App\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
+use App\Discovering\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore;
+use App\Discovering\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the file libsource operator event log store test case for the Discovering component.

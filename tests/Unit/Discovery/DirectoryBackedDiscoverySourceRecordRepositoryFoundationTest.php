@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
-use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
+use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the directory backed discovery source record repository foundation test case for the Discovering component.
@@ -32,17 +31,17 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
 
             public function getStorageDirectoryPath(): string
             {
-                return $this->getProjectDir() . '/resources/discovery/tests';
+                return $this->getProjectDir().'/resources/discovery/tests';
             }
 
             public function getStoragePath(): string
             {
-                return $this->getStorageDirectoryPath() . '/test_source_records.json';
+                return $this->getStorageDirectoryPath().'/test_source_records.json';
             }
 
             public function getLegacyStoragePath(): string
             {
-                return $this->getProjectDir() . '/resources/discovery/test_source_records.json';
+                return $this->getProjectDir().'/resources/discovery/test_source_records.json';
             }
         };
 
@@ -62,7 +61,7 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
         self::assertCount(1, $repository->all());
         self::assertStringContainsString('"resourceId": "test-alpha"', $repository->exportJson());
 
-        $importPath = $projectDir . '/import.json';
+        $importPath = $projectDir.'/import.json';
         file_put_contents($importPath, json_encode([
             [
                 'resourceId' => 'test-beta',
@@ -71,7 +70,7 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
             ],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $importedCount = $repository->importFile($importPath, $repository->getStorageDirectoryPath() . '/beta.json');
+        $importedCount = $repository->importFile($importPath, $repository->getStorageDirectoryPath().'/beta.json');
 
         self::assertSame(1, $importedCount);
         self::assertCount(2, $repository->listStorageFiles());
@@ -82,17 +81,17 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
             @unlink($path);
         }
         @rmdir($repository->getStorageDirectoryPath());
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
+        @rmdir($projectDir.'/resources/discovery');
+        @rmdir($projectDir.'/resources');
         @rmdir($projectDir);
     }
 
     public function testItFallsBackToLegacyFileWhenDirectoryIsMissing(): void
     {
         $projectDir = $this->createTempDirectory('discovering-foundation-legacy-');
-        $legacyDirectory = $projectDir . '/resources/discovery';
+        $legacyDirectory = $projectDir.'/resources/discovery';
         mkdir($legacyDirectory, 0777, true);
-        file_put_contents($legacyDirectory . '/test_source_records.json', json_encode([
+        file_put_contents($legacyDirectory.'/test_source_records.json', json_encode([
             [
                 'resourceId' => 'legacy-alpha',
                 'title' => 'Legacy Alpha',
@@ -113,17 +112,17 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
 
             public function getStorageDirectoryPath(): string
             {
-                return $this->getProjectDir() . '/resources/discovery/tests';
+                return $this->getProjectDir().'/resources/discovery/tests';
             }
 
             public function getStoragePath(): string
             {
-                return $this->getStorageDirectoryPath() . '/test_source_records.json';
+                return $this->getStorageDirectoryPath().'/test_source_records.json';
             }
 
             public function getLegacyStoragePath(): string
             {
-                return $this->getProjectDir() . '/resources/discovery/test_source_records.json';
+                return $this->getProjectDir().'/resources/discovery/test_source_records.json';
             }
         };
 
@@ -132,7 +131,7 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
 
         @unlink($repository->getLegacyStoragePath());
         @rmdir($legacyDirectory);
-        @rmdir($projectDir . '/resources');
+        @rmdir($projectDir.'/resources');
         @rmdir($projectDir);
     }
 }

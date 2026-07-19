@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Libsource;
+namespace App\Discovering\Service\Discovery\Libsource;
 
-use App\Dto\Discovery\LibsourceDiagnosticEntry;
-use App\Dto\Discovery\LibsourceDiagnosticSurface;
-use App\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
-use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
-
+use App\Discovering\Dto\Discovery\LibsourceDiagnosticEntry;
+use App\Discovering\Dto\Discovery\LibsourceDiagnosticSurface;
+use App\Discovering\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
+use App\Discovering\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 
 /**
  * Builds the libsource diagnostic surface output used by discovery management or diagnostics flows.

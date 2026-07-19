@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Rebuild;
+namespace App\Discovering\Service\Discovery\Rebuild;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
 
 /**
  * Handles discovery rebuild evidence json serializer concerns for discovery state, source, or API payloads.
@@ -28,7 +27,7 @@ final class DiscoveryRebuildEvidenceJsonSerializer
      */
     public function decode(string $payload): array
     {
-        if (trim($payload) === '') {
+        if ('' === trim($payload)) {
             return [];
         }
 
