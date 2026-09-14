@@ -263,3 +263,5 @@ phpcs.xml
 
 .automation/.tmp/
 .automation/.cache/
+log/
+logs/
