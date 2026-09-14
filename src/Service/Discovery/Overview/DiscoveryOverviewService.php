@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Discovering\Service\Discovery\Overview;
 
 use App\Discovering\Dto\Discovery\DiscoveryOverview;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
 use App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
 use App\Discovering\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
 use App\Discovering\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
@@ -20,7 +20,7 @@ final class DiscoveryOverviewService implements DiscoveryOverviewServiceInterfac
      */
     public function __construct(
         private readonly DiscoveryDocumentProviderInterface $documentProvider,
-        private readonly DiscoveryAdapterInterface $adapter,
+        private readonly DiscoveryBackendInterface $adapter,
         private readonly iterable $sourceProviders,
     ) {
     }

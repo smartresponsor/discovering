@@ -12,7 +12,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
     public function testVersionedApiDiscoveryReturnsSeededBriefingHit(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/api/discovery', [
+        $client->request('GET', '/api/v1/discovery', [
             'query' => 'governance live source',
             'resource' => 'briefing',
             'mode' => 'governance',
@@ -24,7 +24,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/api/discovery');
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery');
         self::assertSame('briefing', $payload['data']['query']['resource']);
         self::assertGreaterThanOrEqual(1, $payload['data']['total']);
         self::assertSame('briefing-live-source-governance', $payload['data']['hits'][0]['id']);
@@ -44,7 +44,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
 
         $payload = $this->jsonResponsePayload($client);
 
-        $this->assertDiscoveryJsonEnvelope($payload, '/api/discovery', deprecatedAlias: true);
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery', deprecatedAlias: true);
     }
 
     public function testApiClickRequiresWriteToken(): void
@@ -58,7 +58,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($client);
 
         self::assertFalse($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/api/discovery/click');
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click', deprecatedAlias: true);
         self::assertSame('discovery_api_write_unauthorized', $payload['error']['code']);
         self::assertSame('Unauthorized discovery API write request.', $payload['error']['message']);
     }
@@ -66,7 +66,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
     public function testVersionedApiClickRecordsFeedbackCount(): void
     {
         $client = $this->createApiWriteClient();
-        $this->requestApiWrite($client, 'POST', '/api/discovery/click', $this->discoveryClickPayload());
+        $this->requestApiWrite($client, 'POST', '/api/v1/discovery/click', $this->discoveryClickPayload());
 
         self::assertResponseIsSuccessful();
         $this->assertDiscoveryResponseHeaders($client);
@@ -74,7 +74,7 @@ final class DiscoveryApiTest extends AbstractDiscoveryWebTestCase
         $payload = $this->jsonResponsePayload($client);
 
         self::assertTrue($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/api/discovery/click');
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click');
         self::assertSame('briefing', $payload['data']['resource']);
         self::assertSame('briefing-live-source-governance', $payload['data']['id']);
         self::assertSame(1, $payload['data']['feedbackCount']);

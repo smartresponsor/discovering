@@ -55,11 +55,12 @@ final class DiscoveryOverviewManagementController
         return [
             '_view' => [
                 'surface' => 'discovery',
-                'operation' => 'management-overview',
+                'operation' => 'overview',
                 'component' => 'Discovering',
                 'intent' => 'management',
             ],
             'data' => [
+                'templateName' => '@Discovering/management/discovery/overview.html.twig',
                 'overview' => $overview,
                 'operations' => $operations,
                 'stateTopology' => $stateTopology,

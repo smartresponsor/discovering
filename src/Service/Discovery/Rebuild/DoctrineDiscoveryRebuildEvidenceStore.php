@@ -77,9 +77,7 @@ final class DoctrineDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvi
         }
 
         $tool = new SchemaTool($this->entityManager);
-        $tool->updateSchema([
-            $this->entityManager->getClassMetadata(DiscoveryRebuildEvidenceEntity::class),
-        ]);
+        $tool->updateSchema($this->entityManager->getMetadataFactory()->getAllMetadata());
         $this->schemaReady = true;
     }
 }

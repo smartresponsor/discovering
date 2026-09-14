@@ -62,9 +62,7 @@ final class DoctrineLibsourceOperatorEventLogStore implements LibsourceOperatorE
         }
 
         $tool = new SchemaTool($this->entityManager);
-        $tool->updateSchema([
-            $this->entityManager->getClassMetadata(LibsourceOperatorEventEntity::class),
-        ]);
+        $tool->updateSchema($this->entityManager->getMetadataFactory()->getAllMetadata());
         $this->schemaReady = true;
     }
 

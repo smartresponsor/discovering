@@ -64,9 +64,7 @@ final class DoctrineDiscoveryRateLimitStore implements DiscoveryRateLimitStoreIn
         }
 
         $tool = new SchemaTool($this->entityManager);
-        $tool->updateSchema([
-            $this->entityManager->getClassMetadata(DiscoveryRateLimitBucketEntity::class),
-        ]);
+        $tool->updateSchema($this->entityManager->getMetadataFactory()->getAllMetadata());
         $this->schemaReady = true;
     }
 }

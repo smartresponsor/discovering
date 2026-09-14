@@ -65,7 +65,7 @@ services:
     arguments:
       $projectDir: '%kernel.project_dir%'
 
-  App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface: '@App\Discovering\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter'
+  App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface: '@App\Discovering\Service\Discovery\Backend\ConfigurableDiscoveryBackend'
   App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface: '@App\Discovering\Service\Discovery\Indexer\DiscoveryIndexer'
   App\Discovering\ServiceInterface\Discovery\DiscoveryServiceInterface: '@App\Discovering\Service\Discovery\DiscoveryService'
   App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface: '@App\Discovering\Service\Discovery\Document\DiscoveryDocumentProvider'
@@ -76,7 +76,6 @@ services:
   App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface: '@App\Discovering\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore'
   App\Discovering\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface: '@App\Discovering\Service\Discovery\RateLimit\ConfigurableDiscoveryRateLimitStore'
   App\Discovering\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface: '@App\Discovering\Service\Discovery\Diagnostics\NetworkDiscoveryProbeTransport'
-  App\Discovering\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface: '@App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService'
 
   App\Discovering\Service\Discovery\Document\DiscoveryDocumentProvider:
     arguments:
@@ -172,16 +171,16 @@ services:
       $managementMutationLimit: '%env(int:default:app.discovery.default_management_mutation_rate_limit:APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT)%'
       $managementMutationWindowSeconds: '%env(int:default:app.discovery.default_management_mutation_rate_limit_window_seconds:APP_DISCOVERY_MANAGEMENT_MUTATION_RATE_LIMIT_WINDOW_SECONDS)%'
 
-  App\Discovering\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter:
+  App\Discovering\Service\Discovery\Backend\ConfigurableDiscoveryBackend:
     arguments:
       $backend: '%env(default:app.discovery.default_index_backend:APP_DISCOVERY_INDEX_BACKEND)%'
       $meiliBase: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
 
-  App\Discovering\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter:
+  App\Discovering\Service\Discovery\Backend\SqliteFtsDiscoveryBackend:
     arguments:
       $entityManager: '@doctrine.orm.entity_manager'
 
-  App\Discovering\Service\Discovery\Adapter\MeiliDiscoveryAdapter:
+  App\Discovering\Service\Discovery\Backend\MeiliDiscoveryBackend:
     arguments:
       $base: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
       $key: '%env(default:app.discovery.default_meili_api_key:APP_DISCOVERY_MEILI_API_KEY)%'

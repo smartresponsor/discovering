@@ -80,7 +80,7 @@ final class DiscoveryMutationRequestHardeningSubscriber implements EventSubscrib
 
         $path = $request->getPathInfo();
 
-        return '/api/discovery/click' === $path
+        return '/api/v1/discovery/click' === $path
             || '/api/discovery/click' === $path
             || '/management/discovery/rebuild' === $path;
     }

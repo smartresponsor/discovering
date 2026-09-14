@@ -6,6 +6,9 @@ namespace App\Discovering\RepositoryInterface\Discovery;
 
 use App\Discovering\Entity\Discovery\DiscoveryIndexDocumentEntity;
 
+/**
+ * Defines persistence operations for indexed discovery documents.
+ */
 interface DiscoveryIndexDocumentRepositoryInterface
 {
     public function save(DiscoveryIndexDocumentEntity $entity, bool $flush = false): void;

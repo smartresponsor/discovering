@@ -18,7 +18,7 @@ final class DiscoveryDoctrineEntityManagerFactory
     {
         $config = ORMSetup::createAttributeMetadataConfig([
             dirname(__DIR__, 2).'/src/Entity',
-        ]);
+        ], true);
         $config->enableNativeLazyObjects(true);
 
         $connection = DriverManager::getConnection([
@@ -26,6 +26,12 @@ final class DiscoveryDoctrineEntityManagerFactory
             'memory' => true,
         ], $config);
 
-        return new EntityManager($connection, $config);
+        $entityManager = new EntityManager($connection, $config);
+
+        foreach ($entityManager->getMetadataFactory()->getAllMetadata() as $metadata) {
+            $metadata->setCustomRepositoryClass(null);
+        }
+
+        return $entityManager;
     }
 }

@@ -66,9 +66,7 @@ final class DoctrineDiscoveryFeedbackStore implements DiscoveryFeedbackStoreInte
         }
 
         $tool = new SchemaTool($this->entityManager);
-        $tool->updateSchema([
-            $this->entityManager->getClassMetadata(DiscoveryFeedbackEntity::class),
-        ]);
+        $tool->updateSchema($this->entityManager->getMetadataFactory()->getAllMetadata());
         $this->schemaReady = true;
     }
 }

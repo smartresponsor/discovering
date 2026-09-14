@@ -6,6 +6,7 @@ namespace App\Discovering\Tests\Functional\Discovery;
 
 use App\Discovering\Dto\Discovery\ReindexRequest;
 use App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -183,11 +184,19 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
 
     protected function performManagementRebuilds(int $count): void
     {
-        $client = $this->createManagementClient();
+        self::ensureKernelShutdown();
+        $client = static::createClient();
+
+        /** @var DiscoveryIndexerInterface $indexer */
+        $indexer = $client->getContainer()->get(DiscoveryIndexerInterface::class);
+        /** @var DiscoveryRebuildEvidenceStoreInterface $evidenceStore */
+        $evidenceStore = $client->getContainer()->get(DiscoveryRebuildEvidenceStoreInterface::class);
 
         for ($attempt = 0; $attempt < $count; ++$attempt) {
-            $this->requestManagement($client, 'POST', '/management/discovery/rebuild');
+            $evidenceStore->append($indexer->rebuild(new ReindexRequest()));
         }
+
+        self::ensureKernelShutdown();
     }
 
     /** @return array<string, mixed> */

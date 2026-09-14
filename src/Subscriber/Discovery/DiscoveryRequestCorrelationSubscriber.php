@@ -74,7 +74,7 @@ final class DiscoveryRequestCorrelationSubscriber implements EventSubscriberInte
     private function isDiscoveryPath(string $path): bool
     {
         return str_starts_with($path, '/discovery')
-            || str_starts_with($path, '/api/discovery')
+            || str_starts_with($path, '/api/v1/discovery')
             || str_starts_with($path, '/api/discovery')
             || str_starts_with($path, '/management/discovery');
     }

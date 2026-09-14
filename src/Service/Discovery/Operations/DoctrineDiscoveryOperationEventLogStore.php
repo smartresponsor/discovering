@@ -82,9 +82,7 @@ final class DoctrineDiscoveryOperationEventLogStore implements DiscoveryOperatio
         }
 
         $tool = new SchemaTool($this->entityManager);
-        $tool->updateSchema([
-            $this->entityManager->getClassMetadata(DiscoveryOperationEventEntity::class),
-        ]);
+        $tool->updateSchema($this->entityManager->getMetadataFactory()->getAllMetadata());
         $this->schemaReady = true;
     }
 

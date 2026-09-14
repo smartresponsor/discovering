@@ -89,9 +89,9 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
     public function testManagementPlatformProbesExportReturnsReachabilitySummary(): void
     {
         $payload = $this->managementExportPayload('/management/discovery/platform/probes/export', 'discovery.platform.probes');
-        self::assertSame(0, $payload['data']['performedProbeCount']);
-        self::assertSame(6, $payload['data']['skippedProbeCount']);
-        self::assertSame('not_configured', $payload['data']['overallStatus']);
+        self::assertSame(5, $payload['data']['performedProbeCount']);
+        self::assertSame(1, $payload['data']['skippedProbeCount']);
+        self::assertSame('healthy', $payload['data']['overallStatus']);
         self::assertCount(6, $payload['data']['probes']);
         self::assertSame('local_only', $payload['data']['probes'][0]['status']);
     }
@@ -103,8 +103,8 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertSame('sqlite', $payload['data']['indexStoreBackend']);
         self::assertTrue($payload['data']['stagedRebuildSupported']);
         self::assertFalse($payload['data']['distributedReady']);
-        self::assertSame('local_only', $payload['data']['postureStatus']);
-        self::assertSame('medium', $payload['data']['riskLevel']);
+        self::assertSame('transitioning', $payload['data']['postureStatus']);
+        self::assertSame('high', $payload['data']['riskLevel']);
         self::assertArrayHasKey('recommendedAction', $payload['data']);
         self::assertArrayHasKey('blockingStores', $payload['data']);
         self::assertArrayHasKey('notes', $payload['data']);

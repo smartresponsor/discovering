@@ -6,6 +6,9 @@ namespace App\Discovering\RepositoryInterface\Discovery;
 
 use App\Discovering\Entity\Discovery\LibsourceOperatorEventEntity;
 
+/**
+ * Defines persistence operations for libsource operator events.
+ */
 interface LibsourceOperatorEventRepositoryInterface
 {
     public function save(LibsourceOperatorEventEntity $entity, bool $flush = false): void;

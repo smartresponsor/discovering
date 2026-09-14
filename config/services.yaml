@@ -3,8 +3,17 @@ services:
     autowire: true
     autoconfigure: true
 
-  App\:
+  _instanceof:
+    App\Discovering\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface:
+      tags: ['app.discovery_source_provider']
+    App\Discovering\ServiceInterface\Discovery\Source\Repository\DiscoverySourceRecordRepositoryInterface:
+      tags: ['app.discovery_source_repository']
+
+  App\Discovering\:
     resource: '../src/'
+    exclude:
+      - '../src/Service/Discovery/Support/DirectoryBackedFamilyManagementActionService.php'
+      - '../src/Service/Discovery/Support/DirectoryBackedFamilyManagementSurfaceActionResolver.php'
 
   App\Discovering\Controller\:
     resource: '../src/Controller/'
@@ -95,7 +104,7 @@ services:
 
   App\Discovering\Service\Discovery\ConfigurableDiscoveryFeedbackStore: ~
 
-  App\Discovering\Service\Discovery\Adapter\ConfigurableDiscoveryAdapter:
+  App\Discovering\Service\Discovery\Backend\ConfigurableDiscoveryBackend:
     arguments:
       $backend: '%env(default:app.discovery.default_index_backend:APP_DISCOVERY_INDEX_BACKEND)%'
       $meiliBase: '%env(default:app.discovery.default_meili_url:APP_DISCOVERY_MEILI_URL)%'
