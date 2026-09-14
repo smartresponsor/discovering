@@ -11,7 +11,7 @@ use App\Discovering\Service\Discovery\DiscoveryModePresetService;
 use App\Discovering\Service\Discovery\DiscoveryScoringService;
 use App\Discovering\Service\Discovery\DiscoveryService;
 use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -25,7 +25,7 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
         $service = new DiscoveryService(
-            $this->createAdapter([
+            $this->createBackend([
                 [
                     'id' => 'project-recovery',
                     'title' => 'Recovery procedure note',
@@ -75,9 +75,9 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
     /**
      * @param list<array<string, mixed>> $rows
      */
-    private function createAdapter(array $rows): DiscoveryAdapterInterface
+    private function createBackend(array $rows): DiscoveryBackendInterface
     {
-        return new class($rows) implements DiscoveryAdapterInterface {
+        return new class($rows) implements DiscoveryBackendInterface {
             /** @param list<array<string, mixed>> $rows */
             public function __construct(private array $rows)
             {

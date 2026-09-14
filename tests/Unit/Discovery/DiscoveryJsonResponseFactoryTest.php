@@ -33,7 +33,7 @@ final class DiscoveryJsonResponseFactoryTest extends TestCase
         self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $payload['apiVersion']);
         self::assertSame('req-test-123', $payload['requestId']);
         self::assertTrue($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/discovery', $payload['meta']['canonicalPath']);
+        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
         self::assertSame(DiscoveryApiContract::ENVELOPE_SCHEMA_FAMILY, $payload['meta']['schemaFamily']);
         self::assertSame(DiscoveryApiContract::ENVELOPE_SCHEMA_VERSION, $payload['meta']['schemaVersion']);
         self::assertSame(DiscoveryJsonResponseFactory::API_VERSION, $response->headers->get(DiscoveryJsonResponseFactory::API_VERSION_HEADER));
@@ -53,8 +53,8 @@ final class DiscoveryJsonResponseFactoryTest extends TestCase
         self::assertSame('unauthorized', $payload['error']['code']);
         self::assertSame('No token.', $payload['error']['message']);
         self::assertSame('X-Discovery-Api-Write-Token', $payload['error']['details']['header']);
-        self::assertFalse($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/discovery/click', $payload['meta']['canonicalPath']);
+        self::assertTrue($payload['meta']['deprecatedAlias']);
+        self::assertSame('/api/v1/discovery/click', $payload['meta']['canonicalPath']);
     }
 
     public function testSuccessAllowsPayloadSchemaOverrideInMeta(): void

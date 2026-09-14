@@ -12,7 +12,7 @@ use App\Discovering\Service\Discovery\DiscoveryModePresetService;
 use App\Discovering\Service\Discovery\DiscoveryScoringService;
 use App\Discovering\Service\Discovery\DiscoveryService;
 use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -111,7 +111,7 @@ final class DiscoveryModeBehaviorTest extends DiscoveryTempFilesystemTestCase
         $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
 
         return new DiscoveryService(
-            new class($rows) implements DiscoveryAdapterInterface {
+            new class($rows) implements DiscoveryBackendInterface {
                 /** @param list<array<string, mixed>> $rows */
                 public function __construct(private array $rows)
                 {

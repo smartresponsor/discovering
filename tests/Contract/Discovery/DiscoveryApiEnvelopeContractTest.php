@@ -17,7 +17,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
     public function testVersionedDiscoveryEndpointRespectsEnvelopeContract(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/api/discovery', [
+        $client->request('GET', '/api/v1/discovery', [
             'query' => 'governance live source',
             'resource' => 'briefing',
         ]);
@@ -31,7 +31,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
 
         self::assertDiscoveryEnvelopeContract($payload);
         self::assertFalse($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/discovery', $payload['meta']['canonicalPath']);
+        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
     }
 
     public function testLegacyDiscoveryAliasAdvertisesCanonicalSchemaContract(): void
@@ -48,7 +48,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
 
         self::assertDiscoveryEnvelopeContract($payload);
         self::assertTrue($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/discovery', $payload['meta']['canonicalPath']);
+        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
     }
 
     public function testWriteAuthorizationErrorRespectsEnvelopeContract(): void

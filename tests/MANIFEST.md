@@ -4,7 +4,7 @@ The Discovering test tree is split by verification scope rather than by legacy i
 
 ## Canonical buckets
 
-- `tests/Unit/Discovery/` — focused DTO, value object, service, repository-adapter and small policy tests.
+- `tests/Unit/Discovery/` — focused DTO, value object, service, repository/backend and small policy tests.
 - `tests/Functional/Discovery/` — Symfony kernel, HTTP, controller, form and container-level tests.
 - `tests/Contract/Discovery/` — externally visible API/envelope/management contract assertions.
 - `tests/Behavioral/Discovery/` — cross-service behavior and scenario-level learning/mode tests.
