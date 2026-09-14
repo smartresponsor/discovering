@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Briefing;
+namespace App\Discovering\Service\Discovery\Briefing;
 
-use App\Dto\Discovery\BriefingManagementActionResult;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceActionResolver;
+use App\Discovering\Dto\Discovery\BriefingManagementActionResult;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceActionResolver;
 use Symfony\Component\HttpFoundation\Request;
-
 
 /**
  * Provides the briefing management surface action resolver capability within the discovery component.
@@ -29,6 +28,6 @@ final class BriefingManagementSurfaceActionResolver
     {
         $result = $this->delegate->resolve($request);
 
-        return $result !== null ? BriefingManagementActionResult::fromGeneric($result) : null;
+        return null !== $result ? BriefingManagementActionResult::fromGeneric($result) : null;
     }
 }

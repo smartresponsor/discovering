@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Subscriber\Discovery;
+namespace App\Discovering\Subscriber\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -80,7 +80,7 @@ final class DiscoveryMutationRequestHardeningSubscriber implements EventSubscrib
 
         $path = $request->getPathInfo();
 
-        return '/api/discovery/click' === $path
+        return '/api/v1/discovery/click' === $path
             || '/api/discovery/click' === $path
             || '/management/discovery/rebuild' === $path;
     }

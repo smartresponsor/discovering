@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ValueObject\Discovery;
+namespace App\Discovering\ValueObject\Discovery;
 
 /**
  * Represents the discovery scope value within the discovery domain and runtime contracts.

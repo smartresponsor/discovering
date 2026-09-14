@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repository\Discovery;
+namespace App\Discovering\Repository\Discovery;
 
-use App\Entity\Discovery\DiscoveryRateLimitBucketEntity;
-use App\RepositoryInterface\Discovery\DiscoveryRateLimitBucketRepositoryInterface;
+use App\Discovering\Entity\Discovery\DiscoveryRateLimitBucketEntity;
+use App\Discovering\RepositoryInterface\Discovery\DiscoveryRateLimitBucketRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

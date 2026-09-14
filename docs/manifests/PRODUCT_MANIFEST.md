@@ -11,7 +11,7 @@ MVP should already express:
 - a stable discovery query model
 - result and hit models
 - an indexer contract
-- at least one working adapter path
+- at least one working backend path
 - thin HTTP entrypoints
 - CLI rebuild and diagnostics
 - demo UI and templates

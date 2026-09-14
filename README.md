@@ -24,7 +24,7 @@ The repository root is intentionally reserved for standard Symfony/project entry
 - typed query / result model
 - discovery service and indexer
 - operator overview and source diagnostics
-- local demo adapter for resource discovery flows
+- local demo backend for resource discovery flows
 - Twig search UI with status and visibility filters
 - JSON API for discovery queries
 - libsource event log viewer with search, level filters, quick presets, and pagination

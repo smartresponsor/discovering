@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
-use App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
+use App\Discovering\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the file discovery rebuild evidence store test case for the Discovering component.
@@ -18,7 +17,7 @@ final class FileDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempFilesyste
     public function testItPersistsAndReturnsLatestRebuildEvidence(): void
     {
         $directory = $this->createTempDirectory('discovering-rebuild-evidence-');
-        $path = $directory . '/rebuild-evidence.json';
+        $path = $directory.'/rebuild-evidence.json';
 
         $store = new FileDiscoveryRebuildEvidenceStore($path, new DiscoveryRebuildEvidenceJsonSerializer());
         $store->append(new DiscoveryRebuildSummary(

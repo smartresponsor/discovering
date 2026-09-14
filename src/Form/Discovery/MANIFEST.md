@@ -15,5 +15,5 @@ The controller remains the authoritative boundary for building `DiscoveryQuery` 
 ## Rules
 
 - Query/search fields should use `mapped => false`.
-- Form types should remain presentation/input adapters, not business services.
+- Form types should remain presentation/input boundary types, not business services.
 - Form type names must keep the `Type` suffix.

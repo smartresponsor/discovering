@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery\Source\Repository;
+namespace App\Discovering\ServiceInterface\Discovery\Source\Repository;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
 
 /**
  * Defines the contract for the discovery source record repository capability within the discovery component.

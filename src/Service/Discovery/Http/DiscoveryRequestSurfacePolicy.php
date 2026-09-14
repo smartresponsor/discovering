@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Http;
+namespace App\Discovering\Service\Discovery\Http;
 
 use Symfony\Component\HttpFoundation\Request;
 
@@ -53,7 +53,7 @@ final class DiscoveryRequestSurfacePolicy
     public function isProtectedApiWritePath(Request $request, string $path): bool
     {
         return $request->isMethod(Request::METHOD_POST)
-            && ('/api/discovery/click' === $path || '/api/discovery/click' === $path);
+            && ('/api/v1/discovery/click' === $path || '/api/discovery/click' === $path);
     }
 
     public function isProtectedMutationPath(Request $request, string $path): bool
@@ -64,7 +64,7 @@ final class DiscoveryRequestSurfacePolicy
 
     public function isQueryPath(Request $request, string $path): bool
     {
-        if ($request->isMethod(Request::METHOD_GET) && ('/api/discovery' === $path || '/api/discovery' === $path)) {
+        if ($request->isMethod(Request::METHOD_GET) && ('/api/v1/discovery' === $path || '/api/discovery' === $path)) {
             return true;
         }
 

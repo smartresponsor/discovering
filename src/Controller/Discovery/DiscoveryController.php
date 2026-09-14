@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Discovery;
+namespace App\Discovering\Controller\Discovery;
 
-use App\Dto\Discovery\DiscoveryMode;
-use App\Dto\Discovery\DiscoveryQuery;
-use App\Form\Discovery\DiscoverySearchType;
-use App\Service\Discovery\DiscoveryLearningService;
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\ServiceInterface\Discovery\DiscoveryServiceInterface;
+use App\Discovering\Dto\Discovery\DiscoveryMode;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Form\Discovery\DiscoverySearchType;
+use App\Discovering\Service\Discovery\DiscoveryLearningService;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\ServiceInterface\Discovery\DiscoveryServiceInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -57,7 +57,7 @@ final class DiscoveryController
         return [
             '_view' => [
                 'surface' => 'discovery',
-                'operation' => 'index',
+                'operation' => 'search',
                 'component' => 'Discovering',
                 'intent' => 'surface',
             ],
@@ -65,12 +65,14 @@ final class DiscoveryController
                 'body' => ['discovery.index'],
             ],
             'data' => [
+                'templateName' => '@Discovering/discovery/index.html.twig',
                 'form' => $form->createView(),
                 'query' => $result->query,
                 'result' => $result,
             ],
             'meta' => [
                 'title' => 'Discovery',
+                'legacy_template' => 'discovery/index.html.twig',
             ],
         ];
     }
@@ -104,6 +106,7 @@ final class DiscoveryController
         return new RedirectResponse($returnTo);
     }
 
+    #[Route('/api/v1/discovery', name: 'app_discovery_api_v1', methods: ['GET'])]
     #[Route('/api/discovery', name: 'app_discovery_api', methods: ['GET'])]
     /**
      * Handles the api endpoint for the discovery HTTP surface.
@@ -122,6 +125,7 @@ final class DiscoveryController
         return $this->jsonResponseFactory->success($result->toArray());
     }
 
+    #[Route('/api/v1/discovery/click', name: 'app_discovery_api_v1_click', methods: ['POST'])]
     #[Route('/api/discovery/click', name: 'app_discovery_api_click', methods: ['POST'])]
     /**
      * Handles the click endpoint for the discovery HTTP surface.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Entity\Discovery;
+namespace App\Discovering\Entity\Discovery;
 
-use App\Repository\Discovery\DiscoveryFeedbackRepository;
+use App\Discovering\Repository\Discovery\DiscoveryFeedbackRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DiscoveryFeedbackRepository::class)]

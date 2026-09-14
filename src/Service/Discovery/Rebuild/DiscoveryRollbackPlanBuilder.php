@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Rebuild;
+namespace App\Discovering\Service\Discovery\Rebuild;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Dto\Discovery\DiscoveryRollbackPlan;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Dto\Discovery\DiscoveryRollbackPlan;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 
 /**
  * Builds the discovery rollback plan output used by discovery management or diagnostics flows.

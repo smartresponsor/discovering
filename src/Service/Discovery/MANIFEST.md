@@ -4,7 +4,7 @@ This directory contains Discovering service-layer classes.
 
 ## Capability buckets
 
-- `Adapter/` — search backend adapters.
+- `Backend/` — search backend implementations.
 - `Briefing/` — briefing management surface services.
 - `Diagnostics/` — reachability/platform diagnostics.
 - `Document/` — document creation/provider services.

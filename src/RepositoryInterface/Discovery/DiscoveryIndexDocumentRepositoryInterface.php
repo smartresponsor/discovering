@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\RepositoryInterface\Discovery;
+namespace App\Discovering\RepositoryInterface\Discovery;
 
-use App\Entity\Discovery\DiscoveryIndexDocumentEntity;
+use App\Discovering\Entity\Discovery\DiscoveryIndexDocumentEntity;
 
+/**
+ * Defines persistence operations for indexed discovery documents.
+ */
 interface DiscoveryIndexDocumentRepositoryInterface
 {
     public function save(DiscoveryIndexDocumentEntity $entity, bool $flush = false): void;

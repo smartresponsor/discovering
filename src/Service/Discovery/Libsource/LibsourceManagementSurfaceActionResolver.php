@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Libsource;
+namespace App\Discovering\Service\Discovery\Libsource;
 
-use App\Dto\Discovery\LibsourceManagementActionResult;
+use App\Discovering\Dto\Discovery\LibsourceManagementActionResult;
 use Symfony\Component\HttpFoundation\Request;
-
 
 /**
  * Provides the libsource management surface action resolver capability within the discovery component.
@@ -25,7 +24,7 @@ final class LibsourceManagementSurfaceActionResolver
     {
         $action = $request->query->get('action');
 
-        if (!is_string($action) || $action === '') {
+        if (!is_string($action) || '' === $action) {
             return null;
         }
 
@@ -42,7 +41,7 @@ final class LibsourceManagementSurfaceActionResolver
     {
         $sourceName = $request->query->get('sourceName');
 
-        if (!is_string($sourceName) || $sourceName === '') {
+        if (!is_string($sourceName) || '' === $sourceName) {
             return null;
         }
 

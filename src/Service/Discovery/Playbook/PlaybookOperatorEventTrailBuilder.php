@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Playbook;
+namespace App\Discovering\Service\Discovery\Playbook;
 
-use App\Dto\Discovery\PlaybookManagementActionResult;
-use App\Dto\Discovery\PlaybookOperatorEvent;
-use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
-
+use App\Discovering\Dto\Discovery\PlaybookManagementActionResult;
+use App\Discovering\Dto\Discovery\PlaybookOperatorEvent;
+use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
 
 /**
  * Builds the playbook operator event trail output used by discovery management or diagnostics flows.

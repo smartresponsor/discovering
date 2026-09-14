@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Service\Discovery;
+namespace App\Discovering\Service\Discovery;
 
-use App\Dto\Discovery\DiscoveryMode;
-use App\Dto\Discovery\DiscoveryQuery;
-
+use App\Discovering\Dto\Discovery\DiscoveryMode;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
 
 /**
  * Provides the discovery mode preset capability within the discovery component.

@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Http;
-
+namespace App\Discovering\Service\Discovery\Http;
 
 /**
  * Provides the discovery api contract capability within the discovery component.

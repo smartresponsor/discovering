@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Document;
+namespace App\Discovering\Service\Discovery\Document;
 
-use App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
-use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
-use App\ValueObject\Discovery\DiscoveryDocument;
-
+use App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
+use App\Discovering\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
+use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 
 /**
  * Provides the discovery document provider capability within the discovery component.

@@ -1,0 +1,72 @@
+{
+  "name": "discovering/discovery",
+  "description": "Discovering process app",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "ext-pdo_sqlite": "*",
+    "php": ">=8.4",
+    "collectioning/collection": "dev-collection-query-hardening as dev-master",
+    "cruding/crud": "dev-master",
+    "doctrine/doctrine-bundle": "^3.2",
+    "doctrine/orm": "^3.6",
+    "easycorp/easyadmin-bundle": "^5.5",
+    "interfacing/interface": "dev-master",
+    "objecting/object": "dev-master",
+    "symfony/console": "^8.1",
+    "symfony/dotenv": "^8.1",
+    "symfony/error-handler": "^8.1",
+    "symfony/form": "^8.1",
+    "symfony/framework-bundle": "^8.1",
+    "symfony/security-bundle": "^8.1",
+    "symfony/twig-bundle": "^8.1",
+    "symfony/yaml": "^8.1",
+    "tabling/table": "dev-initial-platform-primitive as dev-master",
+    "twig/twig": "^3.0",
+    "viewing/view": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\Discovering\\": "src/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "git@github.com:smartresponsor/collectioning.git",
+      "no-api": true
+    },
+    {
+      "type": "vcs",
+      "url": "git@github.com:smartresponsor/cruding.git",
+      "no-api": true
+    },
+    {
+      "type": "vcs",
+      "url": "git@github.com:smartresponsor/interfacing.git",
+      "no-api": true
+    },
+    {
+      "type": "vcs",
+      "url": "git@github.com:smartresponsor/objecting.git",
+      "no-api": true
+    },
+    {
+      "type": "vcs",
+      "url": "git@github.com:smartresponsor/tabling-.git",
+      "no-api": true
+    },
+    {
+      "type": "vcs",
+      "url": "git@github.com:smartresponsor/viewing.git",
+      "no-api": true
+    }
+  ]
+}

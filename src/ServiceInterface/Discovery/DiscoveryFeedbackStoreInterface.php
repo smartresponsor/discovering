@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery;
+namespace App\Discovering\ServiceInterface\Discovery;
 
 /**
  * Defines the contract for the discovery feedback store capability within the discovery component.

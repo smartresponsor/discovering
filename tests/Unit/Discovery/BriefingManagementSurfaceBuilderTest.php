@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
-use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
+use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the briefing management surface builder test case for the Discovering component.
@@ -44,7 +45,10 @@ final class BriefingManagementSurfaceBuilderTest extends DiscoveryTempFilesystem
             new DiscoverySourceRecordJsonFileEncoder(),
         );
 
-        $surface = (new BriefingManagementSurfaceBuilder($repository))->build();
+        $surface = (new BriefingManagementSurfaceBuilder(
+            $repository,
+            new DirectoryBackedFamilyManagementSurfaceBuilder(),
+        ))->build();
 
         self::assertSame('briefing-file-source-provider', $surface->sourceName);
         self::assertSame($repository->getStorageDirectoryPath(), $surface->storageDirectoryPath);

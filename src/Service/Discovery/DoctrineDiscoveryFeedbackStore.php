@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery;
+namespace App\Discovering\Service\Discovery;
 
-use App\Entity\Discovery\DiscoveryFeedbackEntity;
-use App\ServiceInterface\Discovery\DiscoveryFeedbackStoreInterface;
+use App\Discovering\Entity\Discovery\DiscoveryFeedbackEntity;
+use App\Discovering\ServiceInterface\Discovery\DiscoveryFeedbackStoreInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 
@@ -66,9 +66,7 @@ final class DoctrineDiscoveryFeedbackStore implements DiscoveryFeedbackStoreInte
         }
 
         $tool = new SchemaTool($this->entityManager);
-        $tool->updateSchema([
-            $this->entityManager->getClassMetadata(DiscoveryFeedbackEntity::class),
-        ]);
+        $tool->updateSchema($this->entityManager->getMetadataFactory()->getAllMetadata());
         $this->schemaReady = true;
     }
 }

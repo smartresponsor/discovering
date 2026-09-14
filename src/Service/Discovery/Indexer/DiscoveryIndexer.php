@@ -2,17 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Indexer;
+namespace App\Discovering\Service\Discovery\Indexer;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Dto\Discovery\ReindexRequest;
-use App\Service\Discovery\Rebuild\DiscoveryStagedIndexNamer;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
-use App\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
-use App\ValueObject\Discovery\DiscoveryDocument;
-
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Dto\Discovery\ReindexRequest;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryStagedIndexNamer;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
+use App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
+use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 
 /**
  * Coordinates discovery indexer operations for the discovery index lifecycle.
@@ -20,7 +19,7 @@ use App\ValueObject\Discovery\DiscoveryDocument;
 final class DiscoveryIndexer implements DiscoveryIndexerInterface
 {
     public function __construct(
-        private readonly DiscoveryAdapterInterface $adapter,
+        private readonly DiscoveryBackendInterface $adapter,
         private readonly DiscoveryDocumentProviderInterface $documentProvider,
         private readonly DiscoveryStagedIndexNamer $stagedIndexNamer = new DiscoveryStagedIndexNamer(),
     ) {
@@ -32,9 +31,9 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
     public function rebuild(ReindexRequest $request): DiscoveryRebuildSummary
     {
         $startedAt = gmdate(DATE_ATOM);
-        $evidenceId = 'reb-' . bin2hex(random_bytes(8));
+        $evidenceId = 'reb-'.bin2hex(random_bytes(8));
         $documents = $this->documentProvider->provide();
-        $targetResource = $request->resource === '' ? 'global' : $request->resource;
+        $targetResource = '' === $request->resource ? 'global' : $request->resource;
         $indexedCount = 0;
         $skippedCount = 0;
         $indexedCountsByResource = [];
@@ -52,13 +51,13 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
             }
         } else {
             $this->adapter->createIndex('global');
-            if ($targetResource !== 'global') {
+            if ('global' !== $targetResource) {
                 $this->adapter->createIndex($targetResource);
             }
         }
 
         foreach ($documents as $document) {
-            if ($targetResource !== 'global' && $document->resource !== $targetResource) {
+            if ('global' !== $targetResource && $document->resource !== $targetResource) {
                 ++$skippedCount;
                 continue;
             }
@@ -71,7 +70,7 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
 
             ++$indexedCount;
             $indexedCountsByResource['global'] = ($indexedCountsByResource['global'] ?? 0) + 1;
-            if ($document->resource !== 'global') {
+            if ('global' !== $document->resource) {
                 $indexedCountsByResource[$document->resource] = ($indexedCountsByResource[$document->resource] ?? 0) + 1;
             }
         }
@@ -109,7 +108,7 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
         $payload = $document->toArray();
         $this->adapter->upsert('global', $document->id, $payload);
 
-        if ($document->resource !== 'global') {
+        if ('global' !== $document->resource) {
             $this->adapter->upsert($document->resource, $document->id, $payload);
         }
     }
@@ -120,7 +119,7 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
     public function remove(string $resource, string $id): void
     {
         $this->adapter->remove($resource, $id);
-        if ($resource !== 'global') {
+        if ('global' !== $resource) {
             $this->adapter->remove('global', $id);
         }
     }
@@ -133,20 +132,21 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
         $payload = $document->toArray();
         $this->adapter->upsert($indexMap['global'] ?? 'global', $document->id, $payload);
 
-        if ($document->resource !== 'global') {
+        if ('global' !== $document->resource) {
             $this->adapter->upsert($indexMap[$document->resource] ?? $document->resource, $document->id, $payload);
         }
     }
 
     /**
      * @param list<DiscoveryDocument> $documents
+     *
      * @return list<string>
      */
     private function resolveLogicalIndexesForGlobalRebuild(array $documents): array
     {
         $logicalIndexes = ['global'];
         foreach ($documents as $document) {
-            if ($document->resource === 'global') {
+            if ('global' === $document->resource) {
                 continue;
             }
 
@@ -158,19 +158,19 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
 
     private function supportsStagedRebuild(string $targetResource, ReindexRequest $request): bool
     {
-        if ($request->deploymentMode === 'in_place') {
+        if ('in_place' === $request->deploymentMode) {
             return false;
         }
 
-        if ($request->deploymentMode !== 'auto' && $request->deploymentMode !== 'staged_alias_swap') {
+        if ('auto' !== $request->deploymentMode && 'staged_alias_swap' !== $request->deploymentMode) {
             return false;
         }
 
-        if ($targetResource !== 'global') {
+        if ('global' !== $targetResource) {
             return false;
         }
 
-        return $this->adapter instanceof DiscoveryStagingCapableAdapterInterface
+        return $this->adapter instanceof DiscoveryStagingCapableBackendInterface
             && $this->adapter->supportsStagedRebuild();
     }
 }

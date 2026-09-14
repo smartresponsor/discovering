@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Support;
+namespace App\Discovering\Service\Discovery\Support;
 
-use App\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
-use App\Dto\Discovery\DiscoverySourceRecord;
-use App\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use App\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
+use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
+use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
+use App\Discovering\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 
 /**
  * Provides the directory backed family management action capability within the discovery component.

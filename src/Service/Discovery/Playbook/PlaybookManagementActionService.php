@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Playbook;
+namespace App\Discovering\Service\Discovery\Playbook;
 
-use App\Dto\Discovery\PlaybookManagementActionResult;
-use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
-use App\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
+use App\Discovering\Dto\Discovery\PlaybookManagementActionResult;
+use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
+use App\Discovering\ServiceInterface\Discovery\Support\DirectoryBackedFamilyManagementActionServiceInterface;
 
 /**
  * Provides the playbook management action capability within the discovery component.

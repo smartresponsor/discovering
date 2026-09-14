@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Discovery;
+namespace App\Discovering\Command\Discovery;
 
-use App\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
-use App\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
+use App\Discovering\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
+use App\Discovering\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,7 +31,7 @@ final class DiscoveryPlatformDiagnoseCommand extends Command
     {
         $diagnostics = $this->diagnosticsBuilder->build();
 
-        $output->writeln(sprintf('Adapter backend: %s', $diagnostics->backendName));
+        $output->writeln(sprintf('Discovery backend: %s', $diagnostics->backendName));
         $output->writeln(sprintf('Index store backend: %s', $diagnostics->indexStoreBackend));
         $output->writeln(sprintf('Staged rebuild supported: %s', $diagnostics->stagedRebuildSupported ? 'yes' : 'no'));
         $output->writeln(sprintf('Shared state configured: %s', $diagnostics->sharedStateConfigured ? 'yes' : 'no'));

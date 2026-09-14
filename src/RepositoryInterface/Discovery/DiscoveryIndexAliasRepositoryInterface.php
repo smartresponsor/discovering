@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\RepositoryInterface\Discovery;
+namespace App\Discovering\RepositoryInterface\Discovery;
 
-use App\Entity\Discovery\DiscoveryIndexAliasEntity;
+use App\Discovering\Entity\Discovery\DiscoveryIndexAliasEntity;
 
+/**
+ * Defines persistence operations for discovery index aliases.
+ */
 interface DiscoveryIndexAliasRepositoryInterface
 {
     public function save(DiscoveryIndexAliasEntity $entity, bool $flush = false): void;

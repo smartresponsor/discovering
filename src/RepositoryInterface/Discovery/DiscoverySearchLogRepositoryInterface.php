@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\RepositoryInterface\Discovery;
+namespace App\Discovering\RepositoryInterface\Discovery;
 
-use App\Entity\Discovery\DiscoverySearchLogEntity;
+use App\Discovering\Entity\Discovery\DiscoverySearchLogEntity;
 
+/**
+ * Defines persistence operations for discovery search-log records.
+ */
 interface DiscoverySearchLogRepositoryInterface
 {
     public function save(DiscoverySearchLogEntity $entity, bool $flush = false): void;

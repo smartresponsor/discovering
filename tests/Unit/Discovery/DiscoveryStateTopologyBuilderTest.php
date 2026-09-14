@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
+use App\Discovering\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Functional\Discovery;
+namespace App\Discovering\Tests\Functional\Discovery;
 
 /**
  * Exercises the discovery rate limit test case for the Discovering component.
@@ -14,7 +14,7 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
         $client = $this->createDiscoveryClient();
 
         for ($attempt = 0; $attempt < 4; ++$attempt) {
-            $client->request('GET', '/api/discovery', [
+            $client->request('GET', '/api/v1/discovery', [
                 'query' => 'governance',
                 'resource' => 'briefing',
             ]);
@@ -24,7 +24,7 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
         $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/api/discovery');
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery');
         self::assertSame('discovery_rate_limited', $payload['error']['code']);
         self::assertSame('query', $payload['error']['details']['scope']);
         $this->assertRateLimitHeaders($client->getResponse(), 'query', 3);
@@ -42,7 +42,7 @@ final class DiscoveryRateLimitTest extends AbstractDiscoveryWebTestCase
 
         $payload = $this->jsonResponsePayload($client);
         self::assertFalse($payload['ok']);
-        $this->assertDiscoveryJsonEnvelope($payload, '/api/discovery/click');
+        $this->assertDiscoveryJsonEnvelope($payload, '/api/v1/discovery/click', deprecatedAlias: true);
         self::assertSame('write', $payload['error']['details']['scope']);
         $this->assertRateLimitHeaders($client->getResponse(), 'write', 2);
     }

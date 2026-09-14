@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery\Rebuild;
+namespace App\Discovering\ServiceInterface\Discovery\Rebuild;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
 
 /**
  * Defines the contract for the discovery rebuild evidence store capability within the discovery component.

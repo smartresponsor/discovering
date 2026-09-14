@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery;
+namespace App\Discovering\Service\Discovery;
 
-use App\Dto\Discovery\DiscoveryHit;
-use App\ServiceInterface\Discovery\DiscoveryFeedbackStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryHit;
+use App\Discovering\ServiceInterface\Discovery\DiscoveryFeedbackStoreInterface;
 
 /**
  * Provides the discovery learning capability within the discovery component.

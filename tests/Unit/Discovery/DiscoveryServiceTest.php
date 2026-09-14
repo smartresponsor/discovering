@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryMode;
-use App\Dto\Discovery\DiscoveryQuery;
-use App\Service\Discovery\DiscoveryHighlightingService;
-use App\Service\Discovery\DiscoveryLearningService;
-use App\Service\Discovery\DiscoveryModePresetService;
-use App\Service\Discovery\DiscoveryScoringService;
-use App\Service\Discovery\DiscoveryService;
-use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Dto\Discovery\DiscoveryMode;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
+use App\Discovering\Service\Discovery\DiscoveryLearningService;
+use App\Discovering\Service\Discovery\DiscoveryModePresetService;
+use App\Discovering\Service\Discovery\DiscoveryScoringService;
+use App\Discovering\Service\Discovery\DiscoveryService;
+use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the discovery service test case for the Discovering component.
@@ -28,7 +28,7 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
 
-        $adapter = new class implements DiscoveryAdapterInterface {
+        $adapter = new class implements DiscoveryBackendInterface {
             public function upsert(string $resource, string $id, array $document): void
             {
             }

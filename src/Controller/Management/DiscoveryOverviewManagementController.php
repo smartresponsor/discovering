@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Management;
+namespace App\Discovering\Controller\Management;
 
-use App\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
-use App\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
-use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
-use App\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
-use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
+use App\Discovering\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
+use App\Discovering\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
+use App\Discovering\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
+use App\Discovering\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
+use App\Discovering\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -55,11 +55,12 @@ final class DiscoveryOverviewManagementController
         return [
             '_view' => [
                 'surface' => 'discovery',
-                'operation' => 'management-overview',
+                'operation' => 'overview',
                 'component' => 'Discovering',
                 'intent' => 'management',
             ],
             'data' => [
+                'templateName' => '@Discovering/management/discovery/overview.html.twig',
                 'overview' => $overview,
                 'operations' => $operations,
                 'stateTopology' => $stateTopology,

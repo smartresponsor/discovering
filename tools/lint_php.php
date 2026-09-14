@@ -40,9 +40,9 @@ foreach ($files as $file) {
 }
 
 if ($failures === 0) {
-    fwrite(STDOUT, sprintf("PHP lint passed for %d files.%s", count($files), PHP_EOL));
+    fwrite(STDOUT, sprintf('PHP lint passed for %d files.%s', count($files), PHP_EOL));
     exit(0);
 }
 
-fwrite(STDERR, sprintf("PHP lint failed for %d file(s).%s", $failures, PHP_EOL));
+fwrite(STDERR, sprintf('PHP lint failed for %d file(s).%s', $failures, PHP_EOL));
 exit(1);

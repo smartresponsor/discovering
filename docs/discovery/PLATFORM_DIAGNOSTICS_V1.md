@@ -4,7 +4,7 @@ The platform diagnostics surface provides a structural operator-facing verdict f
 
 It reports:
 
-- active adapter backend
+- active discovery backend
 - index store backend
 - staged rebuild support
 - shared-state posture

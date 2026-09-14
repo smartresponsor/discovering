@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\RateLimit;
+namespace App\Discovering\Service\Discovery\RateLimit;
 
-use App\Dto\Discovery\DiscoveryRateLimitDecision;
-use App\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryRateLimitDecision;
+use App\Discovering\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -76,7 +76,7 @@ final class DiscoveryRateLimiter
 
     private function isQueryPath(Request $request, string $path): bool
     {
-        if ($request->isMethod(Request::METHOD_GET) && ('/api/discovery' === $path || '/api/discovery' === $path)) {
+        if ($request->isMethod(Request::METHOD_GET) && ('/api/v1/discovery' === $path || '/api/discovery' === $path)) {
             return true;
         }
 
@@ -87,7 +87,7 @@ final class DiscoveryRateLimiter
     private function isWritePath(Request $request, string $path): bool
     {
         return $request->isMethod(Request::METHOD_POST)
-            && ('/discovery/feedback' === $path || '/api/discovery/click' === $path || '/api/discovery/click' === $path);
+            && ('/discovery/feedback' === $path || '/api/v1/discovery/click' === $path || '/api/discovery/click' === $path);
     }
 
     private function isManagementMutationPath(Request $request, string $path): bool

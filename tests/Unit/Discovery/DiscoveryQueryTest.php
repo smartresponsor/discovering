@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery query test case for the Discovering component.

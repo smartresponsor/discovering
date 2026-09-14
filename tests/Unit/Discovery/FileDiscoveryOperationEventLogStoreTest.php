@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryOperationEvent;
-use App\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
-use App\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Dto\Discovery\DiscoveryOperationEvent;
+use App\Discovering\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
+use App\Discovering\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the file discovery operation event log store test case for the Discovering component.
@@ -23,7 +22,6 @@ final class FileDiscoveryOperationEventLogStoreTest extends DiscoveryTempFilesys
 
         $this->path = $this->createTempJsonPath('discovering-operation-log-');
     }
-
 
     public function testAppendAndLatestPersistOperationEvents(): void
     {

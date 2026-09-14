@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\RateLimit;
+namespace App\Discovering\Service\Discovery\RateLimit;
 
-use App\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface; /**
+use App\Discovering\ServiceInterface\Discovery\RateLimit\DiscoveryRateLimitStoreInterface; /**
  * Provides the configurable discovery rate limit store capability within the discovery component.
  */
 final class ConfigurableDiscoveryRateLimitStore implements DiscoveryRateLimitStoreInterface

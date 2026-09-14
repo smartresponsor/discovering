@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Discovery;
+namespace App\Discovering\Command\Discovery;
 
-use App\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
+use App\Discovering\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

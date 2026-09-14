@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Discovery;
+namespace App\Discovering\Command\Discovery;
 
-use App\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
+use App\Discovering\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

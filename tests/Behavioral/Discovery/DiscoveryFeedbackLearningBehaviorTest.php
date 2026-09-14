@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Behavioral\Discovery;
+namespace App\Discovering\Tests\Behavioral\Discovery;
 
-use App\Dto\Discovery\DiscoveryQuery;
-use App\Service\Discovery\DiscoveryHighlightingService;
-use App\Service\Discovery\DiscoveryLearningService;
-use App\Service\Discovery\DiscoveryModePresetService;
-use App\Service\Discovery\DiscoveryScoringService;
-use App\Service\Discovery\DiscoveryService;
-use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
+use App\Discovering\Service\Discovery\DiscoveryLearningService;
+use App\Discovering\Service\Discovery\DiscoveryModePresetService;
+use App\Discovering\Service\Discovery\DiscoveryScoringService;
+use App\Discovering\Service\Discovery\DiscoveryService;
+use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the discovery feedback learning behavior test case for the Discovering component.
@@ -25,7 +25,7 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
         $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
         $service = new DiscoveryService(
-            $this->createAdapter([
+            $this->createBackend([
                 [
                     'id' => 'project-recovery',
                     'title' => 'Recovery procedure note',
@@ -75,9 +75,9 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
     /**
      * @param list<array<string, mixed>> $rows
      */
-    private function createAdapter(array $rows): DiscoveryAdapterInterface
+    private function createBackend(array $rows): DiscoveryBackendInterface
     {
-        return new class($rows) implements DiscoveryAdapterInterface {
+        return new class($rows) implements DiscoveryBackendInterface {
             /** @param list<array<string, mixed>> $rows */
             public function __construct(private array $rows)
             {

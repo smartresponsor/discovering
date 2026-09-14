@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Operations;
+namespace App\Discovering\Service\Discovery\Operations;
 
-use App\Dto\Discovery\DiscoveryOperationEvent;
-use App\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryOperationEvent;
+use App\Discovering\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 
 /**
  * Provides the configurable discovery operation event log store capability within the discovery component.

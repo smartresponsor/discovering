@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Topology;
+namespace App\Discovering\Service\Discovery\Topology;
 
-use App\Dto\Discovery\DiscoveryStateStoreDescriptor;
-use App\Dto\Discovery\DiscoveryStateTopology;
+use App\Discovering\Dto\Discovery\DiscoveryStateStoreDescriptor;
+use App\Discovering\Dto\Discovery\DiscoveryStateTopology;
 
 /**
  * Builds the discovery state topology output used by discovery management or diagnostics flows.
@@ -116,7 +116,7 @@ final class DiscoveryStateTopologyBuilder
                 : sprintf('%s#%s', trim($this->meiliUrl), '' === $prefix ? 'discovering' : $prefix);
 
             return new DiscoveryStateStoreDescriptor(
-                name: 'discoveryIndex',
+                nameEntity: 'discoveryIndex',
                 backend: 'meilisearch',
                 path: $path,
                 storageMode: 'service',
@@ -132,7 +132,7 @@ final class DiscoveryStateTopologyBuilder
     private function feedbackStore(): DiscoveryStateStoreDescriptor
     {
         return new DiscoveryStateStoreDescriptor(
-            name: 'feedbackStore',
+            nameEntity: 'feedbackStore',
             backend: 'doctrine',
             path: 'doctrine:discovery_feedback',
             storageMode: 'database',
@@ -153,7 +153,7 @@ final class DiscoveryStateTopologyBuilder
         }
 
         return new DiscoveryStateStoreDescriptor(
-            name: $nameEntity,
+            nameEntity: $nameEntity,
             backend: 'sqlite',
             path: $normalizedPath,
             storageMode: $sharedConfigured ? 'shared_file' : 'local_file',
@@ -172,7 +172,7 @@ final class DiscoveryStateTopologyBuilder
     ): DiscoveryStateStoreDescriptor {
         if ('doctrine' === strtolower(trim($backend))) {
             return new DiscoveryStateStoreDescriptor(
-                name: $nameEntity,
+                nameEntity: $nameEntity,
                 backend: 'doctrine',
                 path: sprintf('doctrine:%s', $nameEntity),
                 storageMode: 'database',
@@ -196,7 +196,7 @@ final class DiscoveryStateTopologyBuilder
         }
 
         return new DiscoveryStateStoreDescriptor(
-            name: $nameEntity,
+            nameEntity: $nameEntity,
             backend: 'json_file',
             path: $normalizedPath,
             storageMode: $sharedConfigured ? 'shared_file' : 'local_file',

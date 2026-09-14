@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repository\Discovery;
+namespace App\Discovering\Repository\Discovery;
 
-use App\Entity\Discovery\DiscoverySearchLogEntity;
-use App\RepositoryInterface\Discovery\DiscoverySearchLogRepositoryInterface;
+use App\Discovering\Entity\Discovery\DiscoverySearchLogEntity;
+use App\Discovering\RepositoryInterface\Discovery\DiscoverySearchLogRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

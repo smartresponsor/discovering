@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Contract\Discovery;
+namespace App\Discovering\Tests\Contract\Discovery;
 
-use App\Tests\Functional\Discovery\DiscoveryHttpAssertionTrait;
+use App\Discovering\Tests\Functional\Discovery\DiscoveryHttpAssertionTrait;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 

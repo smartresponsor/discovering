@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\RepositoryInterface\Discovery;
+namespace App\Discovering\RepositoryInterface\Discovery;
 
-use App\Entity\Discovery\DiscoveryRateLimitBucketEntity;
+use App\Discovering\Entity\Discovery\DiscoveryRateLimitBucketEntity;
 
+/**
+ * Defines persistence operations for discovery rate-limit buckets.
+ */
 interface DiscoveryRateLimitBucketRepositoryInterface
 {
     public function save(DiscoveryRateLimitBucketEntity $entity, bool $flush = false): void;

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Entity\Discovery;
+namespace App\Discovering\Entity\Discovery;
 
-use App\Repository\Discovery\DiscoveryIndexDocumentRepository;
+use App\Discovering\Repository\Discovery\DiscoveryIndexDocumentRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: DiscoveryIndexDocumentRepository::class)]

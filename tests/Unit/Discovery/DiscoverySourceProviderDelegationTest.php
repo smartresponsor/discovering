@@ -2,24 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Source\BriefingDiscoverySourceProvider;
-use App\Service\Discovery\Source\CategoryDiscoverySourceProvider;
-use App\Service\Discovery\Source\DocumentDiscoverySourceProvider;
-use App\Service\Discovery\Source\OfferingDiscoverySourceProvider;
-use App\Service\Discovery\Source\PlaybookDiscoverySourceProvider;
-use App\Service\Discovery\Source\ProjectDiscoverySourceProvider;
-use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Service\Discovery\Source\BriefingDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\CategoryDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\DocumentDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\OfferingDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\PlaybookDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\ProjectDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the discovery source provider delegation test case for the Discovering component.
@@ -65,10 +64,10 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
     public function testPlaybookProviderDelegatesToFileBackedRepository(): void
     {
         $projectDir = $this->createTempDirectory('discovering-provider-playbook-');
-        $resourceDirectory = $projectDir . '/resources/discovery';
+        $resourceDirectory = $projectDir.'/resources/discovery';
 
         mkdir($resourceDirectory, 0777, true);
-        file_put_contents($resourceDirectory . '/playbook_source_records.json', json_encode([
+        file_put_contents($resourceDirectory.'/playbook_source_records.json', json_encode([
             [
                 'resourceId' => 'playbook-sample',
                 'title' => 'Sample playbook',
@@ -86,19 +85,19 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
         self::assertSame('playbook', $provider->getResourceType());
         self::assertCount(1, $provider->provide());
 
-        @unlink($resourceDirectory . '/playbook_source_records.json');
+        @unlink($resourceDirectory.'/playbook_source_records.json');
         @rmdir($resourceDirectory);
-        @rmdir($projectDir . '/resources');
+        @rmdir($projectDir.'/resources');
         @rmdir($projectDir);
     }
 
     public function testBriefingProviderDelegatesToFileBackedRepository(): void
     {
         $projectDir = $this->createTempDirectory('discovering-provider-briefing-');
-        $storageDirectory = $projectDir . '/resources/discovery/briefings';
+        $storageDirectory = $projectDir.'/resources/discovery/briefings';
 
         mkdir($storageDirectory, 0777, true);
-        file_put_contents($storageDirectory . '/sample.json', json_encode([
+        file_put_contents($storageDirectory.'/sample.json', json_encode([
             [
                 'resourceId' => 'briefing-sample',
                 'title' => 'Sample briefing',
@@ -116,10 +115,10 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
         self::assertSame('briefing', $provider->getResourceType());
         self::assertCount(1, $provider->provide());
 
-        @unlink($storageDirectory . '/sample.json');
+        @unlink($storageDirectory.'/sample.json');
         @rmdir($storageDirectory);
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
+        @rmdir($projectDir.'/resources/discovery');
+        @rmdir($projectDir.'/resources');
         @rmdir($projectDir);
     }
 }

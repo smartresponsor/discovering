@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Service\Discovery;
+namespace App\Discovering\Service\Discovery;
 
-use App\Dto\Discovery\DiscoveryHit;
-use App\Dto\Discovery\DiscoveryQuery;
-
+use App\Discovering\Dto\Discovery\DiscoveryHit;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
 
 /**
  * Provides the discovery scoring capability within the discovery component.
@@ -20,6 +20,7 @@ final class DiscoveryScoringService
 
     /**
      * @param list<DiscoveryHit> $hits
+     *
      * @return list<DiscoveryHit>
      */
     public function rank(array $hits, DiscoveryQuery $query): array
@@ -29,7 +30,7 @@ final class DiscoveryScoringService
             fn (DiscoveryHit $hit): bool => $this->matchesFilters($hit, $query),
         ));
 
-        if (trim($query->query) === '') {
+        if ('' === trim($query->query)) {
             return $filteredHits;
         }
 
@@ -52,12 +53,12 @@ final class DiscoveryScoringService
     private function matchesFilters(DiscoveryHit $hit, DiscoveryQuery $query): bool
     {
         $statusFilter = $query->filters['status'] ?? null;
-        if (is_string($statusFilter) && $statusFilter !== '' && $hit->status !== $statusFilter) {
+        if (is_string($statusFilter) && '' !== $statusFilter && $hit->status !== $statusFilter) {
             return false;
         }
 
         $resourceFilter = $query->filters['resource'] ?? null;
-        if (is_string($resourceFilter) && $resourceFilter !== '' && $hit->resource !== $resourceFilter) {
+        if (is_string($resourceFilter) && '' !== $resourceFilter && $hit->resource !== $resourceFilter) {
             return false;
         }
 
@@ -79,17 +80,17 @@ final class DiscoveryScoringService
         $reasons = [];
         $matchedTokens = [];
 
-        if ($phrase !== '' && str_contains($title, $phrase)) {
+        if ('' !== $phrase && str_contains($title, $phrase)) {
             $customScore += 20.0;
             $reasons[] = 'title phrase match';
         }
 
-        if ($phrase !== '' && $reference !== '' && str_contains($reference, $phrase)) {
+        if ('' !== $phrase && '' !== $reference && str_contains($reference, $phrase)) {
             $customScore += 12.0;
             $reasons[] = 'reference phrase match';
         }
 
-        if ($phrase !== '' && $content !== '' && str_contains($content, $phrase)) {
+        if ('' !== $phrase && '' !== $content && str_contains($content, $phrase)) {
             $customScore += 10.0;
             $reasons[] = 'content phrase match';
         }
@@ -101,13 +102,13 @@ final class DiscoveryScoringService
                 $matchedTokens[] = $token;
             }
 
-            if ($reference !== '' && str_contains($reference, $token)) {
+            if ('' !== $reference && str_contains($reference, $token)) {
                 $customScore += 4.0;
                 $reasons[] = sprintf('reference token: %s', $token);
                 $matchedTokens[] = $token;
             }
 
-            if ($content !== '' && str_contains($content, $token)) {
+            if ('' !== $content && str_contains($content, $token)) {
                 $customScore += 3.5;
                 $reasons[] = sprintf('content token: %s', $token);
                 $matchedTokens[] = $token;
@@ -119,20 +120,20 @@ final class DiscoveryScoringService
                 $matchedTokens[] = $token;
             }
 
-            if ($status !== '' && $status === $token) {
+            if ('' !== $status && $status === $token) {
                 $customScore += 2.0;
                 $reasons[] = sprintf('status token: %s', $token);
                 $matchedTokens[] = $token;
             }
         }
 
-        if ($tokens !== [] && $this->allTokensPresent($tokens, $combined)) {
+        if ([] !== $tokens && $this->allTokensPresent($tokens, $combined)) {
             $customScore += 8.0;
             $reasons[] = 'all query tokens matched';
         }
 
         $resourceWeight = $query->resourceWeights[$hit->resource] ?? 1.0;
-        if ($resourceWeight !== 1.0 && $customScore > 0.0) {
+        if (1.0 !== $resourceWeight && $customScore > 0.0) {
             $customScore *= $resourceWeight;
             $reasons[] = sprintf('resource weight %.2f', $resourceWeight);
         }
@@ -176,7 +177,7 @@ final class DiscoveryScoringService
     private function tokenize(string $query): array
     {
         $parts = preg_split('/[^a-z0-9]+/i', strtolower($query)) ?: [];
-        $tokens = array_values(array_filter($parts, static fn (string $part): bool => $part !== ''));
+        $tokens = array_values(array_filter($parts, static fn (string $part): bool => '' !== $part));
 
         return array_values(array_unique($tokens));
     }
@@ -202,7 +203,7 @@ final class DiscoveryScoringService
 
     private function calculateFtsBoost(?float $ftsScore): float
     {
-        if ($ftsScore === null) {
+        if (null === $ftsScore) {
             return 0.0;
         }
 

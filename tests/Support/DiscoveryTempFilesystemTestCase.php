@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Support;
+namespace App\Discovering\Tests\Support;
 
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery temp filesystem test case test helper for the Discovering component.
@@ -16,7 +15,7 @@ abstract class DiscoveryTempFilesystemTestCase extends TestCase
 
     protected function createTempDirectory(string $prefix): string
     {
-        $path = $this->tempRoot() . '/' . $this->normalizePrefix($prefix) . bin2hex(random_bytes(6));
+        $path = $this->tempRoot().'/'.$this->normalizePrefix($prefix).bin2hex(random_bytes(6));
         if (!is_dir($path)) {
             mkdir($path, 0o777, true);
         }
@@ -26,14 +25,13 @@ abstract class DiscoveryTempFilesystemTestCase extends TestCase
 
     protected function createTempFilePath(string $prefix, string $suffix = ''): string
     {
-        return $this->tempRoot() . '/' . $this->normalizePrefix($prefix) . bin2hex(random_bytes(6)) . $suffix;
+        return $this->tempRoot().'/'.$this->normalizePrefix($prefix).bin2hex(random_bytes(6)).$suffix;
     }
 
     protected function createTempProjectDirectory(string $prefix): string
     {
         return $this->createTempDirectory($prefix);
     }
-
 
     protected function createTempSqlitePath(string $prefix): string
     {
@@ -70,7 +68,7 @@ abstract class DiscoveryTempFilesystemTestCase extends TestCase
      */
     protected function writeDiscoveryRegistryFile(string $projectDir, string $directoryName, string $fileName, array $records): string
     {
-        return $this->writeJsonFile($projectDir . '/resources/discovery/' . trim($directoryName, '/') . '/' . ltrim($fileName, '/'), $records);
+        return $this->writeJsonFile($projectDir.'/resources/discovery/'.trim($directoryName, '/').'/'.ltrim($fileName, '/'), $records);
     }
 
     /**
@@ -78,7 +76,7 @@ abstract class DiscoveryTempFilesystemTestCase extends TestCase
      */
     protected function writeLegacyDiscoveryRegistryFile(string $projectDir, string $fileName, array $records): string
     {
-        return $this->writeJsonFile($projectDir . '/resources/discovery/' . ltrim($fileName, '/'), $records);
+        return $this->writeJsonFile($projectDir.'/resources/discovery/'.ltrim($fileName, '/'), $records);
     }
 
     protected function tearDown(): void
@@ -99,7 +97,7 @@ abstract class DiscoveryTempFilesystemTestCase extends TestCase
         }
 
         $classSlug = str_replace('\\', '-', static::class);
-        $this->discoveryTempRoot = sys_get_temp_dir() . '/discovering-tests/' . $classSlug . '-' . bin2hex(random_bytes(6));
+        $this->discoveryTempRoot = sys_get_temp_dir().'/discovering-tests/'.$classSlug.'-'.bin2hex(random_bytes(6));
         if (!is_dir($this->discoveryTempRoot)) {
             mkdir($this->discoveryTempRoot, 0o777, true);
         }
@@ -115,16 +113,16 @@ abstract class DiscoveryTempFilesystemTestCase extends TestCase
     private function removeDirectoryRecursively(string $directory): void
     {
         $items = scandir($directory);
-        if ($items === false) {
+        if (false === $items) {
             return;
         }
 
         foreach ($items as $item) {
-            if ($item === '.' || $item === '..') {
+            if ('.' === $item || '..' === $item) {
                 continue;
             }
 
-            $path = $directory . '/' . $item;
+            $path = $directory.'/'.$item;
             if (is_dir($path)) {
                 $this->removeDirectoryRecursively($path);
                 continue;

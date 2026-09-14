@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Diagnostics;
+namespace App\Discovering\Service\Discovery\Diagnostics;
 
-use App\Dto\Discovery\DiscoveryBackendProbeResult;
-use App\Dto\Discovery\DiscoveryBackendReachabilityReport;
-use App\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface;
+use App\Discovering\Dto\Discovery\DiscoveryBackendProbeResult;
+use App\Discovering\Dto\Discovery\DiscoveryBackendReachabilityReport;
+use App\Discovering\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface;
 
 /**
  * Builds the discovery backend reachability output used by discovery management or diagnostics flows.
@@ -95,7 +95,7 @@ final class DiscoveryBackendReachabilityBuilder
     {
         if ('meili' !== strtolower(trim($this->indexBackend))) {
             return new DiscoveryBackendProbeResult(
-                name: 'discoveryIndex',
+                nameEntity: 'discoveryIndex',
                 backend: 'sqlite',
                 target: 'local-sqlite',
                 status: 'local_only',
@@ -106,7 +106,7 @@ final class DiscoveryBackendReachabilityBuilder
         $target = trim($this->meiliUrl);
         if ('' === $target) {
             return new DiscoveryBackendProbeResult(
-                name: 'discoveryIndex',
+                nameEntity: 'discoveryIndex',
                 backend: 'meilisearch',
                 target: 'unconfigured',
                 status: 'not_configured',
@@ -117,7 +117,7 @@ final class DiscoveryBackendReachabilityBuilder
         $result = $this->transport->probeHttp($target, $this->meiliApiKey);
 
         return new DiscoveryBackendProbeResult(
-            name: 'discoveryIndex',
+            nameEntity: 'discoveryIndex',
             backend: 'meilisearch',
             target: $target,
             status: $result['reachable'] ? 'reachable' : 'unreachable',
@@ -130,7 +130,7 @@ final class DiscoveryBackendReachabilityBuilder
         $normalizedBackend = strtolower(trim($backend));
         if ('doctrine' !== $normalizedBackend) {
             return new DiscoveryBackendProbeResult(
-                name: $nameEntity,
+                nameEntity: $nameEntity,
                 backend: '' === $normalizedBackend ? 'unknown' : $normalizedBackend,
                 target: 'local-default',
                 status: 'local_only',
@@ -139,7 +139,7 @@ final class DiscoveryBackendReachabilityBuilder
         }
 
         return new DiscoveryBackendProbeResult(
-            name: $nameEntity,
+            nameEntity: $nameEntity,
             backend: 'doctrine',
             target: $coordinationConcern,
             status: 'reachable',

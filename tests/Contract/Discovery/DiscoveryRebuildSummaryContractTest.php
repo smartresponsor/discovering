@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Contract\Discovery;
+namespace App\Discovering\Tests\Contract\Discovery;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery rebuild summary contract test case for the Discovering component.

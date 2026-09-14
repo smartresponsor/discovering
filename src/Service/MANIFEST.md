@@ -8,7 +8,7 @@ Discovering service code is organized by capability and technical role.
 
 ## Rules
 
-- Service classes should keep type-identifiable suffixes such as `Service`, `Builder`, `Factory`, `Provider`, `Store`, `Logger`, `Limiter`, `Adapter`, `Resolver`, `Executor`, `Indexer`, `Repository`, `Registry`, `Namer`, `Transport`, `Policy`, `Contract`, `Serializer`, `Encoder`, or `Decoder`.
+- Service classes should keep type-identifiable suffixes such as `Service`, `Builder`, `Factory`, `Provider`, `Store`, `Logger`, `Limiter`, `Backend`, `Resolver`, `Executor`, `Indexer`, `Repository`, `Registry`, `Namer`, `Transport`, `Policy`, `Contract`, `Serializer`, `Encoder`, or `Decoder`.
 - Service interfaces belong under `src/ServiceInterface/`, not inside `src/Service/`.
 - Persistence entities belong under `src/Entity/`.
 - Symfony controllers, commands, subscribers, forms and DTOs belong in their own type layers.

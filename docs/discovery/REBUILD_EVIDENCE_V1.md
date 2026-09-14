@@ -11,8 +11,8 @@ The evidence trail makes every rebuild auditable and explicitly reports whether 
 - evidence is exported from `GET /management/discovery/rebuilds/export`
 - every rebuild summary carries an `evidenceId`
 - `deploymentMode` is explicit in every summary
-- adapters that support staged promotion may report `deploymentMode: staged_alias_swap`
-- adapters that do not support staged promotion continue to report `deploymentMode: in_place`
+- backends that support staged promotion may report `deploymentMode: staged_alias_swap`
+- backends that do not support staged promotion continue to report `deploymentMode: in_place`
 - `zeroDowntimeReady` is backend- and deployment-mode-dependent rather than globally fixed
 
 ## Summary fields

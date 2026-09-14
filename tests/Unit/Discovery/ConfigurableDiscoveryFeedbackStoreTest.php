@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\ConfigurableDiscoveryFeedbackStore;
-use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Service\Discovery\ConfigurableDiscoveryFeedbackStore;
+use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use PHPUnit\Framework\TestCase;
 
 /**

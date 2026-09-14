@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryHit;
-use App\Dto\Discovery\DiscoveryQuery;
-use App\Service\Discovery\DiscoveryHighlightingService;
-use App\Service\Discovery\DiscoveryLearningService;
-use App\Service\Discovery\DiscoveryScoringService;
-use App\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Dto\Discovery\DiscoveryHit;
+use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
+use App\Discovering\Service\Discovery\DiscoveryLearningService;
+use App\Discovering\Service\Discovery\DiscoveryScoringService;
+use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the discovery scoring service test case for the Discovering component.

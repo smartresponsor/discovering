@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Operations;
+namespace App\Discovering\Service\Discovery\Operations;
 
-use App\Dto\Discovery\DiscoveryOperationEvent;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
+use App\Discovering\Dto\Discovery\DiscoveryOperationEvent;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -21,7 +21,7 @@ final class DiscoveryOperationLogger
     public function __construct(
         private readonly DiscoveryOperationEventLogStoreInterface $logStore,
         private readonly RequestStack $requestStack,
-        private readonly DiscoveryAdapterInterface $adapter,
+        private readonly DiscoveryBackendInterface $adapter,
     ) {
     }
 

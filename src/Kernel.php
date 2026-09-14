@@ -1,14 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App;
+namespace App\Discovering;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
-
 
 /**
  * Bootstraps the Discovering Symfony application kernel and its runtime environment.
@@ -19,18 +19,18 @@ final class Kernel extends BaseKernel
 
     protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
     {
-        $configDir = $this->getProjectDir() . '/config';
+        $configDir = $this->getProjectDir().'/config';
 
-        $loader->load($configDir . '/packages/*.yaml', 'glob');
+        $loader->load($configDir.'/packages/*.yaml', 'glob');
 
-        $environmentPackagesDir = $configDir . '/packages/' . $this->environment;
+        $environmentPackagesDir = $configDir.'/packages/'.$this->environment;
         if (is_dir($environmentPackagesDir)) {
-            $loader->load($environmentPackagesDir . '/*.yaml', 'glob');
+            $loader->load($environmentPackagesDir.'/*.yaml', 'glob');
         }
 
-        $loader->load($configDir . '/services.yaml');
+        $loader->load($configDir.'/services.yaml');
 
-        $environmentServices = $configDir . '/services_' . $this->environment . '.yaml';
+        $environmentServices = $configDir.'/services_'.$this->environment.'.yaml';
         if (is_file($environmentServices)) {
             $loader->load($environmentServices);
         }
@@ -38,12 +38,12 @@ final class Kernel extends BaseKernel
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
-        $configDir = $this->getProjectDir() . '/config/routes';
-        $routes->import($configDir . '/*.yaml');
+        $configDir = $this->getProjectDir().'/config/routes';
+        $routes->import($configDir.'/*.yaml');
 
-        $environmentRoutesDir = $configDir . '/' . $this->environment;
+        $environmentRoutesDir = $configDir.'/'.$this->environment;
         if (is_dir($environmentRoutesDir)) {
-            $routes->import($environmentRoutesDir . '/*.yaml');
+            $routes->import($environmentRoutesDir.'/*.yaml');
         }
     }
 }

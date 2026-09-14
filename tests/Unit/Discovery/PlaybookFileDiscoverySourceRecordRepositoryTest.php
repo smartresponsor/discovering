@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
-
+use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the playbook file discovery source record repository test case for the Discovering component.
@@ -88,7 +87,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
             new DiscoverySourceRecordJsonFileEncoder(),
         );
 
-        $importPath = $projectDir . '/import.json';
+        $importPath = $projectDir.'/import.json';
         $this->writeJsonFile($importPath, [
             [
                 'resourceId' => 'playbook-gamma',

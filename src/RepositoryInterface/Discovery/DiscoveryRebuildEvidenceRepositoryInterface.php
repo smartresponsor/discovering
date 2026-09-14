@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\RepositoryInterface\Discovery;
+namespace App\Discovering\RepositoryInterface\Discovery;
 
-use App\Entity\Discovery\DiscoveryRebuildEvidenceEntity;
+use App\Discovering\Entity\Discovery\DiscoveryRebuildEvidenceEntity;
 
+/**
+ * Defines persistence operations for discovery rebuild evidence.
+ */
 interface DiscoveryRebuildEvidenceRepositoryInterface
 {
     public function save(DiscoveryRebuildEvidenceEntity $entity, bool $flush = false): void;

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Command\Discovery;
+namespace App\Discovering\Command\Discovery;
 
-use App\Dto\Discovery\LibsourceEventLogQuery;
-use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
+use App\Discovering\Dto\Discovery\LibsourceEventLogQuery;
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
+use App\Discovering\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

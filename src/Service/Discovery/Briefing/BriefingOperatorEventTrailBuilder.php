@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Briefing;
+namespace App\Discovering\Service\Discovery\Briefing;
 
-use App\Dto\Discovery\BriefingManagementActionResult;
-use App\Dto\Discovery\BriefingOperatorEvent;
-use App\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
-
+use App\Discovering\Dto\Discovery\BriefingManagementActionResult;
+use App\Discovering\Dto\Discovery\BriefingOperatorEvent;
+use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
 
 /**
  * Builds the briefing operator event trail output used by discovery management or diagnostics flows.

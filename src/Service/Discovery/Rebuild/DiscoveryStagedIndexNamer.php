@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Rebuild;
-
+namespace App\Discovering\Service\Discovery\Rebuild;
 
 /**
  * Provides the discovery staged index namer capability within the discovery component.
@@ -17,7 +16,7 @@ final class DiscoveryStagedIndexNamer
     {
         $suffix = preg_replace('/[^a-z0-9]+/i', '_', strtolower($evidenceId)) ?? 'reb';
         $suffix = trim($suffix, '_');
-        if ($suffix === '') {
+        if ('' === $suffix) {
             $suffix = 'reb';
         }
 

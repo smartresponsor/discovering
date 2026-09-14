@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Service\Discovery\Playbook\PlaybookManagementActionService;
-use App\Service\Discovery\Playbook\PlaybookManagementSurfaceActionResolver;
-use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Service\Discovery\Playbook\PlaybookManagementActionService;
+use App\Discovering\Service\Discovery\Playbook\PlaybookManagementSurfaceActionResolver;
+use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
-
 
 /**
  * Exercises the playbook management surface action resolver test case for the Discovering component.
@@ -57,8 +56,8 @@ final class PlaybookManagementSurfaceActionResolverTest extends DiscoveryTempFil
             @unlink($path);
         }
         @rmdir($repository->getStorageDirectoryPath());
-        @rmdir($projectDir . '/resources/discovery');
-        @rmdir($projectDir . '/resources');
+        @rmdir($projectDir.'/resources/discovery');
+        @rmdir($projectDir.'/resources');
         @rmdir($projectDir);
     }
 }

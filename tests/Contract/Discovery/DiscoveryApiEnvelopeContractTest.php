@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Contract\Discovery;
+namespace App\Discovering\Tests\Contract\Discovery;
 
-use App\Service\Discovery\Http\DiscoveryApiContract;
-use App\Tests\Functional\Discovery\AbstractDiscoveryWebTestCase;
+use App\Discovering\Service\Discovery\Http\DiscoveryApiContract;
+use App\Discovering\Tests\Functional\Discovery\AbstractDiscoveryWebTestCase;
 
 /**
  * Exercises the discovery api envelope contract test case for the Discovering component.
@@ -17,7 +17,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
     public function testVersionedDiscoveryEndpointRespectsEnvelopeContract(): void
     {
         $client = $this->createDiscoveryClient();
-        $client->request('GET', '/api/discovery', [
+        $client->request('GET', '/api/v1/discovery', [
             'query' => 'governance live source',
             'resource' => 'briefing',
         ]);
@@ -31,7 +31,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
 
         self::assertDiscoveryEnvelopeContract($payload);
         self::assertFalse($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/discovery', $payload['meta']['canonicalPath']);
+        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
     }
 
     public function testLegacyDiscoveryAliasAdvertisesCanonicalSchemaContract(): void
@@ -48,7 +48,7 @@ final class DiscoveryApiEnvelopeContractTest extends AbstractDiscoveryWebTestCas
 
         self::assertDiscoveryEnvelopeContract($payload);
         self::assertTrue($payload['meta']['deprecatedAlias']);
-        self::assertSame('/api/discovery', $payload['meta']['canonicalPath']);
+        self::assertSame('/api/v1/discovery', $payload['meta']['canonicalPath']);
     }
 
     public function testWriteAuthorizationErrorRespectsEnvelopeContract(): void

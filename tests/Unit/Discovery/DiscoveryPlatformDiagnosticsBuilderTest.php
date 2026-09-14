@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
-use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,7 +21,7 @@ final class DiscoveryPlatformDiagnosticsBuilderTest extends TestCase
     public function testBuildReflectsSingleNodeSqlitePosture(): void
     {
         $builder = new DiscoveryPlatformDiagnosticsBuilder(
-            adapter: new class implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface {
+            adapter: new class implements DiscoveryBackendInterface, DiscoveryStagingCapableBackendInterface {
                 public function upsert(string $resource, string $id, array $document): void
                 {
                 }
@@ -67,14 +67,14 @@ final class DiscoveryPlatformDiagnosticsBuilderTest extends TestCase
         self::assertSame('transitioning', $diagnostics->postureStatus);
         self::assertSame('high', $diagnostics->riskLevel);
         self::assertContains('discoveryIndex', $diagnostics->blockingStores);
-        self::assertContains('Active discovery adapter backend is sqlite-fts5.', $diagnostics->notes);
+        self::assertContains('Active discovery backend is sqlite-fts5.', $diagnostics->notes);
         self::assertStringContainsString('Complete stronger coordination for blocking stores', $diagnostics->recommendedAction);
     }
 
     public function testBuildRecognizesDistributedReadyMeiliPosture(): void
     {
         $builder = new DiscoveryPlatformDiagnosticsBuilder(
-            adapter: new class implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface {
+            adapter: new class implements DiscoveryBackendInterface, DiscoveryStagingCapableBackendInterface {
                 public function upsert(string $resource, string $id, array $document): void
                 {
                 }

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\Repository\Discovery;
+namespace App\Discovering\Repository\Discovery;
 
-use App\Entity\Discovery\DiscoveryRebuildEvidenceEntity;
-use App\RepositoryInterface\Discovery\DiscoveryRebuildEvidenceRepositoryInterface;
+use App\Discovering\Entity\Discovery\DiscoveryRebuildEvidenceEntity;
+use App\Discovering\RepositoryInterface\Discovery\DiscoveryRebuildEvidenceRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

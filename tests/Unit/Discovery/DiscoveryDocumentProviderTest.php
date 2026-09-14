@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
-use App\Service\Discovery\Document\DiscoveryDocumentFactory;
-use App\Service\Discovery\Document\DiscoveryDocumentProvider;
-use App\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
+use App\Discovering\Service\Discovery\Document\DiscoveryDocumentFactory;
+use App\Discovering\Service\Discovery\Document\DiscoveryDocumentProvider;
+use App\Discovering\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the discovery document provider test case for the Discovering component.

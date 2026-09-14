@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Diagnostics;
+namespace App\Discovering\Service\Discovery\Diagnostics;
 
-use App\Dto\Discovery\DiscoveryPlatformDiagnostics;
-use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\Dto\Discovery\DiscoveryPlatformDiagnostics;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 
 /**
  * Builds the discovery platform diagnostics output used by discovery management or diagnostics flows.
@@ -16,7 +16,7 @@ use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterfa
 final class DiscoveryPlatformDiagnosticsBuilder
 {
     public function __construct(
-        private readonly DiscoveryAdapterInterface $adapter,
+        private readonly DiscoveryBackendInterface $adapter,
         private readonly DiscoveryStateTopologyBuilder $stateTopologyBuilder,
         private readonly DiscoveryRollbackPlanBuilder $rollbackPlanBuilder,
     ) {
@@ -30,7 +30,7 @@ final class DiscoveryPlatformDiagnosticsBuilder
         $topology = $this->stateTopologyBuilder->build();
         $rollbackPlan = $this->rollbackPlanBuilder->build();
         $backendName = $this->adapter->getBackendName();
-        $stagedRebuildSupported = $this->adapter instanceof DiscoveryStagingCapableAdapterInterface
+        $stagedRebuildSupported = $this->adapter instanceof DiscoveryStagingCapableBackendInterface
             && $this->adapter->supportsStagedRebuild();
 
         $storeBackends = [];
@@ -49,12 +49,12 @@ final class DiscoveryPlatformDiagnosticsBuilder
         }
 
         $notes = array_values($topology->notes);
-        $notes[] = sprintf('Active discovery adapter backend is %s.', $backendName);
+        $notes[] = sprintf('Active discovery backend is %s.', $backendName);
 
         if ($stagedRebuildSupported) {
-            $notes[] = 'Active discovery adapter supports staged rebuild / alias promotion.';
+            $notes[] = 'Active discovery backend supports staged rebuild / alias promotion.';
         } else {
-            $notes[] = 'Active discovery adapter does not support staged rebuild / alias promotion.';
+            $notes[] = 'Active discovery backend does not support staged rebuild / alias promotion.';
         }
 
         if ($topology->distributedReady && !$stagedRebuildSupported) {

@@ -1035,7 +1035,7 @@ foreach ($requiredServiceTaxonomyFiles as $requiredServiceTaxonomyFile) {
 }
 
 $allowedDiscoveryServiceBuckets = [
-    'Adapter',
+    'Backend',
     'Briefing',
     'Diagnostics',
     'Document',
@@ -1065,7 +1065,7 @@ $allowedDiscoveryRootServiceFiles = [
 
 $allowedServiceSuffixes = [
     'ActionService',
-    'Adapter',
+    'Backend',
     'Builder',
     'Contract',
     'Decoder',
@@ -1195,7 +1195,7 @@ foreach ($requiredServiceInterfaceTaxonomyFiles as $requiredServiceInterfaceTaxo
 }
 
 $allowedServiceInterfaceMirrorBuckets = [
-    'Adapter',
+    'Backend',
     'Diagnostics',
     'Document',
     'Indexer',
@@ -1721,7 +1721,7 @@ if (is_dir($commandDiscoveryRoot)) {
             }
         }
 
-        if (preg_match("/aliases:\\s*\\[([^\\]]*)\\]/s", $commandContents, $aliasMatch) === 1) {
+        if (preg_match('/aliases:\\s*\\[([^\\]]*)\\]/s', $commandContents, $aliasMatch) === 1) {
             if (preg_match_all("/'([^']+)'/", $aliasMatch[1], $aliasMatches) > 0) {
                 foreach ($aliasMatches[1] as $aliasName) {
                     if (str_starts_with($aliasName, 'discovering:') && !in_array($aliasName, $allowedLegacyCommandAliases, true)) {
@@ -2727,7 +2727,7 @@ if (is_file($publicIndexFile)) {
         '$kernel->handle($request)',
         '$response->send()',
         '$kernel->terminate($request, $response)',
-        "vendor/autoload.php",
+        'vendor/autoload.php',
     ] as $expectedPublicIndexMarker) {
         if (!str_contains($publicIndexContents, $expectedPublicIndexMarker)) {
             $httpFrontControllerFindings[] = 'public_index_missing_marker:' . $expectedPublicIndexMarker;
@@ -4020,4 +4020,3 @@ foreach ($findings as $finding) {
         $finding['message']
     );
 }
-

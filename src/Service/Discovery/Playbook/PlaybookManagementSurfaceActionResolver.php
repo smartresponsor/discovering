@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Playbook;
+namespace App\Discovering\Service\Discovery\Playbook;
 
-use App\Dto\Discovery\PlaybookManagementActionResult;
-use App\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceActionResolver;
+use App\Discovering\Dto\Discovery\PlaybookManagementActionResult;
+use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceActionResolver;
 use Symfony\Component\HttpFoundation\Request;
-
 
 /**
  * Provides the playbook management surface action resolver capability within the discovery component.
@@ -29,6 +28,6 @@ final class PlaybookManagementSurfaceActionResolver
     {
         $result = $this->delegate->resolve($request);
 
-        return $result !== null ? PlaybookManagementActionResult::fromGeneric($result) : null;
+        return null !== $result ? PlaybookManagementActionResult::fromGeneric($result) : null;
     }
 }

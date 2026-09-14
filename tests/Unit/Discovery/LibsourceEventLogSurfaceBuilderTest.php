@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\LibsourceEventLogQuery;
-use App\Dto\Discovery\LibsourceOperatorEvent;
-use App\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
-use App\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
+use App\Discovering\Dto\Discovery\LibsourceEventLogQuery;
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
+use App\Discovering\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
+use App\Discovering\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the libsource event log surface builder test case for the Discovering component.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Source\Repository;
+namespace App\Discovering\Service\Discovery\Source\Repository;
 
-use App\ServiceInterface\Discovery\Source\Repository\DiscoverySourceRecordRepositoryInterface; /**
+use App\Discovering\ServiceInterface\Discovery\Source\Repository\DiscoverySourceRecordRepositoryInterface; /**
  * Resolves and serves discovery source repository entries for the discovery component.
  */
 final class DiscoverySourceRepositoryRegistry

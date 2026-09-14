@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Discovery\Source\Support;
+namespace App\Discovering\Service\Discovery\Source\Support;
 
-use App\Dto\Discovery\DiscoverySourceRecord;
-
+use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
 
 /**
  * Handles discovery source record json file decoder concerns for discovery state, source, or API payloads.
@@ -23,7 +22,7 @@ final class DiscoverySourceRecordJsonFileDecoder
 
         $contents = file_get_contents($path);
 
-        if ($contents === false || trim($contents) === '') {
+        if (false === $contents || '' === trim($contents)) {
             return [];
         }
 
@@ -53,7 +52,7 @@ final class DiscoverySourceRecordJsonFileDecoder
             $metadata = $item['metadata'] ?? [];
 
             $records[] = new DiscoverySourceRecord(
-                resourceType: is_string($resourceType) && $resourceType !== '' ? $resourceType : $defaultResourceType,
+                resourceType: is_string($resourceType) && '' !== $resourceType ? $resourceType : $defaultResourceType,
                 resourceId: $resourceId,
                 title: $title,
                 body: $body,

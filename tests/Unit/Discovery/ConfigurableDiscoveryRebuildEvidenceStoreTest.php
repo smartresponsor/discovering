@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore;
-use App\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
-use App\Service\Discovery\Rebuild\DoctrineDiscoveryRebuildEvidenceStore;
-use App\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
-use App\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
-use App\Tests\Support\DiscoveryTempFilesystemTestCase;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Service\Discovery\Rebuild\ConfigurableDiscoveryRebuildEvidenceStore;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
+use App\Discovering\Service\Discovery\Rebuild\DoctrineDiscoveryRebuildEvidenceStore;
+use App\Discovering\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
+use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
+use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the configurable discovery rebuild evidence store test case for the Discovering component.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\ServiceInterface\Discovery\Libsource\Log;
+namespace App\Discovering\ServiceInterface\Discovery\Libsource\Log;
 
-use App\Dto\Discovery\LibsourceOperatorEvent;
+use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
 
 /**
  * Defines the contract for the libsource operator event log store capability within the discovery component.

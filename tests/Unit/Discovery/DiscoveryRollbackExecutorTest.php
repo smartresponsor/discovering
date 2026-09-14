@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
-use App\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
-use App\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,7 +19,7 @@ final class DiscoveryRollbackExecutorTest extends TestCase
 {
     public function testExecutePromotesRollbackTargetWhenPlanIsReady(): void
     {
-        $adapter = new InMemoryStagingDiscoveryAdapter();
+        $adapter = new InMemoryStagingDiscoveryBackend();
         $executor = new DiscoveryRollbackExecutor($this->readyPlanBuilder(), $adapter);
 
         $result = $executor->execute('reb-current', 'reb-previous');
@@ -31,7 +31,7 @@ final class DiscoveryRollbackExecutorTest extends TestCase
 
     public function testExecuteBlocksWhenExpectedEvidenceDoesNotMatchLatestPlan(): void
     {
-        $adapter = new InMemoryStagingDiscoveryAdapter();
+        $adapter = new InMemoryStagingDiscoveryBackend();
         $executor = new DiscoveryRollbackExecutor($this->readyPlanBuilder(), $adapter);
 
         $result = $executor->execute('reb-stale', 'reb-previous');
@@ -98,7 +98,7 @@ final class InMemoryDiscoveryRebuildEvidenceStoreForExecutor implements Discover
     }
 }
 
-final class InMemoryStagingDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
+final class InMemoryStagingDiscoveryBackend implements DiscoveryBackendInterface, DiscoveryStagingCapableBackendInterface
 {
     /** @var list<array{0:string,1:string}> */
     public array $aliasSwaps = [];

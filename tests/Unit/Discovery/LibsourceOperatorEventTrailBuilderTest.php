@@ -2,23 +2,22 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Discovery;
+namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Dto\Discovery\LibsourceManagementActionResult;
-use App\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
-use App\Service\Discovery\Libsource\LibsourceOperatorEventTrailBuilder;
-use App\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
-use App\Service\Discovery\Source\CategoryDiscoverySourceProvider;
-use App\Service\Discovery\Source\DocumentDiscoverySourceProvider;
-use App\Service\Discovery\Source\OfferingDiscoverySourceProvider;
-use App\Service\Discovery\Source\ProjectDiscoverySourceProvider;
-use App\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
-use App\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use App\Discovering\Dto\Discovery\LibsourceManagementActionResult;
+use App\Discovering\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
+use App\Discovering\Service\Discovery\Libsource\LibsourceOperatorEventTrailBuilder;
+use App\Discovering\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
+use App\Discovering\Service\Discovery\Source\CategoryDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\DocumentDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\OfferingDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\ProjectDiscoverySourceProvider;
+use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
+use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
 use PHPUnit\Framework\TestCase;
-
 
 /**
  * Exercises the libsource operator event trail builder test case for the Discovering component.
@@ -42,7 +41,7 @@ final class LibsourceOperatorEventTrailBuilderTest extends TestCase
         ]);
 
         $store = new EphemeralLibsourceOperatorEventLogStore();
-        $store->append(new \App\Dto\Discovery\LibsourceOperatorEvent('action:stored', 'warning', 'Stored event'));
+        $store->append(new \App\Discovering\Dto\Discovery\LibsourceOperatorEvent('action:stored', 'warning', 'Stored event'));
 
         $builder = new LibsourceOperatorEventTrailBuilder(
             diagnosticSurfaceBuilder: new LibsourceDiagnosticSurfaceBuilder($providers, $registry),

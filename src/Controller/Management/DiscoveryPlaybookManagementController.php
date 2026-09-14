@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Controller\Management;
+namespace App\Discovering\Controller\Management;
 
-use App\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Service\Discovery\Playbook\PlaybookManagementSurfaceActionResolver;
-use App\Service\Discovery\Playbook\PlaybookManagementSurfaceBuilder;
-use App\Service\Discovery\Playbook\PlaybookOperatorEventTrailBuilder;
-use App\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
+use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Discovery\Playbook\PlaybookManagementSurfaceActionResolver;
+use App\Discovering\Service\Discovery\Playbook\PlaybookManagementSurfaceBuilder;
+use App\Discovering\Service\Discovery\Playbook\PlaybookOperatorEventTrailBuilder;
+use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
