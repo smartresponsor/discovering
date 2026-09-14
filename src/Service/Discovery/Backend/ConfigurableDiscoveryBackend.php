@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Discovering\Service\Discovery\Adapter;
+namespace App\Discovering\Service\Discovery\Backend;
 
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 
 /**
- * Implements the configurable discovery adapter used by the discovery runtime.
+ * Selects the configured discovery backend used by the discovery runtime.
  */
-final class ConfigurableDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
+final class ConfigurableDiscoveryBackend implements DiscoveryBackendInterface, DiscoveryStagingCapableBackendInterface
 {
     public function __construct(
         private readonly string $backend,
         private readonly string $meiliBase,
-        private readonly SqliteFtsDiscoveryAdapter $sqliteAdapter,
-        private readonly MeiliDiscoveryAdapter $meiliAdapter,
+        private readonly SqliteFtsDiscoveryBackend $sqliteBackend,
+        private readonly MeiliDiscoveryBackend $meiliBackend,
     ) {
     }
 
@@ -75,16 +75,16 @@ final class ConfigurableDiscoveryAdapter implements DiscoveryAdapterInterface, D
     {
         $active = $this->active();
 
-        return $active instanceof DiscoveryStagingCapableAdapterInterface
+        return $active instanceof DiscoveryStagingCapableBackendInterface
             && $active->supportsStagedRebuild();
     }
 
-    private function active(): DiscoveryAdapterInterface
+    private function active(): DiscoveryBackendInterface
     {
         if ('meili' === strtolower(trim($this->backend)) && '' !== trim($this->meiliBase)) {
-            return $this->meiliAdapter;
+            return $this->meiliBackend;
         }
 
-        return $this->sqliteAdapter;
+        return $this->sqliteBackend;
     }
 }

@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Adapter\SqliteFtsDiscoveryAdapter;
+use App\Discovering\Service\Discovery\Backend\SqliteFtsDiscoveryBackend;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
  * Exercises the sqlite fts discovery alias swap test case for the Discovering component.
  */
-final class SqliteFtsDiscoveryAliasSwapTest extends DiscoveryTempFilesystemTestCase
+final class SqliteFtsDiscoveryBackendAliasSwapTest extends DiscoveryTempFilesystemTestCase
 {
     public function testItServesSearchesFromSwappedAliasTarget(): void
     {
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $adapter = new SqliteFtsDiscoveryAdapter($entityManager);
+        $adapter = new SqliteFtsDiscoveryBackend($entityManager);
         $adapter->upsert('global', 'legacy', [
             'title' => 'Legacy document',
             'resource' => 'global',

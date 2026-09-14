@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Discovering\ServiceInterface\Discovery\Adapter;
+namespace App\Discovering\ServiceInterface\Discovery\Backend;
 
 /**
- * Defines the contract for the discovery adapter capability within the discovery component.
+ * Defines the contract for the discovery backend capability within the discovery component.
  */
-interface DiscoveryAdapterInterface
+interface DiscoveryBackendInterface
 {
     /** @param array<string, mixed> $document */
     public function upsert(string $resource, string $id, array $document): void;

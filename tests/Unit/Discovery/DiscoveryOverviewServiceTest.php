@@ -15,7 +15,7 @@ use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceR
 use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
 use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
 use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -39,7 +39,7 @@ final class DiscoveryOverviewServiceTest extends TestCase
 
         $service = new DiscoveryOverviewService(
             documentProvider: $documentProvider,
-            adapter: new class implements DiscoveryAdapterInterface {
+            adapter: new class implements DiscoveryBackendInterface {
                 public function upsert(string $resource, string $id, array $document): void
                 {
                 }

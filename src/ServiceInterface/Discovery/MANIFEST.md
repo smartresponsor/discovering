@@ -4,7 +4,7 @@ This directory contains Discovering service contracts that are intentionally exp
 
 ## Current mirror buckets
 
-- `Adapter/`
+- `Backend/`
 - `Diagnostics/`
 - `Document/`
 - `Indexer/`

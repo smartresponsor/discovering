@@ -7,10 +7,10 @@ namespace App\Discovering\Service\Discovery\Indexer;
 use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
 use App\Discovering\Dto\Discovery\ReindexRequest;
 use App\Discovering\Service\Discovery\Rebuild\DiscoveryStagedIndexNamer;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
 use App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
 use App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 
 /**
@@ -19,7 +19,7 @@ use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 final class DiscoveryIndexer implements DiscoveryIndexerInterface
 {
     public function __construct(
-        private readonly DiscoveryAdapterInterface $adapter,
+        private readonly DiscoveryBackendInterface $adapter,
         private readonly DiscoveryDocumentProviderInterface $documentProvider,
         private readonly DiscoveryStagedIndexNamer $stagedIndexNamer = new DiscoveryStagedIndexNamer(),
     ) {
@@ -170,7 +170,7 @@ final class DiscoveryIndexer implements DiscoveryIndexerInterface
             return false;
         }
 
-        return $this->adapter instanceof DiscoveryStagingCapableAdapterInterface
+        return $this->adapter instanceof DiscoveryStagingCapableBackendInterface
             && $this->adapter->supportsStagedRebuild();
     }
 }

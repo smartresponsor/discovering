@@ -15,7 +15,7 @@ Build Discovering as the application resource discovery workspace for indexing, 
 - unified discovery query flows
 - per-resource discovery flows
 - filtered retrieval
-- adapter-backed search execution
+- backend-backed search execution
 - operational commands for rebuild, diagnostics and maintenance
 - demonstrable UI for querying discovery flows
 - discovery result presentation and support diagnostics

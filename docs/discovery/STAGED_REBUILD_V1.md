@@ -1,10 +1,10 @@
 # Discovery staged rebuild baseline v1
 
-The discovery rebuild path now exposes a staged alias-swap seam for adapters that can keep logical indexes stable while promoting a newly built staged index.
+The discovery rebuild path now exposes a staged alias-swap seam for backends that can keep logical indexes stable while promoting a newly built staged index.
 
 ## Current behavior
 
-- `deploymentMode=auto` chooses `staged_alias_swap` only when the adapter reports staged-rebuild capability and the rebuild target is `global`.
+- `deploymentMode=auto` chooses `staged_alias_swap` only when the backend reports staged-rebuild capability and the rebuild target is `global`.
 - Partial resource rebuilds remain `in_place` because replacing the `global` logical index with a resource-partial corpus would be unsafe.
 - SQLite FTS now maintains a lightweight alias map so logical indexes like `global` and `briefing` can be promoted to staged physical indexes without changing the query-side contract.
 

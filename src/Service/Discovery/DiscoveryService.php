@@ -7,7 +7,7 @@ namespace App\Discovering\Service\Discovery;
 use App\Discovering\Dto\Discovery\DiscoveryHit;
 use App\Discovering\Dto\Discovery\DiscoveryQuery;
 use App\Discovering\Dto\Discovery\DiscoveryResult;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
 use App\Discovering\ServiceInterface\Discovery\DiscoveryServiceInterface;
 
 /**
@@ -16,7 +16,7 @@ use App\Discovering\ServiceInterface\Discovery\DiscoveryServiceInterface;
 final class DiscoveryService implements DiscoveryServiceInterface
 {
     public function __construct(
-        private readonly DiscoveryAdapterInterface $adapter,
+        private readonly DiscoveryBackendInterface $adapter,
         private readonly DiscoveryScoringService $scoringService,
         private readonly DiscoveryModePresetService $modePresetService,
     ) {

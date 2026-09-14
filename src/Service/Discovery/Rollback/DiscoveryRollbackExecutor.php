@@ -6,8 +6,8 @@ namespace App\Discovering\Service\Discovery\Rollback;
 
 use App\Discovering\Dto\Discovery\DiscoveryRollbackExecutionResult;
 use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 
 /**
  * Provides the discovery rollback executor capability within the discovery component.
@@ -16,7 +16,7 @@ final class DiscoveryRollbackExecutor
 {
     public function __construct(
         private readonly DiscoveryRollbackPlanBuilder $rollbackPlanBuilder,
-        private readonly DiscoveryAdapterInterface $adapter,
+        private readonly DiscoveryBackendInterface $adapter,
     ) {
     }
 
@@ -67,7 +67,7 @@ final class DiscoveryRollbackExecutor
             );
         }
 
-        if (!$this->adapter instanceof DiscoveryStagingCapableAdapterInterface || !$this->adapter->supportsStagedRebuild()) {
+        if (!$this->adapter instanceof DiscoveryStagingCapableBackendInterface || !$this->adapter->supportsStagedRebuild()) {
             return new DiscoveryRollbackExecutionResult(
                 executed: false,
                 status: 'backend_not_staging_capable',

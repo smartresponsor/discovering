@@ -12,7 +12,7 @@ use App\Discovering\Service\Discovery\DiscoveryModePresetService;
 use App\Discovering\Service\Discovery\DiscoveryScoringService;
 use App\Discovering\Service\Discovery\DiscoveryService;
 use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -28,7 +28,7 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
 
-        $adapter = new class implements DiscoveryAdapterInterface {
+        $adapter = new class implements DiscoveryBackendInterface {
             public function upsert(string $resource, string $id, array $document): void
             {
             }

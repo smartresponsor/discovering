@@ -7,9 +7,9 @@ namespace App\Discovering\Tests\Unit\Discovery;
 use App\Discovering\Dto\Discovery\ReindexRequest;
 use App\Discovering\Service\Discovery\Indexer\DiscoveryIndexer;
 use App\Discovering\Service\Discovery\Rebuild\DiscoveryStagedIndexNamer;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
 use App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +21,7 @@ final class DiscoveryIndexerTest extends TestCase
     public function testItRebuildsGlobalAndResourceIndexesFromDocumentProvider(): void
     {
         $operations = [];
-        $adapter = new class($operations) implements DiscoveryAdapterInterface {
+        $adapter = new class($operations) implements DiscoveryBackendInterface {
             /** @var list<array<string, mixed>> */
             private array $operations;
 
@@ -108,10 +108,10 @@ final class DiscoveryIndexerTest extends TestCase
         self::assertStringStartsWith('reb-', $summary->evidenceId);
     }
 
-    public function testItPerformsStagedAliasSwapForGlobalRebuildWhenAdapterSupportsIt(): void
+    public function testItPerformsStagedAliasSwapForGlobalRebuildWhenBackendSupportsIt(): void
     {
         $operations = [];
-        $adapter = new class($operations) implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface {
+        $adapter = new class($operations) implements DiscoveryBackendInterface, DiscoveryStagingCapableBackendInterface {
             /** @var list<array<string, mixed>> */
             private array $operations;
 
@@ -210,7 +210,7 @@ final class DiscoveryIndexerTest extends TestCase
     public function testItRemovesFromResourceAndGlobalIndexes(): void
     {
         $operations = [];
-        $adapter = new class($operations) implements DiscoveryAdapterInterface {
+        $adapter = new class($operations) implements DiscoveryBackendInterface {
             /** @var list<array<string, mixed>> */
             private array $operations;
 

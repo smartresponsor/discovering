@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Discovering\Service\Discovery\Adapter;
+namespace App\Discovering\Service\Discovery\Backend;
 
 use App\Discovering\Entity\Discovery\DiscoveryIndexAliasEntity;
 use App\Discovering\Entity\Discovery\DiscoveryIndexDocumentEntity;
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 
 /**
- * Implements the discovery index adapter used by the discovery runtime.
+ * Implements the discovery index backend used by the discovery runtime.
  */
-final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
+final class SqliteFtsDiscoveryBackend implements DiscoveryBackendInterface, DiscoveryStagingCapableBackendInterface
 {
     private bool $schemaReady = false;
 
@@ -178,10 +178,7 @@ final class SqliteFtsDiscoveryAdapter implements DiscoveryAdapterInterface, Disc
         }
 
         $tool = new SchemaTool($this->entityManager);
-        $tool->updateSchema([
-            $this->entityManager->getClassMetadata(DiscoveryIndexDocumentEntity::class),
-            $this->entityManager->getClassMetadata(DiscoveryIndexAliasEntity::class),
-        ]);
+        $tool->updateSchema($this->entityManager->getMetadataFactory()->getAllMetadata());
 
         $this->schemaReady = true;
     }

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace App\Discovering\Service\Discovery\Adapter;
+namespace App\Discovering\Service\Discovery\Backend;
 
-use App\Discovering\ServiceInterface\Discovery\Adapter\DiscoveryAdapterInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableAdapterInterface;
+use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
 
 /**
- * Implements the meili discovery adapter used by the discovery runtime.
+ * Implements the meili discovery backend used by the discovery runtime.
  */
-final class MeiliDiscoveryAdapter implements DiscoveryAdapterInterface, DiscoveryStagingCapableAdapterInterface
+final class MeiliDiscoveryBackend implements DiscoveryBackendInterface, DiscoveryStagingCapableBackendInterface
 {
     public function __construct(
         private readonly ?string $base = null,
