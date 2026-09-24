@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Discovering\Service\Discovery\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
-use App\Discovering\Service\Discovery\Rebuild\FileDiscoveryRebuildEvidenceStore;
+use App\Discovering\DTO\DiscoveryRebuildSummaryDTO;
+use App\Discovering\Normalizer\Rebuild\DiscoveryRebuildEvidenceJsonSerializer;
+use App\Discovering\Service\Rebuild\DiscoveryFileRebuildEvidenceStore;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -19,8 +19,8 @@ final class FileDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempFilesyste
         $directory = $this->createTempDirectory('discovering-rebuild-evidence-');
         $path = $directory.'/rebuild-evidence.json';
 
-        $store = new FileDiscoveryRebuildEvidenceStore($path, new DiscoveryRebuildEvidenceJsonSerializer());
-        $store->append(new DiscoveryRebuildSummary(
+        $store = new DiscoveryFileRebuildEvidenceStore($path, new DiscoveryRebuildEvidenceJsonSerializer());
+        $store->append(new DiscoveryRebuildSummaryDTO(
             evidenceId: 'reb-1',
             resource: 'briefing',
             rebuildMode: 'full',
@@ -34,7 +34,7 @@ final class FileDiscoveryRebuildEvidenceStoreTest extends DiscoveryTempFilesyste
             skippedDocumentCount: 1,
             indexedCountsByResource: ['briefing' => 1, 'global' => 1],
         ));
-        $store->append(new DiscoveryRebuildSummary(
+        $store->append(new DiscoveryRebuildSummaryDTO(
             evidenceId: 'reb-2',
             resource: 'global',
             rebuildMode: 'full',

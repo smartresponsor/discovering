@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Controller\Management;
 
-use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Discovering\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
-use App\Discovering\Service\Discovery\Libsource\LibsourceManagementSurfaceActionResolver;
-use App\Discovering\Service\Discovery\Libsource\LibsourceOperatorEventTrailBuilder;
-use App\Discovering\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
+use App\Discovering\Builder\Libsource\DiscoveryLibsourceDiagnosticSurfaceBuilder;
+use App\Discovering\Builder\Libsource\DiscoveryLibsourceOperatorEventTrailBuilder;
+use App\Discovering\Factory\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Resolver\Libsource\DiscoveryLibsourceManagementSurfaceActionResolver;
+use App\Discovering\Service\Source\Repository\DiscoverySourceRepositoryRegistry;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,9 +20,9 @@ use Symfony\Component\Routing\Attribute\Route;
 final class DiscoveryLibsourceManagementController
 {
     public function __construct(
-        private readonly LibsourceDiagnosticSurfaceBuilder $diagnosticSurfaceBuilder,
-        private readonly LibsourceManagementSurfaceActionResolver $actionResolver,
-        private readonly LibsourceOperatorEventTrailBuilder $eventTrailBuilder,
+        private readonly DiscoveryLibsourceDiagnosticSurfaceBuilder $diagnosticSurfaceBuilder,
+        private readonly DiscoveryLibsourceManagementSurfaceActionResolver $actionResolver,
+        private readonly DiscoveryLibsourceOperatorEventTrailBuilder $eventTrailBuilder,
         private readonly DiscoverySourceRepositoryRegistry $repositoryRegistry,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {

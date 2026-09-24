@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Entity\Discovery\DiscoverySearchLogEntity;
+use App\Discovering\Entity\DiscoverySearchLogEntity;
 use App\Objecting\Embeddable\ObjectIdentityEmbeddable;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;

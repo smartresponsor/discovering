@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
-use App\Discovering\Service\Discovery\Document\DiscoveryDocumentFactory;
+use App\Discovering\DTO\DiscoverySourceRecordDTO;
+use App\Discovering\Factory\Document\DiscoveryDocumentFactory;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,7 +16,7 @@ final class DiscoveryDocumentFactoryTest extends TestCase
     public function testItBuildsDocumentFromSourceRecordWithReferenceFallback(): void
     {
         $factory = new DiscoveryDocumentFactory();
-        $document = $factory->createFromSourceRecord(new DiscoverySourceRecord(
+        $document = $factory->createFromSourceRecord(new DiscoverySourceRecordDTO(
             resourceType: 'briefing',
             resourceId: 'briefing-live-source-governance',
             title: 'Live source governance briefing',
@@ -37,7 +37,7 @@ final class DiscoveryDocumentFactoryTest extends TestCase
     public function testItPrefersStringReferenceFromMetadata(): void
     {
         $factory = new DiscoveryDocumentFactory();
-        $document = $factory->createFromSourceRecord(new DiscoverySourceRecord(
+        $document = $factory->createFromSourceRecord(new DiscoverySourceRecordDTO(
             resourceType: 'playbook',
             resourceId: 'playbook-rollout',
             title: 'Rollout playbook',

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Discovering\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
-use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
+use App\Discovering\Builder\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\DTO\DiscoveryRebuildSummaryDTO;
+use App\Discovering\Service\Rollback\DiscoveryRollbackExecutor;
+use App\Discovering\ServiceInterface\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\ServiceInterface\Rebuild\DiscoveryStagingCapableBackendInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -44,7 +44,7 @@ final class DiscoveryRollbackExecutorTest extends TestCase
     private function readyPlanBuilder(): DiscoveryRollbackPlanBuilder
     {
         return new DiscoveryRollbackPlanBuilder(new InMemoryDiscoveryRebuildEvidenceStoreForExecutor([
-            new DiscoveryRebuildSummary(
+            new DiscoveryRebuildSummaryDTO(
                 evidenceId: 'reb-current',
                 resource: 'global',
                 rebuildMode: 'full',
@@ -60,7 +60,7 @@ final class DiscoveryRollbackExecutorTest extends TestCase
                 stagedIndexes: ['global' => 'discovering__reb_current'],
                 aliasSwapApplied: true,
             ),
-            new DiscoveryRebuildSummary(
+            new DiscoveryRebuildSummaryDTO(
                 evidenceId: 'reb-previous',
                 resource: 'global',
                 rebuildMode: 'full',
@@ -82,12 +82,12 @@ final class DiscoveryRollbackExecutorTest extends TestCase
 
 final class InMemoryDiscoveryRebuildEvidenceStoreForExecutor implements DiscoveryRebuildEvidenceStoreInterface
 {
-    /** @param list<DiscoveryRebuildSummary> $items */
+    /** @param list<DiscoveryRebuildSummaryDTO> $items */
     public function __construct(private array $items)
     {
     }
 
-    public function append(DiscoveryRebuildSummary $summary): void
+    public function append(DiscoveryRebuildSummaryDTO $summary): void
     {
         $this->items[] = $summary;
     }

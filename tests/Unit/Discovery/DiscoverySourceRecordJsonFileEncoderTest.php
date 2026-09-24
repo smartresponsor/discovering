@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\DTO\DiscoverySourceRecordDTO;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,7 +17,7 @@ final class DiscoverySourceRecordJsonFileEncoderTest extends TestCase
     {
         $encoder = new DiscoverySourceRecordJsonFileEncoder();
         $json = $encoder->encodeRecords([
-            new DiscoverySourceRecord(
+            new DiscoverySourceRecordDTO(
                 resourceType: 'playbook',
                 resourceId: 'playbook-alpha',
                 title: 'Alpha playbook',

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Discovering\Controller\Management;
 
-use App\Discovering\Dto\Discovery\LibsourceEventLogQuery;
-use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
-use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Discovering\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
+use App\Discovering\Builder\Libsource\DiscoveryLibsourceEventLogSurfaceBuilder;
+use App\Discovering\DTO\DiscoveryLibsourceEventLogQueryDTO;
+use App\Discovering\DTO\DiscoveryLibsourceOperatorEventDTO;
+use App\Discovering\Factory\Http\DiscoveryJsonResponseFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class DiscoveryLibsourceLogManagementController
 {
     public function __construct(
-        private readonly LibsourceEventLogSurfaceBuilder $surfaceBuilder,
+        private readonly DiscoveryLibsourceEventLogSurfaceBuilder $surfaceBuilder,
         private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
     ) {
     }
@@ -73,7 +73,7 @@ final class DiscoveryLibsourceLogManagementController
             'perPage' => $surface->perPage,
             'totalPages' => $surface->totalPages,
             'events' => array_map(
-                static fn (LibsourceOperatorEvent $event): array => [
+                static fn (DiscoveryLibsourceOperatorEventDTO $event): array => [
                     'eventName' => $event->eventName,
                     'level' => $event->level,
                     'summary' => $event->summary,
@@ -84,7 +84,7 @@ final class DiscoveryLibsourceLogManagementController
         ]);
     }
 
-    private function createQuery(Request $request): LibsourceEventLogQuery
+    private function createQuery(Request $request): DiscoveryLibsourceEventLogQueryDTO
     {
         $preset = $request->query->get('preset');
         $search = $request->query->get('search');
@@ -92,7 +92,7 @@ final class DiscoveryLibsourceLogManagementController
         $page = (int) $request->query->get('page', 1);
         $perPage = (int) $request->query->get('perPage', 10);
 
-        return new LibsourceEventLogQuery(
+        return new DiscoveryLibsourceEventLogQueryDTO(
             preset: is_string($preset) && '' !== $preset ? $preset : null,
             search: is_string($search) && '' !== $search ? $search : null,
             level: is_string($level) && '' !== $level ? $level : null,

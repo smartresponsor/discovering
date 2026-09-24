@@ -10,7 +10,7 @@ This directory contains operator-facing management controllers.
 - `DiscoveryLibsourceLogManagementController`
 - `DiscoveryPlaybookManagementController`
 - `DiscoveryBriefingManagementController`
-- `AbstractDirectoryBackedFamilyManagementController`
+- `DiscoveryAbstractDirectoryBackedFamilyManagementController`
 
 ## Rules
 

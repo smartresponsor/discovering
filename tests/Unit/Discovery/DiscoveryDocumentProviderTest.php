@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
-use App\Discovering\Service\Discovery\Document\DiscoveryDocumentFactory;
-use App\Discovering\Service\Discovery\Document\DiscoveryDocumentProvider;
-use App\Discovering\ServiceInterface\Discovery\Source\DiscoverySourceProviderInterface;
+use App\Discovering\DTO\DiscoverySourceRecordDTO;
+use App\Discovering\Factory\Document\DiscoveryDocumentFactory;
+use App\Discovering\Provider\Document\DiscoveryDocumentProvider;
+use App\Discovering\ServiceInterface\Source\DiscoverySourceProviderInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -33,8 +33,8 @@ final class DiscoveryDocumentProviderTest extends TestCase
                     public function provide(): array
                     {
                         return [
-                            new DiscoverySourceRecord('briefing', 'briefing-zeta', 'Zeta', 'Zeta body'),
-                            new DiscoverySourceRecord('briefing', 'briefing-alpha', 'Alpha', 'Alpha body'),
+                            new DiscoverySourceRecordDTO('briefing', 'briefing-zeta', 'Zeta', 'Zeta body'),
+                            new DiscoverySourceRecordDTO('briefing', 'briefing-alpha', 'Alpha', 'Alpha body'),
                         ];
                     }
                 },
@@ -52,7 +52,7 @@ final class DiscoveryDocumentProviderTest extends TestCase
                     public function provide(): array
                     {
                         return [
-                            new DiscoverySourceRecord('playbook', 'playbook-beta', 'Beta', 'Beta body'),
+                            new DiscoverySourceRecordDTO('playbook', 'playbook-beta', 'Beta', 'Beta body'),
                         ];
                     }
                 },

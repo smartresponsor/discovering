@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\RateLimit\ConfigurableDiscoveryRateLimitStore;
-use App\Discovering\Service\Discovery\RateLimit\DoctrineDiscoveryRateLimitStore;
-use App\Discovering\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
+use App\Discovering\Repository\RateLimit\DiscoveryDoctrineRateLimitStore;
+use App\Discovering\Service\RateLimit\DiscoveryConfigurableRateLimitStore;
+use App\Discovering\Service\RateLimit\DiscoveryFileRateLimitStore;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -19,9 +19,9 @@ final class ConfigurableDiscoveryRateLimitStoreTest extends DiscoveryTempFilesys
     {
         $path = $this->createTempJsonPath('discovering-rate-limit-configurable-');
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $store = new ConfigurableDiscoveryRateLimitStore(
-            new FileDiscoveryRateLimitStore($path),
-            new DoctrineDiscoveryRateLimitStore($entityManager),
+        $store = new DiscoveryConfigurableRateLimitStore(
+            new DiscoveryFileRateLimitStore($path),
+            new DiscoveryDoctrineRateLimitStore($entityManager),
             backend: 'file',
         );
 
@@ -35,9 +35,9 @@ final class ConfigurableDiscoveryRateLimitStoreTest extends DiscoveryTempFilesys
     {
         $path = $this->createTempJsonPath('discovering-rate-limit-configurable-');
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $store = new ConfigurableDiscoveryRateLimitStore(
-            new FileDiscoveryRateLimitStore($path),
-            new DoctrineDiscoveryRateLimitStore($entityManager),
+        $store = new DiscoveryConfigurableRateLimitStore(
+            new DiscoveryFileRateLimitStore($path),
+            new DiscoveryDoctrineRateLimitStore($entityManager),
             backend: 'redis',
         );
 

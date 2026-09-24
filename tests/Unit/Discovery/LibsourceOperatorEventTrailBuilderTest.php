@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\LibsourceManagementActionResult;
-use App\Discovering\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
-use App\Discovering\Service\Discovery\Libsource\LibsourceOperatorEventTrailBuilder;
-use App\Discovering\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
-use App\Discovering\Service\Discovery\Source\CategoryDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\DocumentDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\OfferingDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\ProjectDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
-use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use App\Discovering\Builder\Libsource\DiscoveryLibsourceDiagnosticSurfaceBuilder;
+use App\Discovering\Builder\Libsource\DiscoveryLibsourceOperatorEventTrailBuilder;
+use App\Discovering\DTO\DiscoveryLibsourceManagementActionResultDTO;
+use App\Discovering\Provider\Source\DiscoveryCategorySourceProvider;
+use App\Discovering\Provider\Source\DiscoveryDocumentSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryOfferingSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryProjectSourceProvider;
+use App\Discovering\Repository\Source\DiscoveryCategorySourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryDocumentSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryOfferingSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryProjectSourceRecordRepository;
+use App\Discovering\Service\Libsource\Log\DiscoveryEphemeralLibsourceOperatorEventLogStore;
+use App\Discovering\Service\Source\Repository\DiscoverySourceRepositoryRegistry;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -27,28 +27,28 @@ final class LibsourceOperatorEventTrailBuilderTest extends TestCase
     public function testItIncludesSurfaceLoadStoredEventsAndCoverageEvents(): void
     {
         $providers = [
-            new ProjectDiscoverySourceProvider(new ProjectDiscoverySourceRecordRepository()),
-            new OfferingDiscoverySourceProvider(new OfferingDiscoverySourceRecordRepository()),
-            new DocumentDiscoverySourceProvider(new DocumentDiscoverySourceRecordRepository()),
-            new CategoryDiscoverySourceProvider(new CategoryDiscoverySourceRecordRepository()),
+            new DiscoveryProjectSourceProvider(new DiscoveryProjectSourceRecordRepository()),
+            new DiscoveryOfferingSourceProvider(new DiscoveryOfferingSourceRecordRepository()),
+            new DiscoveryDocumentSourceProvider(new DiscoveryDocumentSourceRecordRepository()),
+            new DiscoveryCategorySourceProvider(new DiscoveryCategorySourceRecordRepository()),
         ];
 
         $registry = new DiscoverySourceRepositoryRegistry([
-            new ProjectDiscoverySourceRecordRepository(),
-            new OfferingDiscoverySourceRecordRepository(),
-            new DocumentDiscoverySourceRecordRepository(),
-            new CategoryDiscoverySourceRecordRepository(),
+            new DiscoveryProjectSourceRecordRepository(),
+            new DiscoveryOfferingSourceRecordRepository(),
+            new DiscoveryDocumentSourceRecordRepository(),
+            new DiscoveryCategorySourceRecordRepository(),
         ]);
 
-        $store = new EphemeralLibsourceOperatorEventLogStore();
-        $store->append(new \App\Discovering\Dto\Discovery\LibsourceOperatorEvent('action:stored', 'warning', 'Stored event'));
+        $store = new DiscoveryEphemeralLibsourceOperatorEventLogStore();
+        $store->append(new \App\Discovering\DTO\DiscoveryLibsourceOperatorEventDTO('action:stored', 'warning', 'Stored event'));
 
-        $builder = new LibsourceOperatorEventTrailBuilder(
-            diagnosticSurfaceBuilder: new LibsourceDiagnosticSurfaceBuilder($providers, $registry),
+        $builder = new DiscoveryLibsourceOperatorEventTrailBuilder(
+            diagnosticSurfaceBuilder: new DiscoveryLibsourceDiagnosticSurfaceBuilder($providers, $registry),
             eventLogStore: $store,
         );
 
-        $events = $builder->build(new LibsourceManagementActionResult('inspect', 'Inspected source.', ['sourceName' => 'project-source-provider']));
+        $events = $builder->build(new DiscoveryLibsourceManagementActionResultDTO('inspect', 'Inspected source.', ['sourceName' => 'project-source-provider']));
 
         self::assertSame('surface:load', $events[0]->eventName);
         self::assertStringContainsString('4 diagnostic entries', $events[0]->summary);

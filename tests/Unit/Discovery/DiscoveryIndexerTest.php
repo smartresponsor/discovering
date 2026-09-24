@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\ReindexRequest;
-use App\Discovering\Service\Discovery\Indexer\DiscoveryIndexer;
-use App\Discovering\Service\Discovery\Rebuild\DiscoveryStagedIndexNamer;
-use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
-use App\Discovering\ServiceInterface\Discovery\Document\DiscoveryDocumentProviderInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
-use App\Discovering\ValueObject\Discovery\DiscoveryDocument;
+use App\Discovering\DTO\DiscoveryReindexRequestDTO;
+use App\Discovering\Service\Indexer\DiscoveryIndexer;
+use App\Discovering\Service\Rebuild\DiscoveryStagedIndexNamer;
+use App\Discovering\ServiceInterface\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Document\DiscoveryDocumentProviderInterface;
+use App\Discovering\ServiceInterface\Rebuild\DiscoveryStagingCapableBackendInterface;
+use App\Discovering\ValueObject\DiscoveryDocument;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -86,7 +86,7 @@ final class DiscoveryIndexerTest extends TestCase
         };
 
         $indexer = new DiscoveryIndexer($adapter, $documentProvider);
-        $summary = $indexer->rebuild(new ReindexRequest(resource: 'briefing'));
+        $summary = $indexer->rebuild(new DiscoveryReindexRequestDTO(resource: 'briefing'));
 
         self::assertSame([
             ['type' => 'createIndex', 'resource' => 'global'],
@@ -181,7 +181,7 @@ final class DiscoveryIndexerTest extends TestCase
         };
 
         $indexer = new DiscoveryIndexer($adapter, $documentProvider, new DiscoveryStagedIndexNamer());
-        $summary = $indexer->rebuild(new ReindexRequest(resource: 'global', deploymentMode: 'staged_alias_swap'));
+        $summary = $indexer->rebuild(new DiscoveryReindexRequestDTO(resource: 'global', deploymentMode: 'staged_alias_swap'));
 
         self::assertTrue($summary->zeroDowntimeReady);
         self::assertSame('staged_alias_swap', $summary->deploymentMode);

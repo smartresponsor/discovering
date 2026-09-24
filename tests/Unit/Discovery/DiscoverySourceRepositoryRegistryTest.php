@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
-use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryCategorySourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryDocumentSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryOfferingSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryProjectSourceRecordRepository;
+use App\Discovering\Service\Source\Repository\DiscoverySourceRepositoryRegistry;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,14 +19,14 @@ final class DiscoverySourceRepositoryRegistryTest extends TestCase
     public function testItReturnsRepositoryBySourceName(): void
     {
         $registry = new DiscoverySourceRepositoryRegistry([
-            new ProjectDiscoverySourceRecordRepository(),
-            new OfferingDiscoverySourceRecordRepository(),
-            new DocumentDiscoverySourceRecordRepository(),
-            new CategoryDiscoverySourceRecordRepository(),
+            new DiscoveryProjectSourceRecordRepository(),
+            new DiscoveryOfferingSourceRecordRepository(),
+            new DiscoveryDocumentSourceRecordRepository(),
+            new DiscoveryCategorySourceRecordRepository(),
         ]);
 
         $repository = $registry->getBySourceName('document-source-provider');
 
-        self::assertSame(DocumentDiscoverySourceRecordRepository::class, $repository::class);
+        self::assertSame(DiscoveryDocumentSourceRecordRepository::class, $repository::class);
     }
 }

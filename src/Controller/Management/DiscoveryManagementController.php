@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Controller\Management;
 
-use App\Discovering\Dto\Discovery\ReindexRequest;
-use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\DTO\DiscoveryReindexRequestDTO;
+use App\Discovering\Factory\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Operations\DiscoveryOperationLogger;
+use App\Discovering\ServiceInterface\Indexer\DiscoveryIndexerInterface;
+use App\Discovering\ServiceInterface\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
@@ -37,7 +37,7 @@ final class DiscoveryManagementController
             $requestedDeploymentMode = 'auto';
         }
 
-        $summary = $this->discoveryIndexer->rebuild(new ReindexRequest(
+        $summary = $this->discoveryIndexer->rebuild(new DiscoveryReindexRequestDTO(
             resource: 'global',
             rebuildMode: 'full',
             deploymentMode: $requestedDeploymentMode,

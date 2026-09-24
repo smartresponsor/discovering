@@ -12,12 +12,12 @@ This is a targeted structural cleanup wave. It does not rename the root `App\` n
 | --- | --- |
 | `src/Service/Discovery/Diagnostics/DiscoveryProbeTransportInterface.php` | `src/ServiceInterface/Discovery/Diagnostics/DiscoveryProbeTransportInterface.php` |
 | `src/Service/Discovery/DiscoveryFeedbackStoreInterface.php` | `src/ServiceInterface/Discovery/DiscoveryFeedbackStoreInterface.php` |
-| `src/Service/Discovery/Libsource/Log/LibsourceOperatorEventLogStoreInterface.php` | `src/ServiceInterface/Discovery/Libsource/Log/LibsourceOperatorEventLogStoreInterface.php` |
+| `src/Service/Discovery/Libsource/Log/DiscoveryLibsourceOperatorEventLogStoreInterface.php` | `src/ServiceInterface/Discovery/Libsource/Log/DiscoveryLibsourceOperatorEventLogStoreInterface.php` |
 | `src/Service/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php` | `src/ServiceInterface/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php` |
 | `src/Service/Discovery/RateLimit/DiscoveryRateLimitStoreInterface.php` | `src/ServiceInterface/Discovery/RateLimit/DiscoveryRateLimitStoreInterface.php` |
 | `src/Service/Discovery/Rebuild/DiscoveryRebuildEvidenceStoreInterface.php` | `src/ServiceInterface/Discovery/Rebuild/DiscoveryRebuildEvidenceStoreInterface.php` |
 | `src/Service/Discovery/Source/Repository/DiscoverySourceRecordRepositoryInterface.php` | `src/ServiceInterface/Discovery/Source/Repository/DiscoverySourceRecordRepositoryInterface.php` |
-| `src/Service/Discovery/Support/DirectoryBackedFamilyManagementActionServiceInterface.php` | `src/ServiceInterface/Discovery/Support/DirectoryBackedFamilyManagementActionServiceInterface.php` |
+| `src/Service/Discovery/Support/DiscoveryDirectoryBackedFamilyManagementActionServiceInterface.php` | `src/ServiceInterface/Discovery/Support/DiscoveryDirectoryBackedFamilyManagementActionServiceInterface.php` |
 
 ## Runtime wiring
 

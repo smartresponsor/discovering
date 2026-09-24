@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
-use App\Discovering\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore;
-use App\Discovering\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
+use App\Discovering\DTO\DiscoveryLibsourceOperatorEventDTO;
+use App\Discovering\Service\Libsource\Log\DiscoveryFileLibsourceOperatorEventLogStore;
+use App\Discovering\Service\Libsource\Log\DiscoveryLibsourceOperatorEventJsonSerializer;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -17,10 +17,10 @@ final class FileLibsourceOperatorEventLogStoreTest extends DiscoveryTempFilesyst
     public function testItPersistsAndClearsEventsInJsonFile(): void
     {
         $path = $this->createTempFilePath('discovering-libsource-log-', '.json');
-        $store = new FileLibsourceOperatorEventLogStore($path, new LibsourceOperatorEventJsonSerializer());
+        $store = new DiscoveryFileLibsourceOperatorEventLogStore($path, new DiscoveryLibsourceOperatorEventJsonSerializer());
 
-        $store->append(new LibsourceOperatorEvent('action:inspect', 'info', 'Inspected source.', ['sourceName' => 'project-source-provider']));
-        $store->append(new LibsourceOperatorEvent('action:audit-alignment', 'info', 'Audited alignment.'));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:inspect', 'info', 'Inspected source.', ['sourceName' => 'project-source-provider']));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:audit-alignment', 'info', 'Audited alignment.'));
 
         $events = $store->all();
 

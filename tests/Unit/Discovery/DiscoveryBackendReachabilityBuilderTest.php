@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
-use App\Discovering\ServiceInterface\Discovery\Diagnostics\DiscoveryProbeTransportInterface;
+use App\Discovering\Builder\Diagnostics\DiscoveryBackendReachabilityBuilder;
+use App\Discovering\ServiceInterface\Diagnostics\DiscoveryProbeTransportInterface;
 use PHPUnit\Framework\TestCase;
 
 /**

@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Discovering\DTO;
+
+/**
+ * Represents the discovery result contract used by discovery application, management, or state coordination flows.
+ */
+final readonly class DiscoveryResultDTO
+{
+    /** @param list<DiscoveryHitDTO> $hits */
+    public function __construct(
+        public DiscoveryQueryDTO $query,
+        public array $hits,
+        public int $total,
+    ) {
+    }
+
+    /**
+     * Serializes this discovery value into its canonical transport array representation.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'query' => [
+                'query' => $this->query->query,
+                'resource' => $this->query->resource,
+                'limit' => $this->query->limit,
+                'offset' => $this->query->offset,
+                'filters' => $this->query->filters,
+                'resourceWeights' => $this->query->resourceWeights,
+                'mode' => $this->query->mode,
+            ],
+            'hits' => array_map(static fn (DiscoveryHitDTO $hit): array => $hit->toArray(), $this->hits),
+            'total' => $this->total,
+        ];
+    }
+}

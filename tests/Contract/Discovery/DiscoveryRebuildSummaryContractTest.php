@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Contract\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
+use App\Discovering\DTO\DiscoveryRebuildSummaryDTO;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -14,7 +14,7 @@ final class DiscoveryRebuildSummaryContractTest extends TestCase
 {
     public function testItSerializesStagedRebuildFieldsInStableShape(): void
     {
-        $summary = new DiscoveryRebuildSummary(
+        $summary = new DiscoveryRebuildSummaryDTO(
             evidenceId: 'reb-1234',
             resource: 'global',
             rebuildMode: 'full',

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DirectoryBackedFamilyManagementActionResult;
-use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyOperatorEventTrailBuilder;
+use App\Discovering\Builder\Support\DiscoveryDirectoryBackedFamilyOperatorEventTrailBuilder;
+use App\Discovering\DTO\DiscoveryDirectoryBackedFamilyManagementActionResultDTO;
+use App\Discovering\Repository\Source\DiscoveryAbstractDirectoryBackedSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -25,7 +25,7 @@ final class DirectoryBackedFamilyOperatorEventTrailBuilderTest extends Discovery
             ['resourceId' => 'family-alpha', 'title' => 'Alpha', 'body' => 'Alpha body'],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends AbstractDirectoryBackedDiscoverySourceRecordRepository {
+        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends DiscoveryAbstractDirectoryBackedSourceRecordRepository {
             public function getSourceName(): string
             {
                 return 'family-file-source-provider';
@@ -52,8 +52,8 @@ final class DirectoryBackedFamilyOperatorEventTrailBuilderTest extends Discovery
             }
         };
 
-        $builder = new DirectoryBackedFamilyOperatorEventTrailBuilder($repository, 'family');
-        $events = $builder->build(new DirectoryBackedFamilyManagementActionResult(
+        $builder = new DiscoveryDirectoryBackedFamilyOperatorEventTrailBuilder($repository, 'family');
+        $events = $builder->build(new DiscoveryDirectoryBackedFamilyManagementActionResultDTO(
             actionName: 'audit-registry',
             summary: 'Audited family registry.',
             payload: ['fileCount' => 1, 'recordCount' => 1],

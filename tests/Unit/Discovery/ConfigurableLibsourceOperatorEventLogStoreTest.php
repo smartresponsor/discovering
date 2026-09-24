@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
-use App\Discovering\Service\Discovery\Libsource\Log\ConfigurableLibsourceOperatorEventLogStore;
-use App\Discovering\Service\Discovery\Libsource\Log\DoctrineLibsourceOperatorEventLogStore;
-use App\Discovering\Service\Discovery\Libsource\Log\FileLibsourceOperatorEventLogStore;
-use App\Discovering\Service\Discovery\Libsource\Log\LibsourceOperatorEventJsonSerializer;
+use App\Discovering\DTO\DiscoveryLibsourceOperatorEventDTO;
+use App\Discovering\Repository\Libsource\DiscoveryDoctrineLibsourceOperatorEventLogStore;
+use App\Discovering\Service\Libsource\Log\DiscoveryConfigurableLibsourceOperatorEventLogStore;
+use App\Discovering\Service\Libsource\Log\DiscoveryFileLibsourceOperatorEventLogStore;
+use App\Discovering\Service\Libsource\Log\DiscoveryLibsourceOperatorEventJsonSerializer;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -21,13 +21,13 @@ final class ConfigurableLibsourceOperatorEventLogStoreTest extends DiscoveryTemp
     {
         $path = $this->createTempFilePath('discovering-libsource-log-', '.json');
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $store = new ConfigurableLibsourceOperatorEventLogStore(
-            new FileLibsourceOperatorEventLogStore($path, new LibsourceOperatorEventJsonSerializer()),
-            new DoctrineLibsourceOperatorEventLogStore($entityManager),
+        $store = new DiscoveryConfigurableLibsourceOperatorEventLogStore(
+            new DiscoveryFileLibsourceOperatorEventLogStore($path, new DiscoveryLibsourceOperatorEventJsonSerializer()),
+            new DiscoveryDoctrineLibsourceOperatorEventLogStore($entityManager),
             backend: 'file',
         );
 
-        $store->append(new LibsourceOperatorEvent('sync.completed', 'info', 'Sync completed.', []));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('sync.completed', 'info', 'Sync completed.', []));
 
         self::assertFileExists($path);
         self::assertCount(1, $store->all());
@@ -38,9 +38,9 @@ final class ConfigurableLibsourceOperatorEventLogStoreTest extends DiscoveryTemp
     {
         $path = $this->createTempFilePath('discovering-libsource-log-', '.json');
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $store = new ConfigurableLibsourceOperatorEventLogStore(
-            new FileLibsourceOperatorEventLogStore($path, new LibsourceOperatorEventJsonSerializer()),
-            new DoctrineLibsourceOperatorEventLogStore($entityManager),
+        $store = new DiscoveryConfigurableLibsourceOperatorEventLogStore(
+            new DiscoveryFileLibsourceOperatorEventLogStore($path, new DiscoveryLibsourceOperatorEventJsonSerializer()),
+            new DiscoveryDoctrineLibsourceOperatorEventLogStore($entityManager),
             backend: 'redis',
         );
 

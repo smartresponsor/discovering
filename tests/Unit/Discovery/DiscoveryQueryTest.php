@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryQuery;
+use App\Discovering\DTO\DiscoveryQueryDTO;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -14,7 +14,7 @@ final class DiscoveryQueryTest extends TestCase
 {
     public function testFromArrayAppliesDefaults(): void
     {
-        $query = DiscoveryQuery::fromArray(['query' => 'alpha']);
+        $query = DiscoveryQueryDTO::fromArray(['query' => 'alpha']);
         self::assertSame('alpha', $query->query);
         self::assertSame('global', $query->resource);
         self::assertSame(20, $query->limit);

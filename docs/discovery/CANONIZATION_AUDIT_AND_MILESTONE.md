@@ -53,12 +53,12 @@ The following interface families currently live under `src/Service/Discovery/...
 
 - `src/Service/Discovery/Diagnostics/DiscoveryProbeTransportInterface.php`
 - `src/Service/Discovery/DiscoveryFeedbackStoreInterface.php`
-- `src/Service/Discovery/Libsource/Log/LibsourceOperatorEventLogStoreInterface.php`
+- `src/Service/Discovery/Libsource/Log/DiscoveryLibsourceOperatorEventLogStoreInterface.php`
 - `src/Service/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php`
 - `src/Service/Discovery/RateLimit/DiscoveryRateLimitStoreInterface.php`
 - `src/Service/Discovery/Rebuild/DiscoveryRebuildEvidenceStoreInterface.php`
 - `src/Service/Discovery/Source/Repository/DiscoverySourceRecordRepositoryInterface.php`
-- `src/Service/Discovery/Support/DirectoryBackedFamilyManagementActionServiceInterface.php`
+- `src/Service/Discovery/Support/DiscoveryDirectoryBackedFamilyManagementActionServiceInterface.php`
 
 This is the most obvious structural cleanup target. Contracts should not remain hidden among concrete implementations.
 
@@ -88,7 +88,7 @@ This does not mean all file stores must be deleted immediately. It means Doctrin
 
 ### 5. DTO and ValueObject class-form naming needs a policy pass
 
-Many DTOs are clear enough by suffix (`Result`, `Entry`, `Surface`, `Event`, `Query`, `Report`, `Summary`, `Plan`, `Record`, `Descriptor`, `Topology`, `Decision`, `Request`). Some names are semantically valid but not form-explicit enough for strict ecosystem scanning, for example `DiscoveryHit`, `DiscoveryMode`, `DiscoveryDocument`, and `DiscoveryScope`.
+Many DTOs are clear enough by suffix (`Result`, `Entry`, `Surface`, `Event`, `Query`, `Report`, `Summary`, `Plan`, `Record`, `Descriptor`, `Topology`, `Decision`, `Request`). Some names are semantically valid but not form-explicit enough for strict ecosystem scanning, for example `DiscoveryHitDTO`, `DiscoveryModeDTO`, `DiscoveryDocument`, and `DiscoveryScope`.
 
 A later wave should decide whether to keep these as accepted forms or rename them to stricter forms such as `DiscoveryHitDto`, `DiscoveryModePreset`, `DiscoveryDocumentValue`, or `DiscoveryScopeValue`.
 

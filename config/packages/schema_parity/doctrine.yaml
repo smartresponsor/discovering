@@ -1,0 +1,6 @@
+doctrine:
+  dbal:
+    connections:
+      infra:
+        path: '%kernel.project_dir%/var/schema-parity/discovering.sqlite'
+

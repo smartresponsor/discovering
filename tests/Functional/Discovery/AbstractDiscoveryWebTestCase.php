@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Functional\Discovery;
 
-use App\Discovering\Dto\Discovery\ReindexRequest;
-use App\Discovering\ServiceInterface\Discovery\Indexer\DiscoveryIndexerInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\DTO\DiscoveryReindexRequestDTO;
+use App\Discovering\ServiceInterface\Indexer\DiscoveryIndexerInterface;
+use App\Discovering\ServiceInterface\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -26,7 +26,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
         $client = static::createClient();
         /** @var DiscoveryIndexerInterface $indexer */
         $indexer = $client->getContainer()->get(DiscoveryIndexerInterface::class);
-        $indexer->rebuild(new ReindexRequest());
+        $indexer->rebuild(new DiscoveryReindexRequestDTO());
 
         self::ensureKernelShutdown();
     }
@@ -193,7 +193,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
         $evidenceStore = $client->getContainer()->get(DiscoveryRebuildEvidenceStoreInterface::class);
 
         for ($attempt = 0; $attempt < $count; ++$attempt) {
-            $evidenceStore->append($indexer->rebuild(new ReindexRequest()));
+            $evidenceStore->append($indexer->rebuild(new DiscoveryReindexRequestDTO()));
         }
 
         self::ensureKernelShutdown();

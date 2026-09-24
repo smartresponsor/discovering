@@ -4,15 +4,15 @@ Wave 5 keeps the existing Symfony form class name because `DiscoverySearchType` 
 
 ## Finding
 
-`DiscoverySearchType` renders a search/query surface for the public discovery UI, while `DiscoveryController` already builds the authoritative `DiscoveryQuery` from the HTTP request. After Wave 4, `DiscoveryQuery` is an immutable `readonly` DTO. A mapped Symfony form over that DTO is therefore the wrong boundary: form submission can try to write into an immutable data carrier.
+`DiscoverySearchType` renders a search/query surface for the public discovery UI, while `DiscoveryController` already builds the authoritative `DiscoveryQueryDTO` from the HTTP request. After Wave 4, `DiscoveryQueryDTO` is an immutable `readonly` DTO. A mapped Symfony form over that DTO is therefore the wrong boundary: form submission can try to write into an immutable data carrier.
 
 ## Change
 
 - Keep `App\Form\Discovery\DiscoverySearchType` in the canonical Form layer.
 - Keep the `*Type` suffix.
 - Mark all child fields as `mapped: false`.
-- Preserve initial field values from the provided `DiscoveryQuery` for rendering.
-- Preserve `DiscoveryQuery::class` as the root data class so callers still pass the same canonical DTO.
+- Preserve initial field values from the provided `DiscoveryQueryDTO` for rendering.
+- Preserve `DiscoveryQueryDTO::class` as the root data class so callers still pass the same canonical DTO.
 - Add a unit test proving form submission does not mutate the immutable query DTO.
 
 ## Non-goals

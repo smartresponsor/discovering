@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
+use App\Discovering\Builder\Topology\DiscoveryStateTopologyBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**

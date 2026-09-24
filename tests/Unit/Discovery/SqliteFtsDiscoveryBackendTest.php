@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Backend\SqliteFtsDiscoveryBackend;
+use App\Discovering\Repository\Backend\DiscoverySqliteFtsBackend;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -16,7 +16,7 @@ final class SqliteFtsDiscoveryBackendTest extends DiscoveryTempFilesystemTestCas
     public function testItReturnsFtsScoreAndContentForNonEmptyQueries(): void
     {
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $adapter = new SqliteFtsDiscoveryBackend($entityManager);
+        $adapter = new DiscoverySqliteFtsBackend($entityManager);
 
         $adapter->upsert('global', 'briefing-1', [
             'title' => 'Search portability briefing',

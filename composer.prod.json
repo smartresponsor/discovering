@@ -11,6 +11,7 @@
     "collectioning/collection": "dev-collection-query-hardening as dev-master",
     "cruding/crud": "dev-master",
     "doctrine/doctrine-bundle": "^3.2",
+    "doctrine/doctrine-migrations-bundle": "^3.7",
     "doctrine/orm": "^3.6",
     "easycorp/easyadmin-bundle": "^5.5",
     "interfacing/interface": "dev-master",
@@ -67,6 +68,14 @@
       "type": "vcs",
       "url": "git@github.com:smartresponsor/viewing.git",
       "no-api": true
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/smartresponsor/gating.git",
+      "no-api": true
     }
-  ]
+  ],
+  "require-dev": {
+    "gating/gate": "dev-master"
+  }
 }

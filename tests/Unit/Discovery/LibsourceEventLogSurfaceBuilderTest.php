@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\LibsourceEventLogQuery;
-use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
-use App\Discovering\Service\Discovery\Libsource\LibsourceEventLogSurfaceBuilder;
-use App\Discovering\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
+use App\Discovering\Builder\Libsource\DiscoveryLibsourceEventLogSurfaceBuilder;
+use App\Discovering\DTO\DiscoveryLibsourceEventLogQueryDTO;
+use App\Discovering\DTO\DiscoveryLibsourceOperatorEventDTO;
+use App\Discovering\Service\Libsource\Log\DiscoveryEphemeralLibsourceOperatorEventLogStore;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,11 +17,11 @@ final class LibsourceEventLogSurfaceBuilderTest extends TestCase
 {
     public function testItBuildsNewestFirstSurfaceFromStoredEvents(): void
     {
-        $store = new EphemeralLibsourceOperatorEventLogStore();
-        $store->append(new LibsourceOperatorEvent('action:first', 'info', 'First action'));
-        $store->append(new LibsourceOperatorEvent('action:second', 'warning', 'Second action'));
+        $store = new DiscoveryEphemeralLibsourceOperatorEventLogStore();
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:first', 'info', 'First action'));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:second', 'warning', 'Second action'));
 
-        $surface = (new LibsourceEventLogSurfaceBuilder($store))->build();
+        $surface = (new DiscoveryLibsourceEventLogSurfaceBuilder($store))->build();
 
         self::assertSame(2, $surface->totalEvents);
         self::assertSame(2, $surface->filteredTotalEvents);
@@ -31,12 +31,12 @@ final class LibsourceEventLogSurfaceBuilderTest extends TestCase
 
     public function testItFiltersByLevelAndSearch(): void
     {
-        $store = new EphemeralLibsourceOperatorEventLogStore();
-        $store->append(new LibsourceOperatorEvent('action:inspect', 'info', 'Inspect project provider', ['source' => 'project-source-provider']));
-        $store->append(new LibsourceOperatorEvent('action:clear', 'warning', 'Clear event log'));
-        $store->append(new LibsourceOperatorEvent('action:inspect', 'info', 'Inspect document provider', ['source' => 'document-source-provider']));
+        $store = new DiscoveryEphemeralLibsourceOperatorEventLogStore();
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:inspect', 'info', 'Inspect project provider', ['source' => 'project-source-provider']));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:clear', 'warning', 'Clear event log'));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:inspect', 'info', 'Inspect document provider', ['source' => 'document-source-provider']));
 
-        $surface = (new LibsourceEventLogSurfaceBuilder($store))->build(new LibsourceEventLogQuery(
+        $surface = (new DiscoveryLibsourceEventLogSurfaceBuilder($store))->build(new DiscoveryLibsourceEventLogQueryDTO(
             search: 'project',
             level: 'info',
             page: 1,
@@ -51,17 +51,17 @@ final class LibsourceEventLogSurfaceBuilderTest extends TestCase
 
     public function testItPaginatesFilteredEvents(): void
     {
-        $store = new EphemeralLibsourceOperatorEventLogStore();
+        $store = new DiscoveryEphemeralLibsourceOperatorEventLogStore();
 
         foreach (range(1, 12) as $index) {
-            $store->append(new LibsourceOperatorEvent(
+            $store->append(new DiscoveryLibsourceOperatorEventDTO(
                 eventName: 'action:test',
                 level: 'info',
                 summary: sprintf('Event %02d', $index),
             ));
         }
 
-        $surface = (new LibsourceEventLogSurfaceBuilder($store))->build(new LibsourceEventLogQuery(
+        $surface = (new DiscoveryLibsourceEventLogSurfaceBuilder($store))->build(new DiscoveryLibsourceEventLogQueryDTO(
             page: 2,
             perPage: 5,
         ));
@@ -77,13 +77,13 @@ final class LibsourceEventLogSurfaceBuilderTest extends TestCase
 
     public function testItAppliesQuickPresetScopes(): void
     {
-        $store = new EphemeralLibsourceOperatorEventLogStore();
-        $store->append(new LibsourceOperatorEvent('action:inspect', 'info', 'Inspect project provider'));
-        $store->append(new LibsourceOperatorEvent('action:audit-alignment', 'info', 'Audit alignment'));
-        $store->append(new LibsourceOperatorEvent('action:clear-event-log', 'warning', 'Clear event log'));
-        $store->append(new LibsourceOperatorEvent('action:rebuild-coverage', 'info', 'Rebuild coverage snapshot'));
+        $store = new DiscoveryEphemeralLibsourceOperatorEventLogStore();
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:inspect', 'info', 'Inspect project provider'));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:audit-alignment', 'info', 'Audit alignment'));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:clear-event-log', 'warning', 'Clear event log'));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:rebuild-coverage', 'info', 'Rebuild coverage snapshot'));
 
-        $warningSurface = (new LibsourceEventLogSurfaceBuilder($store))->build(new LibsourceEventLogQuery(
+        $warningSurface = (new DiscoveryLibsourceEventLogSurfaceBuilder($store))->build(new DiscoveryLibsourceEventLogQueryDTO(
             preset: 'warnings',
             page: 1,
             perPage: 10,
@@ -93,7 +93,7 @@ final class LibsourceEventLogSurfaceBuilderTest extends TestCase
         self::assertSame('Clear event log', $warningSurface->events[0]->summary);
         self::assertSame('warnings', $warningSurface->activePreset);
 
-        $inspectionSurface = (new LibsourceEventLogSurfaceBuilder($store))->build(new LibsourceEventLogQuery(
+        $inspectionSurface = (new DiscoveryLibsourceEventLogSurfaceBuilder($store))->build(new DiscoveryLibsourceEventLogQueryDTO(
             preset: 'inspections',
             page: 1,
             perPage: 10,

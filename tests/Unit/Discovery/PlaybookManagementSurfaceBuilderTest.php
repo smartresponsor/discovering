@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Playbook\PlaybookManagementSurfaceBuilder;
-use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
+use App\Discovering\Builder\Playbook\DiscoveryPlaybookManagementSurfaceBuilder;
+use App\Discovering\Builder\Support\DiscoveryDirectoryBackedFamilyManagementSurfaceBuilder;
+use App\Discovering\Repository\Source\DiscoveryPlaybookFileSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -39,15 +39,15 @@ final class PlaybookManagementSurfaceBuilderTest extends DiscoveryTempFilesystem
             ],
         ]);
 
-        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         );
 
-        $surface = (new PlaybookManagementSurfaceBuilder(
+        $surface = (new DiscoveryPlaybookManagementSurfaceBuilder(
             $repository,
-            new DirectoryBackedFamilyManagementSurfaceBuilder(),
+            new DiscoveryDirectoryBackedFamilyManagementSurfaceBuilder(),
         ))->build();
 
         self::assertSame('playbook-file-source-provider', $surface->sourceName);

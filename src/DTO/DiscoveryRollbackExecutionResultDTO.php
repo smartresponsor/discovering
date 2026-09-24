@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Discovering\DTO;
+
+/**
+ * Represents the discovery rollback execution result contract used by discovery application, management, or state coordination flows.
+ */
+final readonly class DiscoveryRollbackExecutionResultDTO
+{
+    /**
+     * @param list<string> $notes
+     */
+    public function __construct(
+        public bool $executed,
+        public string $status,
+        public string $backendName,
+        public ?string $currentEvidenceId,
+        public ?string $targetEvidenceId,
+        public ?string $alias,
+        public ?string $targetPhysicalIndex,
+        public array $notes = [],
+    ) {
+    }
+
+    /**
+     * Serializes this discovery value into its canonical transport array representation.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'executed' => $this->executed,
+            'status' => $this->status,
+            'backendName' => $this->backendName,
+            'currentEvidenceId' => $this->currentEvidenceId,
+            'targetEvidenceId' => $this->targetEvidenceId,
+            'alias' => $this->alias,
+            'targetPhysicalIndex' => $this->targetPhysicalIndex,
+            'notes' => $this->notes,
+        ];
+    }
+}

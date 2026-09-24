@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoverySourceRecord;
-use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\DTO\DiscoverySourceRecordDTO;
+use App\Discovering\Repository\Source\DiscoveryAbstractDirectoryBackedSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -18,7 +18,7 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
     public function testItProvidesSharedDirectoryBackedLifecycleBehavior(): void
     {
         $projectDir = $this->createTempDirectory('discovering-foundation-');
-        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends AbstractDirectoryBackedDiscoverySourceRecordRepository {
+        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends DiscoveryAbstractDirectoryBackedSourceRecordRepository {
             public function getSourceName(): string
             {
                 return 'test-file-source-provider';
@@ -46,7 +46,7 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
         };
 
         $repository->replaceAll([
-            new DiscoverySourceRecord(
+            new DiscoverySourceRecordDTO(
                 resourceType: 'test',
                 resourceId: 'test-alpha',
                 title: 'Alpha',
@@ -99,7 +99,7 @@ final class DirectoryBackedDiscoverySourceRecordRepositoryFoundationTest extends
             ],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends AbstractDirectoryBackedDiscoverySourceRecordRepository {
+        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends DiscoveryAbstractDirectoryBackedSourceRecordRepository {
             public function getSourceName(): string
             {
                 return 'test-file-source-provider';

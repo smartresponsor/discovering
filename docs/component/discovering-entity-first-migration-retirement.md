@@ -21,7 +21,7 @@ The retired migration tables are covered by existing Doctrine entities:
 - `discovery_operation_event_log` -> `DiscoveryOperationEventEntity`
 - `discovery_rate_limit_bucket` -> `DiscoveryRateLimitBucketEntity`
 - `discovery_rebuild_evidence` -> `DiscoveryRebuildEvidenceEntity`
-- `discovery_libsource_operator_event_log` -> `LibsourceOperatorEventEntity`
+- `discovery_libsource_operator_event_log` -> `DiscoveryLibsourceOperatorEventEntity`
 
 ## Restored legacy concept
 

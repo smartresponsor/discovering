@@ -1,0 +1,21 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Discovering\DTO;
+
+/**
+ * Represents the directory backed family management action result contract used by discovery application, management, or state coordination flows.
+ */
+readonly class DiscoveryDirectoryBackedFamilyManagementActionResultDTO
+{
+    /**
+     * @param array<string, mixed> $payload
+     */
+    public function __construct(
+        public string $actionName,
+        public string $summary,
+        public array $payload,
+    ) {
+    }
+}

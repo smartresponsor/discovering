@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\BriefingManagementActionResult;
-use App\Discovering\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
-use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Builder\Briefing\DiscoveryBriefingOperatorEventTrailBuilder;
+use App\Discovering\DTO\DiscoveryBriefingManagementActionResultDTO;
+use App\Discovering\Repository\Source\DiscoveryBriefingFileSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -26,13 +26,13 @@ final class BriefingOperatorEventTrailBuilderTest extends DiscoveryTempFilesyste
             ['resourceId' => 'briefing-beta', 'title' => 'Beta', 'body' => 'Beta body'],
         ]);
 
-        $builder = new BriefingOperatorEventTrailBuilder(new BriefingFileDiscoverySourceRecordRepository(
+        $builder = new DiscoveryBriefingOperatorEventTrailBuilder(new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         ));
 
-        $events = $builder->build(new BriefingManagementActionResult(
+        $events = $builder->build(new DiscoveryBriefingManagementActionResultDTO(
             actionName: 'audit-registry',
             summary: 'Audited registry.',
             payload: ['fileCount' => 2, 'recordCount' => 2],
@@ -49,7 +49,7 @@ final class BriefingOperatorEventTrailBuilderTest extends DiscoveryTempFilesyste
     public function testItBuildsWarningTrailWhenRegistryIsEmpty(): void
     {
         $projectDir = $this->createTempProjectDirectory('discovering-briefing-trail-empty-');
-        $builder = new BriefingOperatorEventTrailBuilder(new BriefingFileDiscoverySourceRecordRepository(
+        $builder = new DiscoveryBriefingOperatorEventTrailBuilder(new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Controller\Management;
 
-use App\Discovering\Service\Discovery\Briefing\BriefingManagementSurfaceActionResolver;
-use App\Discovering\Service\Discovery\Briefing\BriefingManagementSurfaceBuilder;
-use App\Discovering\Service\Discovery\Briefing\BriefingOperatorEventTrailBuilder;
-use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
+use App\Discovering\Builder\Briefing\DiscoveryBriefingManagementSurfaceBuilder;
+use App\Discovering\Builder\Briefing\DiscoveryBriefingOperatorEventTrailBuilder;
+use App\Discovering\Factory\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Repository\Source\DiscoveryBriefingFileSourceRecordRepository;
+use App\Discovering\Resolver\Briefing\DiscoveryBriefingManagementSurfaceActionResolver;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,14 +17,14 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * Handles management HTTP endpoints for the discovery briefing management surface.
  */
-final class DiscoveryBriefingManagementController extends AbstractDirectoryBackedFamilyManagementController
+final class DiscoveryBriefingManagementController extends DiscoveryAbstractDirectoryBackedFamilyManagementController
 {
     public function __construct(
         DiscoveryJsonResponseFactory $jsonResponseFactory,
-        private readonly BriefingManagementSurfaceBuilder $surfaceBuilder,
-        private readonly BriefingManagementSurfaceActionResolver $actionResolver,
-        private readonly BriefingOperatorEventTrailBuilder $eventTrailBuilder,
-        private readonly BriefingFileDiscoverySourceRecordRepository $repository,
+        private readonly DiscoveryBriefingManagementSurfaceBuilder $surfaceBuilder,
+        private readonly DiscoveryBriefingManagementSurfaceActionResolver $actionResolver,
+        private readonly DiscoveryBriefingOperatorEventTrailBuilder $eventTrailBuilder,
+        private readonly DiscoveryBriefingFileSourceRecordRepository $repository,
     ) {
         parent::__construct($jsonResponseFactory);
     }

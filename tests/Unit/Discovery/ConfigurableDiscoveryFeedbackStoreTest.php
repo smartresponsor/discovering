@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\ConfigurableDiscoveryFeedbackStore;
-use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Discovering\Repository\Feedback\DiscoveryDoctrineFeedbackStore;
+use App\Discovering\Service\DiscoveryConfigurableFeedbackStore;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use PHPUnit\Framework\TestCase;
 
@@ -17,8 +17,8 @@ final class ConfigurableDiscoveryFeedbackStoreTest extends TestCase
     public function testItUsesDoctrineStore(): void
     {
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $store = new ConfigurableDiscoveryFeedbackStore(
-            doctrineStore: new DoctrineDiscoveryFeedbackStore($entityManager),
+        $store = new DiscoveryConfigurableFeedbackStore(
+            doctrineStore: new DiscoveryDoctrineFeedbackStore($entityManager),
         );
 
         self::assertSame(1, $store->recordClick('briefing', 'briefing-2', 'Title', 'reference'));

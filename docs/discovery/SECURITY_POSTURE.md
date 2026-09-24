@@ -40,9 +40,9 @@ Rate-limit defaults are configured under `config/services/discovery.yaml` using 
 Relevant service classes:
 
 - `DiscoveryRateLimiter`
-- `ConfigurableDiscoveryRateLimitStore`
-- `DoctrineDiscoveryRateLimitStore`
-- `FileDiscoveryRateLimitStore`
+- `DiscoveryConfigurableRateLimitStore`
+- `DiscoveryDoctrineRateLimitStore`
+- `DiscoveryFileRateLimitStore`
 
 ## Generated documentation
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementActionService;
+use App\Discovering\Repository\Source\DiscoveryAbstractDirectoryBackedSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Service\Support\DiscoveryDirectoryBackedFamilyManagementActionService;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -24,7 +24,7 @@ final class DirectoryBackedFamilyManagementActionServiceTest extends DiscoveryTe
             ['resourceId' => 'legacy-family', 'title' => 'Legacy', 'body' => 'Legacy body'],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends AbstractDirectoryBackedDiscoverySourceRecordRepository {
+        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends DiscoveryAbstractDirectoryBackedSourceRecordRepository {
             public function getSourceName(): string
             {
                 return 'family-file-source-provider';
@@ -51,7 +51,7 @@ final class DirectoryBackedFamilyManagementActionServiceTest extends DiscoveryTe
             }
         };
 
-        $service = new DirectoryBackedFamilyManagementActionService(
+        $service = new DiscoveryDirectoryBackedFamilyManagementActionService(
             repository: $repository,
             familyLabel: 'family',
             sampleSeedDefinitions: [

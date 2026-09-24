@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\PlaybookManagementActionResult;
-use App\Discovering\Service\Discovery\Playbook\PlaybookOperatorEventTrailBuilder;
-use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Builder\Playbook\DiscoveryPlaybookOperatorEventTrailBuilder;
+use App\Discovering\DTO\DiscoveryPlaybookManagementActionResultDTO;
+use App\Discovering\Repository\Source\DiscoveryPlaybookFileSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -26,13 +26,13 @@ final class PlaybookOperatorEventTrailBuilderTest extends DiscoveryTempFilesyste
             ['resourceId' => 'playbook-beta', 'title' => 'Beta', 'body' => 'Beta body'],
         ]);
 
-        $builder = new PlaybookOperatorEventTrailBuilder(new PlaybookFileDiscoverySourceRecordRepository(
+        $builder = new DiscoveryPlaybookOperatorEventTrailBuilder(new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         ));
 
-        $events = $builder->build(new PlaybookManagementActionResult(
+        $events = $builder->build(new DiscoveryPlaybookManagementActionResultDTO(
             actionName: 'audit-registry',
             summary: 'Audited registry.',
             payload: ['fileCount' => 2, 'recordCount' => 2],
@@ -49,7 +49,7 @@ final class PlaybookOperatorEventTrailBuilderTest extends DiscoveryTempFilesyste
     public function testItBuildsWarningTrailWhenRegistryIsEmpty(): void
     {
         $projectDir = $this->createTempProjectDirectory('discovering-playbook-trail-empty-');
-        $builder = new PlaybookOperatorEventTrailBuilder(new PlaybookFileDiscoverySourceRecordRepository(
+        $builder = new DiscoveryPlaybookOperatorEventTrailBuilder(new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),

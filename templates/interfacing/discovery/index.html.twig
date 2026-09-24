@@ -1,0 +1,11 @@
+{% set discovering_template_by_operation = {
+    'search': '@Discovering/discovery/index.html.twig',
+    'overview': '@Discovering/management/discovery/overview.html.twig',
+    'libsource': '@Discovering/management/discovery/libsource.html.twig',
+    'libsource-log': '@Discovering/management/discovery/libsource_log.html.twig',
+    'briefing': '@Discovering/management/discovery/briefing.html.twig',
+    'playbook': '@Discovering/management/discovery/playbook.html.twig'
+} %}
+
+{% extends discovering_template_by_operation[operation]|default('@Viewing/view/index.html.twig') %}
+

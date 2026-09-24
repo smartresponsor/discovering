@@ -11,6 +11,12 @@
         <server name="KERNEL_CLASS" value="App\Discovering\Kernel" force="true"/>
     </php>
 
+    <source>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </source>
+
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>

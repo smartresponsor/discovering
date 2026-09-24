@@ -1,0 +1,217 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Discovering\Controller;
+
+use App\Discovering\DTO\DiscoveryModeDTO;
+use App\Discovering\DTO\DiscoveryQueryDTO;
+use App\Discovering\Factory\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Form\DiscoverySearchType;
+use App\Discovering\Service\DiscoveryLearningService;
+use App\Discovering\Service\Operations\DiscoveryOperationLogger;
+use App\Discovering\ServiceInterface\DiscoveryServiceInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+/**
+ * Handles public discovery HTTP endpoints for the discovery surface.
+ */
+final class DiscoveryController
+{
+    public function __construct(
+        private readonly DiscoveryServiceInterface $discoveryService,
+        private readonly DiscoveryLearningService $learningService,
+        private readonly DiscoveryOperationLogger $operationLogger,
+        private readonly DiscoveryJsonResponseFactory $jsonResponseFactory,
+        private readonly FormFactoryInterface $formFactory,
+        private readonly RequestStack $requestStack,
+        private readonly UrlGeneratorInterface $urlGenerator,
+    ) {
+    }
+
+    /**
+     * Handles the index endpoint for the discovery HTTP surface.
+     */
+    #[Route('/discovery', name: 'app_discovery_index', methods: ['GET', 'POST'])]
+    public function index(Request $request): Response|array
+    {
+        $query = $this->buildDiscoveryQuery($request, true);
+
+        $form = $this->formFactory->create(DiscoverySearchType::class, $query);
+        $form->handleRequest($request);
+        $result = $this->discoveryService->discover($query);
+        $this->operationLogger->recordHttp('discovery.ui.query', context: [
+            'resource' => $result->query->resource,
+            'mode' => $result->query->mode,
+            'query' => $result->query->query,
+            'total' => $result->total,
+        ]);
+
+        return [
+            '_view' => [
+                'surface' => 'discovery',
+                'operation' => 'search',
+                'component' => 'Discovering',
+                'intent' => 'surface',
+            ],
+            'locations' => [
+                'body' => ['discovery.index'],
+            ],
+            'data' => [
+                'templateName' => '@Discovering/discovery/index.html.twig',
+                'form' => $form->createView(),
+                'query' => $result->query,
+                'result' => $result,
+            ],
+            'meta' => [
+                'title' => 'Discovery',
+                'legacy_template' => 'discovery/index.html.twig',
+            ],
+        ];
+    }
+
+    /**
+     * Handles the feedback endpoint for the discovery HTTP surface.
+     */
+    #[Route('/discovery/feedback', name: 'app_discovery_feedback', methods: ['POST'])]
+    public function feedback(Request $request): RedirectResponse
+    {
+        $count = $this->learningService->recordUsefulClick(
+            resource: (string) $request->request->get('resource', 'global'),
+            hitId: (string) $request->request->get('id', ''),
+            title: (string) $request->request->get('title', ''),
+            reference: (string) $request->request->get('reference', ''),
+        );
+
+        $this->operationLogger->recordHttp('discovery.ui.feedback', context: [
+            'resource' => (string) $request->request->get('resource', 'global'),
+            'id' => (string) $request->request->get('id', ''),
+            'feedbackCount' => $count,
+        ]);
+
+        $session = $this->requestStack->getSession();
+        if ($session) {
+            $session->getFlashBag()->add('success', sprintf('Recorded useful click (%d total).', $count));
+        }
+
+        $returnTo = (string) $request->request->get('return_to', $this->urlGenerator->generate('app_discovery_index'));
+
+        return new RedirectResponse($returnTo);
+    }
+
+    #[Route('/api/v1/discovery', name: 'app_discovery_api_v1', methods: ['GET'])]
+    #[Route('/api/discovery', name: 'app_discovery_api', methods: ['GET'])]
+    /**
+     * Handles the api endpoint for the discovery HTTP surface.
+     */
+    public function api(Request $request): JsonResponse
+    {
+        $query = $this->buildDiscoveryQuery($request, false);
+        $result = $this->discoveryService->discover($query);
+        $this->operationLogger->recordHttp('discovery.api.query', context: [
+            'resource' => $result->query->resource,
+            'mode' => $result->query->mode,
+            'query' => $result->query->query,
+            'total' => $result->total,
+        ]);
+
+        return $this->jsonResponseFactory->success($result->toArray());
+    }
+
+    #[Route('/api/v1/discovery/click', name: 'app_discovery_api_v1_click', methods: ['POST'])]
+    #[Route('/api/discovery/click', name: 'app_discovery_api_click', methods: ['POST'])]
+    /**
+     * Handles the click endpoint for the discovery HTTP surface.
+     */
+    public function click(Request $request): JsonResponse
+    {
+        $payload = json_decode($request->getContent(), true);
+        if (!is_array($payload)) {
+            $payload = $request->request->all();
+        }
+
+        $count = $this->learningService->recordUsefulClick(
+            resource: (string) ($payload['resource'] ?? 'global'),
+            hitId: (string) ($payload['id'] ?? ''),
+            title: (string) ($payload['title'] ?? ''),
+            reference: (string) ($payload['reference'] ?? ''),
+        );
+
+        $this->operationLogger->recordHttp('discovery.api.click', context: [
+            'resource' => (string) ($payload['resource'] ?? 'global'),
+            'id' => (string) ($payload['id'] ?? ''),
+            'feedbackCount' => $count,
+        ]);
+
+        return $this->jsonResponseFactory->success([
+            'resource' => (string) ($payload['resource'] ?? 'global'),
+            'id' => (string) ($payload['id'] ?? ''),
+            'feedbackCount' => $count,
+        ]);
+    }
+
+    private function buildDiscoveryQuery(Request $request, bool $allowFormFallback): DiscoveryQueryDTO
+    {
+        $source = $allowFormFallback ? $request->request : $request->query;
+        $fallback = $request->query;
+        $status = $this->stringOrNull($source->get('status', $fallback->get('status')));
+
+        $filters = [];
+        if (null !== $status) {
+            $filters['status'] = $status;
+        }
+
+        return DiscoveryQueryDTO::fromArray([
+            'query' => (string) $source->get('query', $fallback->get('query', '')),
+            'resource' => (string) $source->get('resource', $fallback->get('resource', 'global')),
+            'limit' => (int) $source->get('limit', $fallback->getInt('limit', 20)),
+            'offset' => (int) $source->get('offset', $fallback->getInt('offset', 0)),
+            'filters' => $filters,
+            'resourceWeights' => $this->extractResourceWeights($request),
+            'mode' => (string) $source->get('mode', $fallback->get('mode', DiscoveryModeDTO::RELEVANCE)),
+        ]);
+    }
+
+    /** @return array<string, float> */
+    private function extractResourceWeights(Request $request): array
+    {
+        $weightMap = [
+            'global' => 'global_weight',
+            'project' => 'project_weight',
+            'offering' => 'offering_weight',
+            'document' => 'document_weight',
+            'playbook' => 'playbook_weight',
+            'briefing' => 'briefing_weight',
+        ];
+
+        $weights = [];
+        foreach ($weightMap as $resource => $parameter) {
+            $value = $request->query->get($parameter);
+            if (!is_numeric($value)) {
+                continue;
+            }
+
+            $weights[$resource] = max(0.1, (float) $value);
+        }
+
+        return $weights;
+    }
+
+    private function stringOrNull(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return '' === $trimmed ? null : $trimmed;
+    }
+}

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Discovering\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
-use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Discovering\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
-use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryStagingCapableBackendInterface;
+use App\Discovering\Builder\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
+use App\Discovering\Builder\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\Builder\Topology\DiscoveryStateTopologyBuilder;
+use App\Discovering\DTO\DiscoveryRebuildSummaryDTO;
+use App\Discovering\ServiceInterface\Backend\DiscoveryBackendInterface;
+use App\Discovering\ServiceInterface\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\ServiceInterface\Rebuild\DiscoveryStagingCapableBackendInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -115,7 +115,7 @@ final class DiscoveryPlatformDiagnosticsBuilderTest extends TestCase
                 rateLimitBackend: 'doctrine',
             ),
             rollbackPlanBuilder: $this->rollbackPlanBuilder([
-                new DiscoveryRebuildSummary(
+                new DiscoveryRebuildSummaryDTO(
                     evidenceId: 'reb-current',
                     resource: 'global',
                     rebuildMode: 'full',
@@ -131,7 +131,7 @@ final class DiscoveryPlatformDiagnosticsBuilderTest extends TestCase
                     stagedIndexes: ['global' => 'discovering_global_v2'],
                     aliasSwapApplied: true,
                 ),
-                new DiscoveryRebuildSummary(
+                new DiscoveryRebuildSummaryDTO(
                     evidenceId: 'reb-prev',
                     resource: 'global',
                     rebuildMode: 'full',
@@ -198,17 +198,17 @@ final class DiscoveryPlatformDiagnosticsBuilderTest extends TestCase
     }
 
     /**
-     * @param list<DiscoveryRebuildSummary> $summaries
+     * @param list<DiscoveryRebuildSummaryDTO> $summaries
      */
     private function rollbackPlanBuilder(array $summaries): DiscoveryRollbackPlanBuilder
     {
         return new DiscoveryRollbackPlanBuilder(new class($summaries) implements DiscoveryRebuildEvidenceStoreInterface {
-            /** @param list<DiscoveryRebuildSummary> $summaries */
+            /** @param list<DiscoveryRebuildSummaryDTO> $summaries */
             public function __construct(private readonly array $summaries)
             {
             }
 
-            public function append(DiscoveryRebuildSummary $summary): void
+            public function append(DiscoveryRebuildSummaryDTO $summary): void
             {
             }
 

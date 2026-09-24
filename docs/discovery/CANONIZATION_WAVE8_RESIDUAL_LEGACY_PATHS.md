@@ -15,12 +15,12 @@ The canonical replacements were already introduced in earlier waves:
 
 - `src/Service/Discovery/Diagnostics/DiscoveryProbeTransportInterface.php`
 - `src/Service/Discovery/DiscoveryFeedbackStoreInterface.php`
-- `src/Service/Discovery/Libsource/Log/LibsourceOperatorEventLogStoreInterface.php`
+- `src/Service/Discovery/Libsource/Log/DiscoveryLibsourceOperatorEventLogStoreInterface.php`
 - `src/Service/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php`
 - `src/Service/Discovery/RateLimit/DiscoveryRateLimitStoreInterface.php`
 - `src/Service/Discovery/Rebuild/DiscoveryRebuildEvidenceStoreInterface.php`
 - `src/Service/Discovery/Source/Repository/DiscoverySourceRecordRepositoryInterface.php`
-- `src/Service/Discovery/Support/DirectoryBackedFamilyManagementActionServiceInterface.php`
+- `src/Service/Discovery/Support/DiscoveryDirectoryBackedFamilyManagementActionServiceInterface.php`
 
 ## Retired legacy subscriber paths
 

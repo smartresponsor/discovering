@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\LibsourceOperatorEvent;
-use App\Discovering\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
+use App\Discovering\DTO\DiscoveryLibsourceOperatorEventDTO;
+use App\Discovering\Service\Libsource\Log\DiscoveryEphemeralLibsourceOperatorEventLogStore;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,9 +15,9 @@ final class LibsourceOperatorEventLogStoreTest extends TestCase
 {
     public function testEphemeralStoreAppendsAndClearsEvents(): void
     {
-        $store = new EphemeralLibsourceOperatorEventLogStore();
-        $store->append(new LibsourceOperatorEvent('action:test', 'info', 'First event'));
-        $store->append(new LibsourceOperatorEvent('action:test', 'warning', 'Second event'));
+        $store = new DiscoveryEphemeralLibsourceOperatorEventLogStore();
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:test', 'info', 'First event'));
+        $store->append(new DiscoveryLibsourceOperatorEventDTO('action:test', 'warning', 'Second event'));
 
         self::assertCount(2, $store->all());
         self::assertSame('First event', $store->all()[0]->summary);

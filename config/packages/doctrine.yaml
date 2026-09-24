@@ -1,17 +1,29 @@
+parameters:
+  app.discovery.default_data_database_url: 'postgresql://postgres:postgres@127.0.0.1:5432/discovering?serverVersion=16&charset=utf8'
+
 doctrine:
   dbal:
-    driver: 'pdo_sqlite'
-    path: '%kernel.project_dir%/var/discovery/discovering.sqlite'
+    default_connection: infra
+    connections:
+      data:
+        url: '%env(default:app.discovery.default_data_database_url:DATABASE_URL)%'
+      infra:
+        driver: 'pdo_sqlite'
+        path: '%kernel.project_dir%/var/discovery/discovering.sqlite'
   orm:
-    auto_mapping: true
-    mappings:
-      App:
-        is_bundle: false
-        type: attribute
-        dir: '%kernel.project_dir%/src/Entity'
-        prefix: 'App\Discovering\Entity'
-      Objecting:
-        is_bundle: false
-        type: attribute
-        dir: '%kernel.project_dir%/vendor/objecting/object/src/Embeddable'
-        prefix: 'App\Objecting\Embeddable'
+    default_entity_manager: infra
+    entity_managers:
+      infra:
+        connection: infra
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        mappings:
+          App:
+            is_bundle: false
+            type: attribute
+            dir: '%kernel.project_dir%/src/Entity'
+            prefix: 'App\Discovering\Entity'
+          Objecting:
+            is_bundle: false
+            type: attribute
+            dir: '%kernel.project_dir%/vendor/objecting/object/src/Embeddable'
+            prefix: 'App\Objecting\Embeddable'

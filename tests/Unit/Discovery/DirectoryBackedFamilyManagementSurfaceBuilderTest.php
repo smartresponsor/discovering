@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Source\Repository\AbstractDirectoryBackedDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
-use App\Discovering\Service\Discovery\Support\DirectoryBackedFamilyManagementSurfaceBuilder;
+use App\Discovering\Builder\Support\DiscoveryDirectoryBackedFamilyManagementSurfaceBuilder;
+use App\Discovering\Repository\Source\DiscoveryAbstractDirectoryBackedSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -40,7 +40,7 @@ final class DirectoryBackedFamilyManagementSurfaceBuilderTest extends DiscoveryT
             ],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends AbstractDirectoryBackedDiscoverySourceRecordRepository {
+        $repository = new class($projectDir, new DiscoverySourceRecordJsonFileDecoder(), new DiscoverySourceRecordJsonFileEncoder()) extends DiscoveryAbstractDirectoryBackedSourceRecordRepository {
             public function getSourceName(): string
             {
                 return 'family-file-source-provider';
@@ -67,7 +67,7 @@ final class DirectoryBackedFamilyManagementSurfaceBuilderTest extends DiscoveryT
             }
         };
 
-        $surface = (new DirectoryBackedFamilyManagementSurfaceBuilder())->build($repository);
+        $surface = (new DiscoveryDirectoryBackedFamilyManagementSurfaceBuilder())->build($repository);
 
         self::assertSame('family-file-source-provider', $surface->sourceName);
         self::assertSame($repository->getStorageDirectoryPath(), $surface->storageDirectoryPath);

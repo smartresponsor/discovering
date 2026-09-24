@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Briefing\BriefingManagementActionService;
-use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Repository\Source\DiscoveryBriefingFileSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Service\Briefing\DiscoveryBriefingManagementActionService;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -22,7 +22,7 @@ final class BriefingManagementActionServiceTest extends DiscoveryTempFilesystemT
             ['resourceId' => 'briefing-alpha', 'title' => 'Alpha', 'body' => 'Alpha body'],
         ]);
 
-        $service = new BriefingManagementActionService(new BriefingFileDiscoverySourceRecordRepository(
+        $service = new DiscoveryBriefingManagementActionService(new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -39,14 +39,14 @@ final class BriefingManagementActionServiceTest extends DiscoveryTempFilesystemT
     public function testEnsureSampleRegistrySeedsFilesWhenRegistryIsEmpty(): void
     {
         $projectDir = $this->createTempProjectDirectory('discovering-briefing-action-seed-');
-        $service = new BriefingManagementActionService(new BriefingFileDiscoverySourceRecordRepository(
+        $service = new DiscoveryBriefingManagementActionService(new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         ));
 
         $result = $service->ensureSampleRegistry();
-        $repository = new BriefingFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -65,12 +65,12 @@ final class BriefingManagementActionServiceTest extends DiscoveryTempFilesystemT
             ['resourceId' => 'legacy-briefing', 'title' => 'Legacy', 'body' => 'Legacy body'],
         ]);
 
-        $repository = new BriefingFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         );
-        $service = new BriefingManagementActionService($repository);
+        $service = new DiscoveryBriefingManagementActionService($repository);
 
         $result = $service->migrateLegacyStorage();
 

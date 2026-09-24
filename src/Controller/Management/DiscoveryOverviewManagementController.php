@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Discovering\Controller\Management;
 
-use App\Discovering\Service\Discovery\Diagnostics\DiscoveryBackendReachabilityBuilder;
-use App\Discovering\Service\Discovery\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
-use App\Discovering\Service\Discovery\Http\DiscoveryJsonResponseFactory;
-use App\Discovering\Service\Discovery\Operations\DiscoveryOperationLogger;
-use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Discovering\Service\Discovery\Rollback\DiscoveryRollbackExecutor;
-use App\Discovering\Service\Discovery\Topology\DiscoveryStateTopologyBuilder;
-use App\Discovering\ServiceInterface\Discovery\Operations\DiscoveryOperationEventLogStoreInterface;
-use App\Discovering\ServiceInterface\Discovery\Overview\DiscoveryOverviewServiceInterface;
+use App\Discovering\Builder\Diagnostics\DiscoveryBackendReachabilityBuilder;
+use App\Discovering\Builder\Diagnostics\DiscoveryPlatformDiagnosticsBuilder;
+use App\Discovering\Builder\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\Builder\Topology\DiscoveryStateTopologyBuilder;
+use App\Discovering\Factory\Http\DiscoveryJsonResponseFactory;
+use App\Discovering\Service\Operations\DiscoveryOperationLogger;
+use App\Discovering\Service\Rollback\DiscoveryRollbackExecutor;
+use App\Discovering\ServiceInterface\Operations\DiscoveryOperationEventLogStoreInterface;
+use App\Discovering\ServiceInterface\Overview\DiscoveryOverviewServiceInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -211,7 +211,7 @@ final class DiscoveryOverviewManagementController
     /**
      * Handles the exportStateTopology endpoint for the discovery overview management HTTP surface.
      */
-    #[Route('/management/discovery/state-topology/export', name: 'app_management_discovery_state_topology_export', methods: ['GET'])]
+    #[Route('/management/discovery/state/topology/export', name: 'app_management_discovery_state_topology_export', methods: ['GET'])]
     public function exportStateTopology(): JsonResponse
     {
         $this->operationLogger->recordHttp('discovery.management.state_topology.export');

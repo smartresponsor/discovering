@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryMode;
-use App\Discovering\Dto\Discovery\DiscoveryQuery;
-use App\Discovering\Service\Discovery\DiscoveryModePresetService;
+use App\Discovering\DTO\DiscoveryModeDTO;
+use App\Discovering\DTO\DiscoveryQueryDTO;
+use App\Discovering\Service\DiscoveryModePresetService;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,11 +17,11 @@ final class DiscoveryModePresetServiceTest extends TestCase
     public function testItAppliesGovernancePresetWeightsAndStatusFilter(): void
     {
         $service = new DiscoveryModePresetService();
-        $query = new DiscoveryQuery(query: 'audit', mode: DiscoveryMode::GOVERNANCE);
+        $query = new DiscoveryQueryDTO(query: 'audit', mode: DiscoveryModeDTO::GOVERNANCE);
 
         $effective = $service->apply($query);
 
-        self::assertSame(DiscoveryMode::GOVERNANCE, $effective->mode);
+        self::assertSame(DiscoveryModeDTO::GOVERNANCE, $effective->mode);
         self::assertSame('active', $effective->filters['status']);
         self::assertSame(1.35, $effective->resourceWeights['briefing']);
         self::assertSame(1.25, $effective->resourceWeights['document']);
@@ -30,9 +30,9 @@ final class DiscoveryModePresetServiceTest extends TestCase
     public function testExplicitWeightsAndFiltersOverridePresetValues(): void
     {
         $service = new DiscoveryModePresetService();
-        $query = new DiscoveryQuery(
+        $query = new DiscoveryQueryDTO(
             query: 'operations',
-            mode: DiscoveryMode::OPERATIONS,
+            mode: DiscoveryModeDTO::OPERATIONS,
             filters: ['status' => 'draft'],
             resourceWeights: ['playbook' => 2.0],
         );

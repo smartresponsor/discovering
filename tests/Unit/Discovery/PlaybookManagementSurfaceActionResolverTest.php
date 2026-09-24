@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Playbook\PlaybookManagementActionService;
-use App\Discovering\Service\Discovery\Playbook\PlaybookManagementSurfaceActionResolver;
-use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Repository\Source\DiscoveryPlaybookFileSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Resolver\Playbook\DiscoveryPlaybookManagementSurfaceActionResolver;
+use App\Discovering\Service\Playbook\DiscoveryPlaybookManagementActionService;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -20,8 +20,8 @@ final class PlaybookManagementSurfaceActionResolverTest extends DiscoveryTempFil
     public function testItResolvesAuditRegistryAction(): void
     {
         $projectDir = $this->createTempDirectory('discovering-playbook-resolver-audit-');
-        $resolver = new PlaybookManagementSurfaceActionResolver(new PlaybookManagementActionService(
-            new PlaybookFileDiscoverySourceRecordRepository(
+        $resolver = new DiscoveryPlaybookManagementSurfaceActionResolver(new DiscoveryPlaybookManagementActionService(
+            new DiscoveryPlaybookFileSourceRecordRepository(
                 $projectDir,
                 new DiscoverySourceRecordJsonFileDecoder(),
                 new DiscoverySourceRecordJsonFileEncoder(),
@@ -39,12 +39,12 @@ final class PlaybookManagementSurfaceActionResolverTest extends DiscoveryTempFil
     public function testItResolvesEnsureSampleRegistryAction(): void
     {
         $projectDir = $this->createTempDirectory('discovering-playbook-resolver-seed-');
-        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         );
-        $resolver = new PlaybookManagementSurfaceActionResolver(new PlaybookManagementActionService($repository));
+        $resolver = new DiscoveryPlaybookManagementSurfaceActionResolver(new DiscoveryPlaybookManagementActionService($repository));
 
         $result = $resolver->resolve(new Request(query: ['action' => 'ensure-sample-registry']));
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Playbook\PlaybookManagementActionService;
-use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Repository\Source\DiscoveryPlaybookFileSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Service\Playbook\DiscoveryPlaybookManagementActionService;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -22,7 +22,7 @@ final class PlaybookManagementActionServiceTest extends DiscoveryTempFilesystemT
             ['resourceId' => 'playbook-alpha', 'title' => 'Alpha', 'body' => 'Alpha body'],
         ]);
 
-        $service = new PlaybookManagementActionService(new PlaybookFileDiscoverySourceRecordRepository(
+        $service = new DiscoveryPlaybookManagementActionService(new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -39,14 +39,14 @@ final class PlaybookManagementActionServiceTest extends DiscoveryTempFilesystemT
     public function testEnsureSampleRegistrySeedsFilesWhenRegistryIsEmpty(): void
     {
         $projectDir = $this->createTempProjectDirectory('discovering-playbook-action-seed-');
-        $service = new PlaybookManagementActionService(new PlaybookFileDiscoverySourceRecordRepository(
+        $service = new DiscoveryPlaybookManagementActionService(new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         ));
 
         $result = $service->ensureSampleRegistry();
-        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -65,12 +65,12 @@ final class PlaybookManagementActionServiceTest extends DiscoveryTempFilesystemT
             ['resourceId' => 'legacy-playbook', 'title' => 'Legacy', 'body' => 'Legacy body'],
         ]);
 
-        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
         );
-        $service = new PlaybookManagementActionService($repository);
+        $service = new DiscoveryPlaybookManagementActionService($repository);
 
         $result = $service->migrateLegacyStorage();
 

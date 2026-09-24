@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Discovering\Repository\Feedback\DiscoveryDoctrineFeedbackStore;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -16,7 +16,7 @@ final class DiscoveryFeedbackStoreTest extends DiscoveryTempFilesystemTestCase
     public function testItPersistsAndIncrementsFeedbackCounts(): void
     {
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $store = new DoctrineDiscoveryFeedbackStore($entityManager);
+        $store = new DiscoveryDoctrineFeedbackStore($entityManager);
 
         self::assertSame(1, $store->recordClick('briefing', 'briefing-1', 'Title', 'reference'));
         self::assertSame(2, $store->recordClick('briefing', 'briefing-1', 'Title', 'reference'));

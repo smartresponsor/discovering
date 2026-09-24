@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Source\BriefingDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\CategoryDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\DocumentDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\OfferingDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\PlaybookDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\ProjectDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Provider\Source\DiscoveryBriefingSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryCategorySourceProvider;
+use App\Discovering\Provider\Source\DiscoveryDocumentSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryOfferingSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryPlaybookSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryProjectSourceProvider;
+use App\Discovering\Repository\Source\DiscoveryBriefingFileSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryCategorySourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryDocumentSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryOfferingSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryPlaybookFileSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryProjectSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -27,7 +27,7 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
 {
     public function testProjectProviderDelegatesToRepository(): void
     {
-        $provider = new ProjectDiscoverySourceProvider(new ProjectDiscoverySourceRecordRepository());
+        $provider = new DiscoveryProjectSourceProvider(new DiscoveryProjectSourceRecordRepository());
 
         self::assertSame('project-source-provider', $provider->getSourceName());
         self::assertSame('project', $provider->getResourceType());
@@ -36,7 +36,7 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
 
     public function testOfferingProviderDelegatesToRepository(): void
     {
-        $provider = new OfferingDiscoverySourceProvider(new OfferingDiscoverySourceRecordRepository());
+        $provider = new DiscoveryOfferingSourceProvider(new DiscoveryOfferingSourceRecordRepository());
 
         self::assertSame('offering-source-provider', $provider->getSourceName());
         self::assertSame('offering', $provider->getResourceType());
@@ -45,7 +45,7 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
 
     public function testDocumentProviderDelegatesToRepository(): void
     {
-        $provider = new DocumentDiscoverySourceProvider(new DocumentDiscoverySourceRecordRepository());
+        $provider = new DiscoveryDocumentSourceProvider(new DiscoveryDocumentSourceRecordRepository());
 
         self::assertSame('document-source-provider', $provider->getSourceName());
         self::assertSame('document', $provider->getResourceType());
@@ -54,7 +54,7 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
 
     public function testCategoryProviderDelegatesToRepository(): void
     {
-        $provider = new CategoryDiscoverySourceProvider(new CategoryDiscoverySourceRecordRepository());
+        $provider = new DiscoveryCategorySourceProvider(new DiscoveryCategorySourceRecordRepository());
 
         self::assertSame('category-source-provider', $provider->getSourceName());
         self::assertSame('category', $provider->getResourceType());
@@ -75,7 +75,7 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
             ],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $provider = new PlaybookDiscoverySourceProvider(new PlaybookFileDiscoverySourceRecordRepository(
+        $provider = new DiscoveryPlaybookSourceProvider(new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -105,7 +105,7 @@ final class DiscoverySourceProviderDelegationTest extends DiscoveryTempFilesyste
             ],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-        $provider = new BriefingDiscoverySourceProvider(new BriefingFileDiscoverySourceRecordRepository(
+        $provider = new DiscoveryBriefingSourceProvider(new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),

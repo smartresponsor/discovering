@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryMode;
-use App\Discovering\Dto\Discovery\DiscoveryQuery;
-use App\Discovering\Form\Discovery\DiscoverySearchType;
+use App\Discovering\DTO\DiscoveryModeDTO;
+use App\Discovering\DTO\DiscoveryQueryDTO;
+use App\Discovering\Form\DiscoverySearchType;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Form\Forms;
 
@@ -17,14 +17,14 @@ final class DiscoverySearchTypeTest extends TestCase
 {
     public function testSearchFormDoesNotMutateReadonlyDiscoveryQuery(): void
     {
-        $query = new DiscoveryQuery(
+        $query = new DiscoveryQueryDTO(
             query: 'governance',
             resource: 'project',
             limit: 10,
             offset: 5,
             filters: ['status' => 'active'],
             resourceWeights: ['document' => 1.25],
-            mode: DiscoveryMode::GOVERNANCE,
+            mode: DiscoveryModeDTO::GOVERNANCE,
         );
 
         $form = Forms::createFormFactoryBuilder()
@@ -34,7 +34,7 @@ final class DiscoverySearchTypeTest extends TestCase
 
         $form->submit([
             'query' => 'changed',
-            'mode' => DiscoveryMode::OPERATIONS,
+            'mode' => DiscoveryModeDTO::OPERATIONS,
             'resource' => 'document',
             'status' => 'draft',
             'limit' => '25',
@@ -50,6 +50,6 @@ final class DiscoverySearchTypeTest extends TestCase
         self::assertSame(5, $query->offset);
         self::assertSame('active', $query->filters['status']);
         self::assertSame(1.25, $query->resourceWeights['document']);
-        self::assertSame(DiscoveryMode::GOVERNANCE, $query->mode);
+        self::assertSame(DiscoveryModeDTO::GOVERNANCE, $query->mode);
     }
 }

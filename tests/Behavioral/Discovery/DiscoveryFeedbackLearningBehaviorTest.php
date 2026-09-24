@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Behavioral\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryQuery;
-use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
-use App\Discovering\Service\Discovery\DiscoveryLearningService;
-use App\Discovering\Service\Discovery\DiscoveryModePresetService;
-use App\Discovering\Service\Discovery\DiscoveryScoringService;
-use App\Discovering\Service\Discovery\DiscoveryService;
-use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\DTO\DiscoveryQueryDTO;
+use App\Discovering\Repository\Feedback\DiscoveryDoctrineFeedbackStore;
+use App\Discovering\Service\DiscoveryHighlightingService;
+use App\Discovering\Service\DiscoveryLearningService;
+use App\Discovering\Service\DiscoveryModePresetService;
+use App\Discovering\Service\DiscoveryScoringService;
+use App\Discovering\Service\DiscoveryService;
+use App\Discovering\ServiceInterface\Backend\DiscoveryBackendInterface;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -23,7 +23,7 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
     public function testRecordedClicksCanPromoteTrustedOperationalHitAbovePureFtsLeader(): void
     {
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
+        $learningService = new DiscoveryLearningService(new DiscoveryDoctrineFeedbackStore($entityManager));
         $service = new DiscoveryService(
             $this->createBackend([
                 [
@@ -49,7 +49,7 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
             new DiscoveryModePresetService(),
         );
 
-        $beforeLearning = $service->discover(new DiscoveryQuery(query: 'recovery procedure'));
+        $beforeLearning = $service->discover(new DiscoveryQueryDTO(query: 'recovery procedure'));
         self::assertSame('project-recovery', $beforeLearning->hits[0]->id);
         self::assertSame(0, $beforeLearning->hits[0]->feedbackCount);
         self::assertSame(0.0, $beforeLearning->hits[0]->feedbackBoost);
@@ -63,7 +63,7 @@ final class DiscoveryFeedbackLearningBehaviorTest extends DiscoveryTempFilesyste
             );
         }
 
-        $afterLearning = $service->discover(new DiscoveryQuery(query: 'recovery procedure'));
+        $afterLearning = $service->discover(new DiscoveryQueryDTO(query: 'recovery procedure'));
 
         self::assertSame('playbook-recovery', $afterLearning->hits[0]->id);
         self::assertSame(8, $afterLearning->hits[0]->feedbackCount);

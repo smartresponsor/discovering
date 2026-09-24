@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryOperationEvent;
-use App\Discovering\Service\Discovery\Operations\DiscoveryOperationEventJsonSerializer;
-use App\Discovering\Service\Discovery\Operations\FileDiscoveryOperationEventLogStore;
+use App\Discovering\DTO\DiscoveryOperationEventDTO;
+use App\Discovering\Service\Operations\DiscoveryFileOperationEventLogStore;
+use App\Discovering\Service\Operations\DiscoveryOperationEventJsonSerializer;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -25,9 +25,9 @@ final class FileDiscoveryOperationEventLogStoreTest extends DiscoveryTempFilesys
 
     public function testAppendAndLatestPersistOperationEvents(): void
     {
-        $store = new FileDiscoveryOperationEventLogStore($this->path, new DiscoveryOperationEventJsonSerializer());
+        $store = new DiscoveryFileOperationEventLogStore($this->path, new DiscoveryOperationEventJsonSerializer());
 
-        $store->append(new DiscoveryOperationEvent(
+        $store->append(new DiscoveryOperationEventDTO(
             requestId: 'req-1',
             channel: 'http',
             operation: 'discovery.api.query',
@@ -35,7 +35,7 @@ final class FileDiscoveryOperationEventLogStoreTest extends DiscoveryTempFilesys
             occurredAt: '2026-04-03T00:00:00+00:00',
             context: ['resource' => 'briefing'],
         ));
-        $store->append(new DiscoveryOperationEvent(
+        $store->append(new DiscoveryOperationEventDTO(
             requestId: 'req-2',
             channel: 'console',
             operation: 'discovering.rebuild',

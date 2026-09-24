@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Source\Repository\PlaybookFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Repository\Source\DiscoveryPlaybookFileSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -38,7 +38,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
             ],
         ]);
 
-        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -68,7 +68,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
             ],
         ]);
 
-        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -81,7 +81,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
     public function testItExportsAndReplacesPlaybookRecords(): void
     {
         $projectDir = $this->createTempProjectDirectory('discovering-playbook-export-');
-        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryPlaybookFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -108,7 +108,7 @@ final class PlaybookFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
 
     public function testItReturnsEmptyListWhenNoStorageExists(): void
     {
-        $repository = new PlaybookFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryPlaybookFileSourceRecordRepository(
             $this->createTempProjectDirectory('discovering-playbook-missing-'),
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),

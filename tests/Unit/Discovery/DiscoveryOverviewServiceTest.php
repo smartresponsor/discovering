@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Document\DiscoveryDocumentFactory;
-use App\Discovering\Service\Discovery\Document\DiscoveryDocumentProvider;
-use App\Discovering\Service\Discovery\Overview\DiscoveryOverviewService;
-use App\Discovering\Service\Discovery\Source\CategoryDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\DocumentDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\OfferingDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\ProjectDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
-use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\Factory\Document\DiscoveryDocumentFactory;
+use App\Discovering\Provider\Document\DiscoveryDocumentProvider;
+use App\Discovering\Provider\Source\DiscoveryCategorySourceProvider;
+use App\Discovering\Provider\Source\DiscoveryDocumentSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryOfferingSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryProjectSourceProvider;
+use App\Discovering\Repository\Source\DiscoveryCategorySourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryDocumentSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryOfferingSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryProjectSourceRecordRepository;
+use App\Discovering\Service\Overview\DiscoveryOverviewService;
+use App\Discovering\ServiceInterface\Backend\DiscoveryBackendInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -26,10 +26,10 @@ final class DiscoveryOverviewServiceTest extends TestCase
     public function testItBuildsCountsBySourceName(): void
     {
         $sourceProviders = [
-            new ProjectDiscoverySourceProvider(new ProjectDiscoverySourceRecordRepository()),
-            new OfferingDiscoverySourceProvider(new OfferingDiscoverySourceRecordRepository()),
-            new DocumentDiscoverySourceProvider(new DocumentDiscoverySourceRecordRepository()),
-            new CategoryDiscoverySourceProvider(new CategoryDiscoverySourceRecordRepository()),
+            new DiscoveryProjectSourceProvider(new DiscoveryProjectSourceRecordRepository()),
+            new DiscoveryOfferingSourceProvider(new DiscoveryOfferingSourceRecordRepository()),
+            new DiscoveryDocumentSourceProvider(new DiscoveryDocumentSourceRecordRepository()),
+            new DiscoveryCategorySourceProvider(new DiscoveryCategorySourceRecordRepository()),
         ];
 
         $documentProvider = new DiscoveryDocumentProvider(

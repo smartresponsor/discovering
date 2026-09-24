@@ -22,7 +22,7 @@ It records HTTP/application operation events with request ID, channel, operation
 
 The operation-event payload is:
 
-- `src/Dto/Discovery/DiscoveryOperationEvent.php`
+- `src/Dto/Discovery/DiscoveryOperationEventDTO.php`
 
 The persistence model is:
 
@@ -36,9 +36,9 @@ The service contract is:
 
 Operation-event store implementations are under `src/Service/Discovery/Operations/`:
 
-- `ConfigurableDiscoveryOperationEventLogStore`
-- `DoctrineDiscoveryOperationEventLogStore`
-- `FileDiscoveryOperationEventLogStore`
+- `DiscoveryConfigurableOperationEventLogStore`
+- `DiscoveryDoctrineOperationEventLogStore`
+- `DiscoveryFileOperationEventLogStore`
 
 Serialization is handled by:
 

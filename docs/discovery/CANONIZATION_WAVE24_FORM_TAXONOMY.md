@@ -17,7 +17,7 @@ Touched files:
 
 - `DiscoverySearchType`
 
-The form is already named correctly and keeps query/search child fields unmapped so the readonly `DiscoveryQuery` DTO is not mutated by Symfony Form submit handling.
+The form is already named correctly and keeps query/search child fields unmapped so the readonly `DiscoveryQueryDTO` DTO is not mutated by Symfony Form submit handling.
 
 ## Canonical posture
 

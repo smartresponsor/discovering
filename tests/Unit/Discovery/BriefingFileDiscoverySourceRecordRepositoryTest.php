@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Source\Repository\BriefingFileDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileDecoder;
-use App\Discovering\Service\Discovery\Source\Support\DiscoverySourceRecordJsonFileEncoder;
+use App\Discovering\Repository\Source\DiscoveryBriefingFileSourceRecordRepository;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileDecoder;
+use App\Discovering\Repository\Source\Support\DiscoverySourceRecordJsonFileEncoder;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
 /**
@@ -38,7 +38,7 @@ final class BriefingFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
             ],
         ]);
 
-        $repository = new BriefingFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),
@@ -68,7 +68,7 @@ final class BriefingFileDiscoverySourceRecordRepositoryTest extends DiscoveryTem
             ],
         ]);
 
-        $repository = new BriefingFileDiscoverySourceRecordRepository(
+        $repository = new DiscoveryBriefingFileSourceRecordRepository(
             $projectDir,
             new DiscoverySourceRecordJsonFileDecoder(),
             new DiscoverySourceRecordJsonFileEncoder(),

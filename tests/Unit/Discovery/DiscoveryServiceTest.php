@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryMode;
-use App\Discovering\Dto\Discovery\DiscoveryQuery;
-use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
-use App\Discovering\Service\Discovery\DiscoveryLearningService;
-use App\Discovering\Service\Discovery\DiscoveryModePresetService;
-use App\Discovering\Service\Discovery\DiscoveryScoringService;
-use App\Discovering\Service\Discovery\DiscoveryService;
-use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\DTO\DiscoveryModeDTO;
+use App\Discovering\DTO\DiscoveryQueryDTO;
+use App\Discovering\Repository\Feedback\DiscoveryDoctrineFeedbackStore;
+use App\Discovering\Service\DiscoveryHighlightingService;
+use App\Discovering\Service\DiscoveryLearningService;
+use App\Discovering\Service\DiscoveryModePresetService;
+use App\Discovering\Service\DiscoveryScoringService;
+use App\Discovering\Service\DiscoveryService;
+use App\Discovering\ServiceInterface\Backend\DiscoveryBackendInterface;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -24,7 +24,7 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
     public function testItBuildsRankedHitsWithFeedbackAwareBoosting(): void
     {
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
+        $learningService = new DiscoveryLearningService(new DiscoveryDoctrineFeedbackStore($entityManager));
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
         $learningService->recordUsefulClick('briefing', 'briefing-2', 'Governance review briefing', 'briefing-governance-review');
 
@@ -81,9 +81,9 @@ final class DiscoveryServiceTest extends DiscoveryTempFilesystemTestCase
             new DiscoveryModePresetService(),
         );
 
-        $result = $service->discover(new DiscoveryQuery(
+        $result = $service->discover(new DiscoveryQueryDTO(
             query: 'governance review',
-            mode: DiscoveryMode::GOVERNANCE,
+            mode: DiscoveryModeDTO::GOVERNANCE,
         ));
 
         self::assertSame(2, $result->total);

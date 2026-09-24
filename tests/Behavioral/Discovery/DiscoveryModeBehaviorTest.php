@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Behavioral\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryMode;
-use App\Discovering\Dto\Discovery\DiscoveryQuery;
-use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
-use App\Discovering\Service\Discovery\DiscoveryLearningService;
-use App\Discovering\Service\Discovery\DiscoveryModePresetService;
-use App\Discovering\Service\Discovery\DiscoveryScoringService;
-use App\Discovering\Service\Discovery\DiscoveryService;
-use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
-use App\Discovering\ServiceInterface\Discovery\Backend\DiscoveryBackendInterface;
+use App\Discovering\DTO\DiscoveryModeDTO;
+use App\Discovering\DTO\DiscoveryQueryDTO;
+use App\Discovering\Repository\Feedback\DiscoveryDoctrineFeedbackStore;
+use App\Discovering\Service\DiscoveryHighlightingService;
+use App\Discovering\Service\DiscoveryLearningService;
+use App\Discovering\Service\DiscoveryModePresetService;
+use App\Discovering\Service\DiscoveryScoringService;
+use App\Discovering\Service\DiscoveryService;
+use App\Discovering\ServiceInterface\Backend\DiscoveryBackendInterface;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -53,9 +53,9 @@ final class DiscoveryModeBehaviorTest extends DiscoveryTempFilesystemTestCase
             ],
         ]);
 
-        $result = $service->discover(new DiscoveryQuery(
+        $result = $service->discover(new DiscoveryQueryDTO(
             query: 'audit readiness',
-            mode: DiscoveryMode::GOVERNANCE,
+            mode: DiscoveryModeDTO::GOVERNANCE,
         ));
 
         self::assertSame(2, $result->total);
@@ -90,9 +90,9 @@ final class DiscoveryModeBehaviorTest extends DiscoveryTempFilesystemTestCase
             ],
         ]);
 
-        $result = $service->discover(new DiscoveryQuery(
+        $result = $service->discover(new DiscoveryQueryDTO(
             query: 'recovery drill',
-            mode: DiscoveryMode::OPERATIONS,
+            mode: DiscoveryModeDTO::OPERATIONS,
         ));
 
         self::assertSame(2, $result->total);
@@ -108,7 +108,7 @@ final class DiscoveryModeBehaviorTest extends DiscoveryTempFilesystemTestCase
     private function createService(array $rows): DiscoveryService
     {
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
+        $learningService = new DiscoveryLearningService(new DiscoveryDoctrineFeedbackStore($entityManager));
 
         return new DiscoveryService(
             new class($rows) implements DiscoveryBackendInterface {

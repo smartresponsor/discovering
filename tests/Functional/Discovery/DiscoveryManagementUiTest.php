@@ -27,6 +27,28 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
         self::assertStringContainsString('Mark useful', $content);
     }
 
+    public function testBriefingPlaybookAndFeedbackSurfacesExecuteSuccessfully(): void
+    {
+        $client = $this->createManagementClient();
+
+        $this->requestManagement($client, 'GET', '/management/discovery/briefing');
+        self::assertResponseIsSuccessful();
+
+        $briefingExport = $this->managementExportPayload('/management/discovery/briefing/export');
+        self::assertTrue($briefingExport['ok']);
+
+        $client = $this->createManagementClient();
+        $this->requestManagement($client, 'GET', '/management/discovery/playbook');
+        self::assertResponseIsSuccessful();
+
+        $playbookExport = $this->managementExportPayload('/management/discovery/playbook/export');
+        self::assertTrue($playbookExport['ok']);
+
+        $client = $this->createDiscoveryClient();
+        $client->request('POST', '/discovery/feedback', $this->discoveryClickPayload() + ['return_to' => '/discovery']);
+        self::assertResponseRedirects('/discovery');
+    }
+
     public function testManagementOverviewRequiresManagementToken(): void
     {
         $client = $this->createDiscoveryClient();
@@ -80,7 +102,7 @@ final class DiscoveryManagementUiTest extends AbstractDiscoveryWebTestCase
 
     public function testManagementStateTopologyExportReturnsDistributedReadinessPosture(): void
     {
-        $payload = $this->managementExportPayload('/management/discovery/state-topology/export', 'discovery.state.topology');
+        $payload = $this->managementExportPayload('/management/discovery/state/topology/export', 'discovery.state.topology');
         self::assertFalse($payload['data']['distributedReady']);
         self::assertSame('local_file', $payload['data']['stores'][0]['storageMode']);
         self::assertArrayHasKey('notes', $payload['data']);

@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Libsource\LibsourceDiagnosticSurfaceBuilder;
-use App\Discovering\Service\Discovery\Libsource\LibsourceManagementActionService;
-use App\Discovering\Service\Discovery\Libsource\LibsourceManagementSurfaceActionResolver;
-use App\Discovering\Service\Discovery\Libsource\Log\EphemeralLibsourceOperatorEventLogStore;
-use App\Discovering\Service\Discovery\Source\CategoryDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\DocumentDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\OfferingDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\ProjectDiscoverySourceProvider;
-use App\Discovering\Service\Discovery\Source\Repository\CategoryDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\DiscoverySourceRepositoryRegistry;
-use App\Discovering\Service\Discovery\Source\Repository\DocumentDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\OfferingDiscoverySourceRecordRepository;
-use App\Discovering\Service\Discovery\Source\Repository\ProjectDiscoverySourceRecordRepository;
+use App\Discovering\Builder\Libsource\DiscoveryLibsourceDiagnosticSurfaceBuilder;
+use App\Discovering\Provider\Source\DiscoveryCategorySourceProvider;
+use App\Discovering\Provider\Source\DiscoveryDocumentSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryOfferingSourceProvider;
+use App\Discovering\Provider\Source\DiscoveryProjectSourceProvider;
+use App\Discovering\Repository\Source\DiscoveryCategorySourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryDocumentSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryOfferingSourceRecordRepository;
+use App\Discovering\Repository\Source\DiscoveryProjectSourceRecordRepository;
+use App\Discovering\Resolver\Libsource\DiscoveryLibsourceManagementSurfaceActionResolver;
+use App\Discovering\Service\Libsource\DiscoveryLibsourceManagementActionService;
+use App\Discovering\Service\Libsource\Log\DiscoveryEphemeralLibsourceOperatorEventLogStore;
+use App\Discovering\Service\Source\Repository\DiscoverySourceRepositoryRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -25,33 +25,33 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class LibsourceManagementSurfaceActionResolverTest extends TestCase
 {
-    private function createResolver(EphemeralLibsourceOperatorEventLogStore $store): LibsourceManagementSurfaceActionResolver
+    private function createResolver(DiscoveryEphemeralLibsourceOperatorEventLogStore $store): DiscoveryLibsourceManagementSurfaceActionResolver
     {
         $providers = [
-            new ProjectDiscoverySourceProvider(new ProjectDiscoverySourceRecordRepository()),
-            new OfferingDiscoverySourceProvider(new OfferingDiscoverySourceRecordRepository()),
-            new DocumentDiscoverySourceProvider(new DocumentDiscoverySourceRecordRepository()),
-            new CategoryDiscoverySourceProvider(new CategoryDiscoverySourceRecordRepository()),
+            new DiscoveryProjectSourceProvider(new DiscoveryProjectSourceRecordRepository()),
+            new DiscoveryOfferingSourceProvider(new DiscoveryOfferingSourceRecordRepository()),
+            new DiscoveryDocumentSourceProvider(new DiscoveryDocumentSourceRecordRepository()),
+            new DiscoveryCategorySourceProvider(new DiscoveryCategorySourceRecordRepository()),
         ];
 
         $registry = new DiscoverySourceRepositoryRegistry([
-            new ProjectDiscoverySourceRecordRepository(),
-            new OfferingDiscoverySourceRecordRepository(),
-            new DocumentDiscoverySourceRecordRepository(),
-            new CategoryDiscoverySourceRecordRepository(),
+            new DiscoveryProjectSourceRecordRepository(),
+            new DiscoveryOfferingSourceRecordRepository(),
+            new DiscoveryDocumentSourceRecordRepository(),
+            new DiscoveryCategorySourceRecordRepository(),
         ]);
 
-        $service = new LibsourceManagementActionService(
-            diagnosticSurfaceBuilder: new LibsourceDiagnosticSurfaceBuilder($providers, $registry),
+        $service = new DiscoveryLibsourceManagementActionService(
+            diagnosticSurfaceBuilder: new DiscoveryLibsourceDiagnosticSurfaceBuilder($providers, $registry),
             eventLogStore: $store,
         );
 
-        return new LibsourceManagementSurfaceActionResolver($service);
+        return new DiscoveryLibsourceManagementSurfaceActionResolver($service);
     }
 
     public function testItResolvesInspectAction(): void
     {
-        $store = new EphemeralLibsourceOperatorEventLogStore();
+        $store = new DiscoveryEphemeralLibsourceOperatorEventLogStore();
         $resolver = $this->createResolver($store);
 
         $result = $resolver->resolve(new Request(query: ['action' => 'inspect', 'sourceName' => 'category-source-provider']));
@@ -64,7 +64,7 @@ final class LibsourceManagementSurfaceActionResolverTest extends TestCase
 
     public function testItResolvesClearEventLogAction(): void
     {
-        $store = new EphemeralLibsourceOperatorEventLogStore();
+        $store = new DiscoveryEphemeralLibsourceOperatorEventLogStore();
         $resolver = $this->createResolver($store);
 
         $resolver->resolve(new Request(query: ['action' => 'audit-alignment']));

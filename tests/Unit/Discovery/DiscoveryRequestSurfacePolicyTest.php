@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\Http\DiscoveryRequestSurfacePolicy;
+use App\Discovering\Policy\Http\DiscoveryRequestSurfacePolicy;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 

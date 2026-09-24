@@ -40,13 +40,13 @@ Allowed current buckets:
 
 Accepted transitional root-level service files:
 
-- `ConfigurableDiscoveryFeedbackStore.php`
+- `DiscoveryConfigurableFeedbackStore.php`
 - `DiscoveryHighlightingService.php`
 - `DiscoveryLearningService.php`
 - `DiscoveryModePresetService.php`
 - `DiscoveryScoringService.php`
 - `DiscoveryService.php`
-- `DoctrineDiscoveryFeedbackStore.php`
+- `DiscoveryDoctrineFeedbackStore.php`
 
 ## Non-goals
 

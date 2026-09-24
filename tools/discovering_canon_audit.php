@@ -291,12 +291,12 @@ $legacyServiceInterfaceFiles = [];
 $legacyServiceInterfaceCandidates = [
     'src/Service/Discovery/Diagnostics/DiscoveryProbeTransportInterface.php',
     'src/Service/Discovery/DiscoveryFeedbackStoreInterface.php',
-    'src/Service/Discovery/Libsource/Log/LibsourceOperatorEventLogStoreInterface.php',
+    'src/Service/Discovery/Libsource/Log/DiscoveryLibsourceOperatorEventLogStoreInterface.php',
     'src/Service/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php',
     'src/Service/Discovery/RateLimit/DiscoveryRateLimitStoreInterface.php',
     'src/Service/Discovery/Rebuild/DiscoveryRebuildEvidenceStoreInterface.php',
     'src/Service/Discovery/Source/Repository/DiscoverySourceRecordRepositoryInterface.php',
-    'src/Service/Discovery/Support/DirectoryBackedFamilyManagementActionServiceInterface.php',
+    'src/Service/Discovery/Support/DiscoveryDirectoryBackedFamilyManagementActionServiceInterface.php',
 ];
 
 foreach ($legacyServiceInterfaceCandidates as $legacyPath) {
@@ -1054,13 +1054,13 @@ $allowedDiscoveryServiceBuckets = [
 ];
 
 $allowedDiscoveryRootServiceFiles = [
-    'ConfigurableDiscoveryFeedbackStore.php',
+    'DiscoveryConfigurableFeedbackStore.php',
     'DiscoveryHighlightingService.php',
     'DiscoveryLearningService.php',
     'DiscoveryModePresetService.php',
     'DiscoveryScoringService.php',
     'DiscoveryService.php',
-    'DoctrineDiscoveryFeedbackStore.php',
+    'DiscoveryDoctrineFeedbackStore.php',
 ];
 
 $allowedServiceSuffixes = [
@@ -1820,7 +1820,7 @@ if (is_dir($formDiscoveryRoot)) {
                         'severity' => 'warning',
                         'code' => 'discovery_search_type_missing_unmapped_boundary',
                         'path' => $formRelative,
-                        'message' => 'DiscoverySearchType should keep explicit unmapped query fields because DiscoveryQuery is readonly.',
+                        'message' => 'DiscoverySearchType should keep explicit unmapped query fields because DiscoveryQueryDTO is readonly.',
                     ];
                     break;
                 }
@@ -1832,17 +1832,17 @@ if (is_dir($formDiscoveryRoot)) {
                     'severity' => 'warning',
                     'code' => 'discovery_search_type_has_too_few_unmapped_fields',
                     'path' => $formRelative,
-                    'message' => 'DiscoverySearchType should keep its core query fields mapped=false because DiscoveryQuery is readonly.',
+                    'message' => 'DiscoverySearchType should keep its core query fields mapped=false because DiscoveryQueryDTO is readonly.',
                 ];
             }
 
-            if (!str_contains($formContents, 'DiscoveryQuery')) {
+            if (!str_contains($formContents, 'DiscoveryQueryDTO')) {
                 $formTaxonomyFindings[] = 'discovery_search_type_missing_query_boundary:' . $formRelative;
                 $findings[] = [
                     'severity' => 'warning',
                     'code' => 'discovery_search_type_missing_query_boundary',
                     'path' => $formRelative,
-                    'message' => 'DiscoverySearchType should document/declare the DiscoveryQuery boundary.',
+                    'message' => 'DiscoverySearchType should document/declare the DiscoveryQueryDTO boundary.',
                 ];
             }
         }
@@ -2242,7 +2242,7 @@ $requiredSecurityPostureFiles = [
     'src/Subscriber/Discovery/DiscoveryRequestCorrelationSubscriber.php',
     'src/Subscriber/Discovery/DiscoveryResponseSecurityHeadersSubscriber.php',
     'src/Service/Discovery/RateLimit/DiscoveryRateLimiter.php',
-    'src/Service/Discovery/RateLimit/ConfigurableDiscoveryRateLimitStore.php',
+    'src/Service/Discovery/RateLimit/DiscoveryConfigurableRateLimitStore.php',
     'config/services/discovery.yaml',
 ];
 
@@ -2300,7 +2300,7 @@ if (is_file($endpointSecuritySubscriberFile)) {
 $rateLimitSubscriberFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Subscriber' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryRateLimitSubscriber.php';
 if (is_file($rateLimitSubscriberFile)) {
     $rateLimitSubscriberContents = (string) file_get_contents($rateLimitSubscriberFile);
-    foreach (['DiscoveryRateLimiter', 'DiscoveryRateLimitDecision', 'EventSubscriberInterface', 'X-RateLimit-Limit', 'Retry-After'] as $expectedRateLimitSubscriberMarker) {
+    foreach (['DiscoveryRateLimiter', 'DiscoveryRateLimitDecisionDTO', 'EventSubscriberInterface', 'X-RateLimit-Limit', 'Retry-After'] as $expectedRateLimitSubscriberMarker) {
         if (!str_contains($rateLimitSubscriberContents, $expectedRateLimitSubscriberMarker)) {
             $securityPostureFindings[] = 'rate_limit_subscriber_missing_marker:' . $expectedRateLimitSubscriberMarker;
             $findings[] = [
@@ -2391,11 +2391,11 @@ $requiredObservabilityOperationsFiles = [
     'docs/discovery/OBSERVABILITY_POSTURE.md',
     'src/Subscriber/Discovery/DiscoveryRequestCorrelationSubscriber.php',
     'src/Service/Discovery/Operations/DiscoveryOperationLogger.php',
-    'src/Service/Discovery/Operations/ConfigurableDiscoveryOperationEventLogStore.php',
-    'src/Service/Discovery/Operations/DoctrineDiscoveryOperationEventLogStore.php',
-    'src/Service/Discovery/Operations/FileDiscoveryOperationEventLogStore.php',
+    'src/Service/Discovery/Operations/DiscoveryConfigurableOperationEventLogStore.php',
+    'src/Service/Discovery/Operations/DiscoveryDoctrineOperationEventLogStore.php',
+    'src/Service/Discovery/Operations/DiscoveryFileOperationEventLogStore.php',
     'src/Service/Discovery/Operations/DiscoveryOperationEventJsonSerializer.php',
-    'src/Dto/Discovery/DiscoveryOperationEvent.php',
+    'src/Dto/Discovery/DiscoveryOperationEventDTO.php',
     'src/Entity/Discovery/DiscoveryOperationEventEntity.php',
     'src/ServiceInterface/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php',
     'config/services/discovery.yaml',
@@ -2420,7 +2420,7 @@ if (is_file($operationLoggerFile)) {
         'REQUEST_ID_HEADER',
         'REQUEST_ID_ATTRIBUTE',
         'recordHttp',
-        'DiscoveryOperationEvent',
+        'DiscoveryOperationEventDTO',
         'DiscoveryOperationEventLogStoreInterface',
     ] as $expectedOperationLoggerMarker) {
         if (!str_contains($operationLoggerContents, $expectedOperationLoggerMarker)) {
@@ -2457,16 +2457,16 @@ if (is_file($correlationSubscriberFile)) {
     }
 }
 
-$operationEventDtoFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryOperationEvent.php';
+$operationEventDtoFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Dto' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'DiscoveryOperationEventDTO.php';
 if (is_file($operationEventDtoFile)) {
     $operationEventDtoContents = (string) file_get_contents($operationEventDtoFile);
-    foreach (['final readonly class DiscoveryOperationEvent', 'requestId', 'channel', 'operation', 'status', 'occurredAt', 'context'] as $expectedOperationEventDtoMarker) {
+    foreach (['final readonly class DiscoveryOperationEventDTO', 'requestId', 'channel', 'operation', 'status', 'occurredAt', 'context'] as $expectedOperationEventDtoMarker) {
         if (!str_contains($operationEventDtoContents, $expectedOperationEventDtoMarker)) {
             $observabilityOperationsFindings[] = 'operation_event_dto_missing_marker:' . $expectedOperationEventDtoMarker;
             $findings[] = [
                 'severity' => 'warning',
                 'code' => 'operation_event_dto_missing_marker',
-                'path' => 'src/Dto/Discovery/DiscoveryOperationEvent.php',
+                'path' => 'src/Dto/Discovery/DiscoveryOperationEventDTO.php',
                 'message' => sprintf('Operation event DTO should contain marker "%s".', $expectedOperationEventDtoMarker),
             ];
         }
@@ -2492,7 +2492,7 @@ if (is_file($operationEventEntityFile)) {
 $operationStoreInterfaceFile = $root . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'ServiceInterface' . DIRECTORY_SEPARATOR . 'Discovery' . DIRECTORY_SEPARATOR . 'Operations' . DIRECTORY_SEPARATOR . 'DiscoveryOperationEventLogStoreInterface.php';
 if (is_file($operationStoreInterfaceFile)) {
     $operationStoreInterfaceContents = (string) file_get_contents($operationStoreInterfaceFile);
-    foreach (['append', 'all', 'latest', 'clear', 'DiscoveryOperationEvent'] as $expectedOperationStoreInterfaceMarker) {
+    foreach (['append', 'all', 'latest', 'clear', 'DiscoveryOperationEventDTO'] as $expectedOperationStoreInterfaceMarker) {
         if (!str_contains($operationStoreInterfaceContents, $expectedOperationStoreInterfaceMarker)) {
             $observabilityOperationsFindings[] = 'operation_store_interface_missing_marker:' . $expectedOperationStoreInterfaceMarker;
             $findings[] = [
@@ -2536,7 +2536,7 @@ if (is_file($discoveryServicesConfigFile)) {
         'APP_DISCOVERY_OPERATION_LOG_PATH',
         'APP_DISCOVERY_OPERATION_LOG_BACKEND',
         'App\\ServiceInterface\\Discovery\\Operations\\DiscoveryOperationEventLogStoreInterface',
-        'App\\Service\\Discovery\\Operations\\ConfigurableDiscoveryOperationEventLogStore',
+        'App\\Service\\Discovery\\Operations\\DiscoveryConfigurableOperationEventLogStore',
     ] as $expectedObservabilityConfigMarker) {
         if (!str_contains($discoveryServicesConfigContents, $expectedObservabilityConfigMarker)) {
             $observabilityOperationsFindings[] = 'observability_config_missing_marker:' . $expectedObservabilityConfigMarker;
@@ -3065,12 +3065,12 @@ $docblockPolicyTargets = [
     'src/Entity/Discovery/DiscoveryOperationEventEntity.php',
     'src/Entity/Discovery/DiscoveryRateLimitBucketEntity.php',
     'src/Entity/Discovery/DiscoveryRebuildEvidenceEntity.php',
-    'src/Entity/Discovery/LibsourceOperatorEventEntity.php',
-    'src/Service/Discovery/DoctrineDiscoveryFeedbackStore.php',
-    'src/Service/Discovery/Libsource/Log/DoctrineLibsourceOperatorEventLogStore.php',
-    'src/Service/Discovery/Operations/DoctrineDiscoveryOperationEventLogStore.php',
-    'src/Service/Discovery/RateLimit/DoctrineDiscoveryRateLimitStore.php',
-    'src/Service/Discovery/Rebuild/DoctrineDiscoveryRebuildEvidenceStore.php',
+    'src/Entity/Discovery/DiscoveryLibsourceOperatorEventEntity.php',
+    'src/Service/Discovery/DiscoveryDoctrineFeedbackStore.php',
+    'src/Service/Discovery/Libsource/Log/DiscoveryDoctrineLibsourceOperatorEventLogStore.php',
+    'src/Service/Discovery/Operations/DiscoveryDoctrineOperationEventLogStore.php',
+    'src/Service/Discovery/RateLimit/DiscoveryDoctrineRateLimitStore.php',
+    'src/Service/Discovery/Rebuild/DiscoveryDoctrineRebuildEvidenceStore.php',
     'tests/Support/DiscoveryDoctrineEntityManagerFactory.php',
 ];
 
@@ -3106,12 +3106,12 @@ $legacyRetirementFindings = [];
 $legacyRetirementFiles = [
     'src/Service/Discovery/Diagnostics/DiscoveryProbeTransportInterface.php',
     'src/Service/Discovery/DiscoveryFeedbackStoreInterface.php',
-    'src/Service/Discovery/Libsource/Log/LibsourceOperatorEventLogStoreInterface.php',
+    'src/Service/Discovery/Libsource/Log/DiscoveryLibsourceOperatorEventLogStoreInterface.php',
     'src/Service/Discovery/Operations/DiscoveryOperationEventLogStoreInterface.php',
     'src/Service/Discovery/RateLimit/DiscoveryRateLimitStoreInterface.php',
     'src/Service/Discovery/Rebuild/DiscoveryRebuildEvidenceStoreInterface.php',
     'src/Service/Discovery/Source/Repository/DiscoverySourceRecordRepositoryInterface.php',
-    'src/Service/Discovery/Support/DirectoryBackedFamilyManagementActionServiceInterface.php',
+    'src/Service/Discovery/Support/DiscoveryDirectoryBackedFamilyManagementActionServiceInterface.php',
     'src/EventSubscriber/DiscoveryEndpointSecuritySubscriber.php',
     'src/EventSubscriber/DiscoveryMutationRequestHardeningSubscriber.php',
     'src/EventSubscriber/DiscoveryRateLimitSubscriber.php',

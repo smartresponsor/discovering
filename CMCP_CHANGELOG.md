@@ -58,6 +58,16 @@
 - Two non-blocking diagnostic warnings remain for TODO/FIXME markers in `src/Form/Discovery/DiscoverySearchType.php` and `templates/management/discovery/libsource_log.html.twig`; they are not current hard failures.
 - Growth remains post-RC: richer faceting/authority/relevance semantics, hybrid lexical/vector retrieval, and further discovery UX/API maturity must not be mixed into RC correctness work.
 - Git integration must preserve the pre-existing dirty baseline. Do not create a mixed commit that silently absorbs unrelated user changes; final staging/commit/push is permitted only if the current work can be factually isolated.
+
+## 2026-09-23 — Canon gate revalidation and DTO wave
+
+- Re-ran the repository's executable Gating companion against current Canonization semantics instead of relying on the older RC diagnostic snapshot.
+- Found and repaired a false-green Windows PHP lint gate: the old path-prefix comparison selected zero files. The gate now performs real php -l checks through a bounded process pool and verifies 257 PHP files.
+- Restored the locked local gating/gate development dependency in vendor so the declared Composer gate is executable.
+- Read the current Canon001, Canon003, Canon004, Canon006, Canon007, Canon018, Canon019, and related executable rule implementations before structural changes.
+- Completed the bounded DTO migration required by Canon003/004/007/018: src/Dto/Discovery/* moved to canonical src/DTO/Discovery*DTO.php identities, with namespaces and references updated. Windows case-only Dto -> DTO handling was completed through an intermediate directory.
+- Post-wave verification: PHP lint PASS for 257 files; PHPStan analyse PASS; Gating now reports Canon003 and Canon007 PASS. Remaining hard findings are early Discovery subject folders, dominant-role placement, and non-Discovery-prefixed component types. Canon011 and Canon016 remain semantic warnings requiring review rather than suppression.
+- Safeguard: no sibling repository or Navigating write is authorized; unrelated existing Composer/Gating workspace dirt is preserved.
 - Final acceptance rerun: `composer ci` PASS after excluding generated `config/reference.php` from the CS source boundary; `composer run-script validate:prod` PASS; `npm test` / Playwright PASS; final RC diagnostic remains `rc_diagnostic_green` with the same two non-blocking TODO warnings.
 - Initial Git snapshot before integration: protected `master`, HEAD `133023ac7b3780169ef64f879181a1da4e0c41ab`, upstream `origin/master`, ahead 2 / behind 0, dirty set 117 paths.
 - The dirty tree was subsequently isolated by responsibility while preserving the three explicitly recorded baseline-untracked paths (`.gating/`, `AGENTS.md`, `tools/migrate_component_namespace.php`). Signed commits created for this RC workstream: `29e1461` (`refactor: replace discovery adapters with backends`), `e61c523` (`feat: harden discovering standalone runtime`), `c1847c6` (`test: close discovering rc acceptance`), `80a1646` (`style: normalize discovering php sources`), and `1a95084` (`build: unify php cs fixer configuration`).
@@ -65,3 +75,32 @@
 - Post-integration acceptance on committed HEAD: `composer ci` PASS and `npm test` / Playwright PASS. Current protected `master` HEAD before RC branch publication is `1a95084182b4b02f83974d49c20fc72c221aa479`, ahead 7 / behind 0; worktree contained only the three preserved baseline-untracked paths.
 - To satisfy the branch-switch clean-tree guard without deleting those baseline assets, they were preserved in an isolated signed governance commit `edac071` (`chore: preserve repository governance baseline`). Generated Commanding log files discovered inside that snapshot were immediately removed from tracking while preserved locally; `da02b0a` (`chore: exclude local gating logs`) added ignore rules and removed 18 log artifacts from the Git index.
 - Clean HEAD `da02b0a49f8e349b92475d0d1b783f0d1eb3c62c` was published as `rc/discovering-canon-closure-20260914` with upstream `origin/rc/discovering-canon-closure-20260914`. GitHub PR #5 (`RC: canonicalize Discovering and close runtime acceptance`) targets protected `master`; PR inspection reports OPEN, MERGEABLE, no local merge-safety blockers, and no configured/pending/failed GitHub status checks at inspection time.
+
+## 2026-09-24 — Canon closure, evidence, and final runtime acceptance
+
+### Canonical topology and runtime closure
+
+- Flattened the remaining subject-first source trees into canonical technical-role roots, moved DTOs to `src/DTO`, normalized component-owned type names to the `Discovery*` subject vocabulary, and moved repository-owned persistence collaborators out of orchestration roles.
+- Added the reusable Discovering bundle surface and standalone registration, canonical PostgreSQL `data` plus SQLite `infra` DBAL roles, direct PHPStan/PHP-CS-Fixer scripts, Doctrine Migrations tooling, and canonical YAML/route naming.
+- Repaired Viewing/Interfacing integration through a host-owned `DiscoveringExtension` that prepends the Discovering resource-specific Interfacing template override without patching sibling repositories.
+- Repaired public route imports after controller flattening and updated the state/topology route to canonical segmented path semantics.
+- Changed the file-backed rate-limit store to fail observably on corrupted authoritative JSON instead of silently resetting the bucket; added unit coverage for this failure mode.
+
+### Schema and evidence contracts
+
+- Added initial Doctrine migration `DoctrineMigrations\\Version20260923192125` generated from an empty schema.
+- Added reproducible isolated schema parity: a dedicated `schema_parity` environment migrates a clean SQLite database, runs `doctrine:schema:validate`, then verifies migration currentness. The accumulated developer SQLite is left untouched and remains inspectable through explicit current-state diagnostics.
+- Added reproducible behavioral/UI coverage producer `test:behavioral-coverage`, deriving functional route inventory from Symfony router metadata and exercised functional URLs.
+- Canon042 evidence now reports functional 20/24 (83.3%), behavioral 3/3 (100%), UI 2/2 (100%), and critical 2/2 (100%).
+- PHPUnit/Xdebug path coverage evidence is present on the final tree: lines 75.9% (2660/3506), methods 56.4% (305/541), branches 64.6% (1348/2088). This remains measured post-RC test debt under Canon040, not missing evidence.
+
+### Final acceptance
+
+- Gating: 70 rules, 0 failed, 2 warnings. Canon016 remains a semantic review warning on the operational `DiscoveryIndexAlias*` surface; Canon040 remains measured PHP coverage debt.
+- Canon031 PHPDoc coverage: PASS at 70.1% contract methods and 95.7% classes.
+- Strict Composer validation: development and production manifests PASS.
+- PHP lint: PASS for 259 files; PHPStan: PASS; PHP CS Fixer check: PASS.
+- Runtime/security/docblock preflights: PASS.
+- Doctrine isolated schema parity and migration currentness: PASS.
+- Full `ci:runtime`: PASS. Suites on the final tree: Unit 103/488, Contract 7/96, Behavioral 3/20, Functional 28/444.
+- No sibling repository or Navigating source was modified by this run. Remaining growth work (hybrid/vector retrieval and deeper relevance tuning) stays outside RC.

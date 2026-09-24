@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryHit;
-use App\Discovering\Dto\Discovery\DiscoveryQuery;
-use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
-use App\Discovering\Service\Discovery\DiscoveryLearningService;
-use App\Discovering\Service\Discovery\DiscoveryScoringService;
-use App\Discovering\Service\Discovery\DoctrineDiscoveryFeedbackStore;
+use App\Discovering\DTO\DiscoveryHitDTO;
+use App\Discovering\DTO\DiscoveryQueryDTO;
+use App\Discovering\Repository\Feedback\DiscoveryDoctrineFeedbackStore;
+use App\Discovering\Service\DiscoveryHighlightingService;
+use App\Discovering\Service\DiscoveryLearningService;
+use App\Discovering\Service\DiscoveryScoringService;
 use App\Discovering\Tests\Support\DiscoveryDoctrineEntityManagerFactory;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 
@@ -21,13 +21,13 @@ final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
     public function testItRanksHitsAndAppliesFeedbackBoost(): void
     {
         $entityManager = DiscoveryDoctrineEntityManagerFactory::create();
-        $learningService = new DiscoveryLearningService(new DoctrineDiscoveryFeedbackStore($entityManager));
+        $learningService = new DiscoveryLearningService(new DiscoveryDoctrineFeedbackStore($entityManager));
         $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
         $learningService->recordUsefulClick('playbook', 'playbook-1', 'Reindex operations playbook', 'playbook-reindex-operations');
 
         $service = new DiscoveryScoringService(new DiscoveryHighlightingService(), $learningService);
         $hits = [
-            new DiscoveryHit(
+            new DiscoveryHitDTO(
                 id: 'briefing-1',
                 title: 'Search portability briefing',
                 resource: 'briefing',
@@ -36,7 +36,7 @@ final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
                 content: 'This briefing explains search portability and governance expectations for discovery.',
                 ftsScore: -0.8,
             ),
-            new DiscoveryHit(
+            new DiscoveryHitDTO(
                 id: 'playbook-1',
                 title: 'Reindex operations playbook',
                 resource: 'playbook',
@@ -47,7 +47,7 @@ final class DiscoveryScoringServiceTest extends DiscoveryTempFilesystemTestCase
             ),
         ];
 
-        $query = new DiscoveryQuery(query: 'reindex operations');
+        $query = new DiscoveryQueryDTO(query: 'reindex operations');
         $rankedHits = $service->rank($hits, $query);
 
         self::assertSame('playbook-1', $rankedHits[0]->id);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\DiscoveryHighlightingService;
+use App\Discovering\Service\DiscoveryHighlightingService;
 use PHPUnit\Framework\TestCase;
 
 /**

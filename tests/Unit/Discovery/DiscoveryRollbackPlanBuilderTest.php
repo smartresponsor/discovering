@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Dto\Discovery\DiscoveryRebuildSummary;
-use App\Discovering\Service\Discovery\Rebuild\DiscoveryRollbackPlanBuilder;
-use App\Discovering\ServiceInterface\Discovery\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
+use App\Discovering\Builder\Rebuild\DiscoveryRollbackPlanBuilder;
+use App\Discovering\DTO\DiscoveryRebuildSummaryDTO;
+use App\Discovering\ServiceInterface\Rebuild\DiscoveryRebuildEvidenceStoreInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -28,7 +28,7 @@ final class DiscoveryRollbackPlanBuilderTest extends TestCase
     public function testBuildReturnsReadyPlanWhenTwoDistinctGlobalStagedRebuildsExist(): void
     {
         $builder = new DiscoveryRollbackPlanBuilder(new InMemoryDiscoveryRebuildEvidenceStore([
-            new DiscoveryRebuildSummary(
+            new DiscoveryRebuildSummaryDTO(
                 evidenceId: 'reb-current',
                 resource: 'global',
                 rebuildMode: 'full',
@@ -44,7 +44,7 @@ final class DiscoveryRollbackPlanBuilderTest extends TestCase
                 stagedIndexes: ['global' => 'discovering__reb_current'],
                 aliasSwapApplied: true,
             ),
-            new DiscoveryRebuildSummary(
+            new DiscoveryRebuildSummaryDTO(
                 evidenceId: 'reb-previous',
                 resource: 'global',
                 rebuildMode: 'full',
@@ -76,7 +76,7 @@ final class DiscoveryRollbackPlanBuilderTest extends TestCase
     public function testBuildReturnsNoPreviousCandidateWhenOnlyOneGlobalRebuildExists(): void
     {
         $builder = new DiscoveryRollbackPlanBuilder(new InMemoryDiscoveryRebuildEvidenceStore([
-            new DiscoveryRebuildSummary(
+            new DiscoveryRebuildSummaryDTO(
                 evidenceId: 'reb-current',
                 resource: 'global',
                 rebuildMode: 'full',
@@ -106,13 +106,13 @@ final class DiscoveryRollbackPlanBuilderTest extends TestCase
 final class InMemoryDiscoveryRebuildEvidenceStore implements DiscoveryRebuildEvidenceStoreInterface
 {
     /**
-     * @param list<DiscoveryRebuildSummary> $items
+     * @param list<DiscoveryRebuildSummaryDTO> $items
      */
     public function __construct(private array $items)
     {
     }
 
-    public function append(DiscoveryRebuildSummary $summary): void
+    public function append(DiscoveryRebuildSummaryDTO $summary): void
     {
         $this->items[] = $summary;
     }

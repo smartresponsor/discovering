@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Discovering\Tests\Unit\Discovery;
 
-use App\Discovering\Service\Discovery\RateLimit\DiscoveryRateLimiter;
-use App\Discovering\Service\Discovery\RateLimit\FileDiscoveryRateLimitStore;
+use App\Discovering\Service\RateLimit\DiscoveryFileRateLimitStore;
+use App\Discovering\Service\RateLimit\DiscoveryRateLimiter;
 use App\Discovering\Tests\Support\DiscoveryTempFilesystemTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -24,7 +24,7 @@ final class DiscoveryRateLimiterTest extends DiscoveryTempFilesystemTestCase
     public function testQueryScopeExceedsConfiguredLimit(): void
     {
         $limiter = new DiscoveryRateLimiter(
-            new FileDiscoveryRateLimitStore($this->path),
+            new DiscoveryFileRateLimitStore($this->path),
             queryLimit: 2,
             queryWindowSeconds: 60,
             writeLimit: 5,
@@ -50,10 +50,21 @@ final class DiscoveryRateLimiterTest extends DiscoveryTempFilesystemTestCase
         self::assertGreaterThan(0, $third?->retryAfterSeconds ?? 0);
     }
 
+    public function testCorruptedRateLimitStateFailsObservably(): void
+    {
+        file_put_contents($this->path, '{invalid-json');
+
+        $store = new DiscoveryFileRateLimitStore($this->path);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('contains invalid JSON');
+        $store->increment('query', 'ip:127.0.0.3', 60);
+    }
+
     public function testManagementMutationScopeUsesDedicatedBucket(): void
     {
         $limiter = new DiscoveryRateLimiter(
-            new FileDiscoveryRateLimitStore($this->path),
+            new DiscoveryFileRateLimitStore($this->path),
             queryLimit: 5,
             queryWindowSeconds: 60,
             writeLimit: 5,
