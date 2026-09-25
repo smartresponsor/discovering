@@ -233,7 +233,7 @@ abstract class AbstractDiscoveryWebTestCase extends WebTestCase
 
     private function resetConfiguredDiscoveryStorage(): void
     {
-        $directory = \dirname(__DIR__, 3).'/var/discovery';
+        $directory = \dirname(__DIR__, 3).'/var/test';
         if (!\is_dir($directory)) {
             return;
         }

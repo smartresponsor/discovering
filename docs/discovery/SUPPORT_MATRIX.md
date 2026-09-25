@@ -25,7 +25,7 @@ The repository expects the following developer tooling for full RC proving:
 
 ## Supported repository modes
 
-- ecosystem brick inside the Smart Responsor component landscape
+- ecosystem component inside the multi-domain SaaS platform landscape
 - local standalone Symfony-oriented application mode
 - local SQLite-first indexing mode
 - integration-ready Meilisearch mode when configured

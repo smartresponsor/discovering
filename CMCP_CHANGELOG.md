@@ -104,3 +104,42 @@
 - Doctrine isolated schema parity and migration currentness: PASS.
 - Full `ci:runtime`: PASS. Suites on the final tree: Unit 103/488, Contract 7/96, Behavioral 3/20, Functional 28/444.
 - No sibling repository or Navigating source was modified by this run. Remaining growth work (hybrid/vector retrieval and deeper relevance tuning) stays outside RC.
+
+## 2026-09-24 — Canon055 terminology and dev-path reproducibility
+
+### Reconnaissance baseline
+
+- Re-entered the current `D:\\PhpstormProjects\\www\\Discovering` tree on `master` at `fd31f9f14c5ef7dea3c3d685106f26d2e3d1a21f`; worktree was clean and the branch was 4 commits ahead of `origin/master`.
+- Re-read the target README, Composer manifests, local agent rules, product/bounding/architecture manifests, CI/security/runtime documentation, Doctrine/bundle wiring, source topology, routes, Entity mappings, and memory-graph scope.
+- Re-read the mandatory dependency contour from Objecting, Cruding, Viewing, and Interfacing and the executable Gating contract. Canonization was treated as read-only normative source.
+- Canonization rules consulted in this pass: Canon001, Canon002, Canon018, Canon019, Canon022, Canon043, Canon044, Canon053, Canon054, and Canon055.
+- Target mapping: preserve `App\\Discovering\\ => src/`; keep role-first technical trees and mirrored typed contracts; keep generic CRUD outside Discovering; retain the complete standalone dependency baseline; use only canonical Objecting persisted-field vocabulary; keep allowed sibling symlinks explicit and reproducible with `dev-master`; use neutral platform terminology in current human-facing documentation.
+
+### RC-critical workstream
+
+- Executable Gating found one hard current-tree failure: Canon055 flagged three human-facing uses of the SmartResponsor/Smart Responsor consumer identity as platform/ecosystem identity.
+- Canon043 textual review found four local first-party path repositories (`Cruding`, `Interfacing`, `Objecting`, `Viewing`) missing explicit `options.versions[package] = dev-master` despite direct `dev-master` requirements.
+- The bounded repair neutralizes the three Canon055 prose violations and completes the four missing Composer path-version mappings. No sibling repository is modified.
+
+### Growth workstream
+
+- Post-RC maturity remains separate: semantic/vector retrieval, second-stage reranking, richer relevance analytics, and broader discovery UX/API capabilities are useful competitive growth but are not correctness blockers for this RC pass.
+
+### Planned acceptance
+
+- Re-run `composer gate`, strict development/production Composer validation, local/runtime/quality CI scripts, Doctrine/schema checks, PHP lint/static analysis/tests, then inspect final Git diff/status/upstream before any signed commit or push.
+
+### Acceptance evidence
+
+- `composer gate`: PASS; Canon055 is green, 0 failed, 0 warnings (2 profile-dependent rules skipped by Gating because no profile was supplied).
+- `composer validate --strict` and `composer validate:prod`: PASS.
+- Composer lock/install state was synchronized after adding the Canon043 path-version mappings; the seven live first-party path package references were refreshed to their current local `dev-master` revisions and `composer audit` reported no advisories.
+- The first runtime pass exposed a reproducible SQLite lock while a stale managed PHP dev server was using the same `var/discovery/discovering.sqlite` as PHPUnit. The existing `config/packages/test/doctrine.yaml` override targeted the wrong DBAL level and therefore did not override the named `infra` connection.
+- Test state is now isolated at `var/test/discovering.sqlite`; PHPUnit bootstrap creates only `var/test`, and functional teardown cleans only that test-owned directory. With the dev server still running, Contract passed 7/7 (96 assertions) and `composer ci:runtime` completed successfully, proving the dev/test lock and destructive cleanup coupling is closed.
+- `composer ci:local`: PASS; runtime/security/docblock/PHP lint preflight green.
+- `composer ci:runtime`: PASS after test-state isolation; Unit, Contract, Behavioral, and Functional suites all completed successfully.
+- `composer ci:quality`: PASS; static analysis clean and PHP-CS-Fixer reported 0 fixable files.
+- `composer verify:schema`: PASS on isolated SQLite; mapping valid and schema synchronized through `DoctrineMigrations\\Version20260923192125`.
+- `composer verify:migrations:current`: PASS; no migrations pending.
+- A manual dev `cache:clear` additionally exposed generated PHP from the current upstream EasyAdmin/Twig/UX Twig Component combination that is syntactically invalid around vendor component attribute spread. Current upstream releases and the EasyAdmin 5.x template still contain the same expression; no target-owned workaround or vendor patch was introduced because ownership and a verified upstream fix are absent. This is recorded as an external dependency/cache-warmup risk, not mixed into the Discovering RC patch.
+- No sibling repository or Navigating source was modified.

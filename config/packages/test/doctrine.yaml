@@ -1,7 +1,12 @@
+parameters:
+  app.discovery.default_sqlite_path: '%kernel.project_dir%/var/test/discovering.sqlite'
+
 doctrine:
   dbal:
-    driver: 'pdo_sqlite'
-    path: '%kernel.project_dir%/var/discovery/discovering.test.sqlite'
+    connections:
+      infra:
+        driver: 'pdo_sqlite'
+        path: '%kernel.project_dir%/var/test/discovering.sqlite'
   orm:
     auto_mapping: true
     mappings:

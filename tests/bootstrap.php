@@ -6,7 +6,7 @@ use Symfony\Component\Dotenv\Dotenv;
 
 require dirname(__DIR__).'/vendor/autoload.php';
 
-$discoveryStateDirectory = dirname(__DIR__).'/var/discovery';
+$discoveryStateDirectory = dirname(__DIR__).'/var/test';
 if (!is_dir($discoveryStateDirectory) && !mkdir($discoveryStateDirectory, 0775, true) && !is_dir($discoveryStateDirectory)) {
     throw new RuntimeException(sprintf('Unable to create discovery test state directory "%s".', $discoveryStateDirectory));
 }

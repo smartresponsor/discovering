@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b1bcc792026995e21e27420fbb81fa86",
+    "content-hash": "c3a84ce45a636a339ff0107f01e64b84",
     "packages": [
         {
             "name": "collectioning/collection",
@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "../Collectioning",
-                "reference": "8d0bf8ed56c06ff84d54a99abaadcaab55da11c2"
+                "reference": "82194f4f9f67bb53a2536c5a15e1d924f0ec8991"
             },
             "require": {
                 "doctrine/doctrine-bundle": "^3.2",
@@ -166,7 +166,7 @@
             "dist": {
                 "type": "path",
                 "url": "../Cruding",
-                "reference": "33edc69d0850efe296cb699d11299748497c7bd4"
+                "reference": "1a9131ce3075fb939c73d4654f26302111ac8df8"
             },
             "require": {
                 "collectioning/collection": "dev-master",
@@ -1509,7 +1509,7 @@
             "dist": {
                 "type": "path",
                 "url": "../Interfacing",
-                "reference": "cae44dc8c1ce4a0d7b44a24ffda086170f83f554"
+                "reference": "0f3353dc5a4d06bd2c2b04fa46b918e8e42f4c84"
             },
             "require": {
                 "collectioning/collection": "dev-master",
@@ -1663,7 +1663,7 @@
             "dist": {
                 "type": "path",
                 "url": "../Objecting",
-                "reference": "3ab0571efdda23dbe6da800e2ed28528a95a140d"
+                "reference": "69274db3dc29d3d1d67db4f59ec1c0afa328d530"
             },
             "require": {
                 "doctrine/orm": "^3.3",
@@ -7231,7 +7231,7 @@
             "dist": {
                 "type": "path",
                 "url": "../Tabling",
-                "reference": "0110010c7a5502b3c4736cfb6d7157e7ecb3c9bc"
+                "reference": "e42a781348a0150f25e9775b6faf2a67f80cf69a"
             },
             "require": {
                 "collectioning/collection": "dev-master",
@@ -7527,7 +7527,7 @@
             "dist": {
                 "type": "path",
                 "url": "../Viewing",
-                "reference": "108a01f71bbc6ac59d07414a681d2a762c97753f"
+                "reference": "50a07fccc04af40d85a8430b6af44f087adeefb4"
             },
             "require": {
                 "collectioning/collection": "dev-master",
@@ -7584,6 +7584,9 @@
                 ],
                 "test:coverage": [
                     "php -d xdebug.mode=coverage vendor/bin/phpunit --path-coverage --coverage-text=coverage.txt"
+                ],
+                "test:behavioral-coverage": [
+                    "php tool/behavioral-coverage.php"
                 ],
                 "validate:prod": [
                     "composer validate --strict --no-check-all composer.prod.json"
@@ -8108,7 +8111,7 @@
             "dist": {
                 "type": "path",
                 "url": "../Gating",
-                "reference": "cfa496a7ab891cb93ad5ea45d0a2429bec9c05cd"
+                "reference": "8685a0e6c55fabe557a870fc9ffdaf38045da57e"
             },
             "require": {
                 "php": "^8.4",
@@ -8174,7 +8177,7 @@
             "license": [
                 "PolyForm-Noncommercial-1.0.0"
             ],
-            "description": "Smart Responsor Symfony-oriented executable ecosystem gate.",
+            "description": "Symfony-oriented executable gate for the multi-domain SaaS platform ecosystem.",
             "transport-options": {
                 "symlink": true,
                 "relative": true

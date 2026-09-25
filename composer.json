@@ -136,7 +136,10 @@
       "type": "path",
       "url": "../Cruding",
       "options": {
-        "symlink": true
+        "symlink": true,
+        "versions": {
+          "cruding/crud": "dev-master"
+        }
       }
     },
     {
@@ -163,21 +166,30 @@
       "type": "path",
       "url": "../Interfacing",
       "options": {
-        "symlink": true
+        "symlink": true,
+        "versions": {
+          "interfacing/interface": "dev-master"
+        }
       }
     },
     {
       "type": "path",
       "url": "../Objecting",
       "options": {
-        "symlink": true
+        "symlink": true,
+        "versions": {
+          "objecting/object": "dev-master"
+        }
       }
     },
     {
       "type": "path",
       "url": "../Viewing",
       "options": {
-        "symlink": true
+        "symlink": true,
+        "versions": {
+          "viewing/view": "dev-master"
+        }
       }
     },
     {

@@ -2,7 +2,7 @@
 
 ## Scope
 
-Wave 3 aligns Symfony event subscribers with the Smart Responsor source-tree canon.
+Wave 3 aligns Symfony event subscribers with the platform source-tree canon.
 Subscribers are type-identifiable infrastructure classes and therefore belong under
 `src/Subscriber`, not under the legacy `src/EventSubscriber` folder name.
 
