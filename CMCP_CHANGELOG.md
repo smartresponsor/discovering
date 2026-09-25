@@ -143,3 +143,28 @@
 - `composer verify:migrations:current`: PASS; no migrations pending.
 - A manual dev `cache:clear` additionally exposed generated PHP from the current upstream EasyAdmin/Twig/UX Twig Component combination that is syntactically invalid around vendor component attribute spread. Current upstream releases and the EasyAdmin 5.x template still contain the same expression; no target-owned workaround or vendor patch was introduced because ownership and a verified upstream fix are absent. This is recorded as an external dependency/cache-warmup risk, not mixed into the Discovering RC patch.
 - No sibling repository or Navigating source was modified.
+
+## 2026-09-25 — Canon052 consumer Gating boundary hardening
+
+### Baseline and mapping
+
+- Reconfirmed `master` at `832aeeb5d5a203b41f54ccfee56f7b69ee3dde97`, synchronized with `origin/master` before this pass; the only initial dirt was a pre-existing copied `.gating/` owner tree plus a modified `.gating/README.md`.
+- Re-read Discovering README/Composer/manifests and the mandatory Objecting, Cruding, Viewing, Interfacing, Gating, and Canonization contours required by this execution specification.
+- Canonization rules consulted for this pass: Canon001, Canon002, Canon007, Canon008, Canon018, Canon030, Canon052, and Canon054.
+- Canon052 mapping: Discovering is a consumer; `.gating/` may contain generated artifact state and a non-executable boundary README, but executable policy/implementation belongs to the sibling Gating package.
+
+### RC-critical implementation
+
+- Replaced the tracked copied owner README with a Discovering-specific artifact-boundary README.
+- Added root ignore rules for `/.gating/*` while preserving `!/.gating/README.md`, preventing generated or accidentally copied Gating internals from becoming product source.
+- Existing physical untracked `.gating/` residue was deliberately not deleted because this execution forbids destructive operations.
+
+### Baseline verification
+
+- `composer validate:composer`: PASS.
+- `composer ci:local`: PASS.
+- `composer test:unit`: PASS — 103 tests, 488 assertions.
+- `composer test:contract`: PASS — 7 tests, 96 assertions.
+- `composer test:behavioral`: PASS — 3 tests, 20 assertions.
+- `composer gate`: PASS — 0 failed, 0 warnings; two profile-dependent checks remain skipped because no profile was supplied.
+- Functional suite exceeded the current single Console-MCP tool-call window and therefore has not yet produced a fresh result in this pass.

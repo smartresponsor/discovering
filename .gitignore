@@ -1,3 +1,7 @@
+# Consumer Gating surface is generated artifact state only.
+/.gating/*
+!/.gating/README.md
+
 # Composer
 /vendor/
 /report/
