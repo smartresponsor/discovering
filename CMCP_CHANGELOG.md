@@ -168,3 +168,31 @@
 - `composer test:behavioral`: PASS — 3 tests, 20 assertions.
 - `composer gate`: PASS — 0 failed, 0 warnings; two profile-dependent checks remain skipped because no profile was supplied.
 - Functional suite exceeded the current single Console-MCP tool-call window and therefore has not yet produced a fresh result in this pass.
+
+## 2026-09-26 — Component autodiscovery RC checkpoint
+
+### Reconnaissance and canon mapping
+
+- Workspace resolved through Console MCP: `D:\\PhpstormProjects\\www\\Discovering`; initial HEAD `22ec734b5d8b23a6a88d7f45796d9ab94984510c`, branch `master`, upstream `origin/master`, ahead 0 / behind 0.
+- Initial dirty state contained only `.gating/README.md`; diff showed owner-side Gating documentation replacing the tracked Discovering consumer-artifact boundary. The change was treated as in-scope boundary drift, not silently absorbed.
+- Re-read target AGENTS/README/Composer/test configuration plus the mandatory Objecting, Cruding, Viewing, Interfacing, Gating, and Canonization contours. Composer declares the complete standalone baseline including Collectioning and Tabling, and production uses VCS rather than sibling path repositories.
+- Canonization textual rules consulted in this pass: Canon005, Canon007, Canon008, Canon010, Canon017, Canon018, Canon019, Canon021, Canon022, Canon045, Canon053. Mapping: preserve `App\\Discovering\\ => src/`; keep role-first topology; keep generic CRUD in Cruding; keep all first-party runtime dependencies explicit; keep owner-side Gating policy out of the consumer artifact tree.
+
+### Market baseline and workstreams
+
+- Current mature search/discovery practice uses engine abstraction, index synchronization, filtering/pagination, tunable relevance and optional external engines for advanced typo tolerance/faceting/geo/vector capabilities. Discovering already has lexical/hybrid ranking, diagnostics, explainability and feedback loops, so semantic/vector expansion remains growth rather than RC correctness.
+- RC-critical workstream: restore the tracked `.gating/README.md` consumer boundary, then prove deterministic gates do not reintroduce owner-side content and close any resulting in-scope failures.
+- Growth workstream: semantic/vector retrieval, second-stage reranking and deeper relevance analytics remain post-RC.
+
+### Planned gates
+
+- `composer gate`, strict development/production Composer validation, `composer ci:local`, unit/contract/behavioral/functional suites as applicable, static analysis/CS, and final Git status/diff/upstream inspection.
+
+### Acceptance checkpoint
+
+- `composer gate`: PASS; restoring the tracked consumer README remained stable after Gating execution and did not reintroduce owner-side policy text.
+- `validate:composer`: PASS; `validate:prod`: PASS; `ci:local`: PASS (runtime preflight, security, docblocks, PHP lint across 259 files).
+- `ci:quality`: PASS (PHPStan/analysis and CS).
+- `ci:runtime`: BLOCKED by host storage exhaustion. The runtime preflight emitted Windows `errno=28 No space left on device`; the subsequent file-backed rebuild-evidence unit test failed while exercising disk persistence. This is not attributed to the boundary documentation change.
+- Playwright start was not admitted by the shared Console MCP runtime because heavy execution capacity was temporarily restricted under engine backlog/resource-pressure WATCH. No UI code changed in this pass, so no new visual artifact is required.
+- Post-gate worktree contains only this orchestration journal; `.gating/README.md` is back to HEAD content. Full runtime/browser re-verification remains required after host storage/capacity recovery.
