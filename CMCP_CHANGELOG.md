@@ -196,3 +196,40 @@
 - `ci:runtime`: BLOCKED by host storage exhaustion. The runtime preflight emitted Windows `errno=28 No space left on device`; the subsequent file-backed rebuild-evidence unit test failed while exercising disk persistence. This is not attributed to the boundary documentation change.
 - Playwright start was not admitted by the shared Console MCP runtime because heavy execution capacity was temporarily restricted under engine backlog/resource-pressure WATCH. No UI code changed in this pass, so no new visual artifact is required.
 - Post-gate worktree contains only this orchestration journal; `.gating/README.md` is back to HEAD content. Full runtime/browser re-verification remains required after host storage/capacity recovery.
+
+## 2026-09-28 — Component autodiscovery canon/OpenAPI closure
+
+### Reconnaissance baseline and canon mapping
+
+- Task: `engine-20260928100211-discovering-90b687`; workspace resolved through Console MCP to `D:\\PhpstormProjects\\www\\Discovering`.
+- Initial Git state: `master` at `f46d683ba7cfca1979df67eb20d8428fdd0ebff9`, synchronized with `origin/master`; only pre-existing tracked dirt was `.gating/README.md`.
+- Consumed the supplied CanonScanning evidence for fingerprint `71ba2303a46ab6d7ba071492cd0169b75ac7f8217b23db8eb70f8b0b5b3a515c` before remediation. Hard failures are Canon052 consumer Gating topology plus Canon056/063 OpenAPI path/method parity. Fresh Inspecting evidence contains medium maintainability/design findings only and is reused until the target mutates.
+- Read target AGENTS/README/Composer/runtime OpenAPI wiring and the mandatory Objecting, Cruding, Viewing, Interfacing, Gating, and Canonization contours.
+- Normative Canonization rules consulted: Canon052GatingIntegrationRule, Canon056ExternalApiOpenApiParityRule, Canon058CanonicalOpenApiSourceRule, Canon059OpenApiParityCanonicalSourceRule, Canon060OpenApiVersionPrefixRule, Canon061OpenApiNelmioProducerDependencyRule, Canon062OpenApiProfileCanonicalPathAliasRule, and Canon063ExternalApiMethodParityRule.
+- Target mapping: Discovering remains an ordinary Symfony consumer; generic CRUD stays in Cruding; `.gating/` is artifact-only; the single canonical API source is `config/openapi/discovery_openapi.yaml`; Nelmio is a direct runtime dependency for an OpenAPI-owning repository; runtime/OpenAPI METHOD + path inventories must be bidirectionally identical.
+
+### Workstreams
+
+- RC-critical: preserve the accidental copied Gating owner tree without deletion, restore the canonical consumer `.gating/README.md`, materialize the canonical OpenAPI source for the four current external operations, promote Nelmio to runtime ownership, and verify the resulting canon/runtime state.
+- Growth: semantic/vector retrieval, second-stage reranking, richer relevance analytics, and broader discovery UX/API capability remain post-RC and do not block correctness.
+
+### Material risks and planned acceptance
+
+- The copied `.gating/` owner tree is pre-existing residue. Destructive cleanup is forbidden, so preservation must be non-destructive and outside the canonical source surface.
+- Canon061 activation requires development/production Composer parity and all-environment bundle registration.
+- Planned gates: Gating, strict development/production Composer validation, local/runtime/quality CI, schema parity, affected PHP lint/static analysis/tests, post-mutation Inspecting, and final Git/upstream inspection.
+
+### Material implementation and acceptance
+
+- Preserved the accidental copied Gating owner tree non-destructively under `var/gating-owner-residue-engine-20260928100211-discovering-90b687`; restored `.gating/README.md` to the consumer-only artifact boundary. Canon052 now passes.
+- Added `config/openapi/discovery_openapi.yaml` as the single canonical OpenAPI source for the four external operations and promoted `nelmio/api-doc-bundle` to a direct runtime dependency in development and production manifests. Canon056/058/059/060/061/063 now pass.
+- Corrected the custom Symfony kernel so package and route configuration loads both PHP and YAML files. This activated the already-present Nelmio PHP config/routes that had previously been silently ignored.
+- Corrected `bin/console` bootstrap to resolve `--env/-e` and `--no-debug` before Kernel construction. The isolated `schema_parity` environment now uses its own SQLite database and `verify:schema` passes through migration, mapping validation, schema validation, and migration-currentness.
+- Corrected Nelmio documentation routes to target the bundle's registered public controller service IDs and switched Swagger assets from external CDN mode to local bundle assets.
+- Exact 68-rule CanonScanning-equivalent verification against owner Gating: 54 passed, 0 failed, 11 skipped, 3 warnings. Remaining warnings are pre-existing/non-blocking debt: Canon016 alias lifecycle metadata, Canon040 measured PHP coverage (75.9% lines / 56.4% methods / 64.6% branches), and Canon042 functional evidence 20/28 (71.4%) while behavioral, UI, and critical cohorts are green.
+- Strict Composer validation and production-manifest validation: PASS. `ci:local`, `ci:runtime`, and `ci:quality`: PASS. Public and management OpenAPI dumps: PASS.
+- Test evidence: Unit 103 tests / 488 assertions; Contract 7 / 96; Behavioral 3 / 20; Functional 28 / 444; coverage run 141 / 1048; Playwright canonical discovery-shell test 1/1 PASS.
+- Fresh Inspecting report `D--PhpstormProjects-www-Discovering-20260928-193935.json`: PHPStan 0 errors; 12 findings, all medium, with no high/critical or autofixable finding.
+- Managed PHP runtime is healthy on loopback port 8123. Public and management Swagger UI surfaces return HTTP 200 with local assets, no browser console errors, failed requests, or response errors. Final public screenshot: `var/Discovering/2026-09-28/run-19-41-51/screenshots/web/unspecified/page.png`; management screenshot: `var/Discovering/2026-09-28/run-19-38-11/screenshots/web/unspecified/page.png`.
+- No sibling repository was modified. Semantic/vector retrieval, deeper reranking, and relevance analytics remain post-RC growth work.
+

@@ -21,11 +21,11 @@ final class Kernel extends BaseKernel
     {
         $configDir = $this->getProjectDir().'/config';
 
-        $loader->load($configDir.'/packages/*.yaml', 'glob');
+        $loader->load($configDir.'/packages/*.{php,yaml}', 'glob');
 
         $environmentPackagesDir = $configDir.'/packages/'.$this->environment;
         if (is_dir($environmentPackagesDir)) {
-            $loader->load($environmentPackagesDir.'/*.yaml', 'glob');
+            $loader->load($environmentPackagesDir.'/*.{php,yaml}', 'glob');
         }
 
         $loader->load($configDir.'/services.yaml');
@@ -39,11 +39,11 @@ final class Kernel extends BaseKernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $configDir = $this->getProjectDir().'/config/routes';
-        $routes->import($configDir.'/*.yaml');
+        $routes->import($configDir.'/*.{php,yaml}');
 
         $environmentRoutesDir = $configDir.'/'.$this->environment;
         if (is_dir($environmentRoutesDir)) {
-            $routes->import($environmentRoutesDir.'/*.yaml');
+            $routes->import($environmentRoutesDir.'/*.{php,yaml}');
         }
     }
 }

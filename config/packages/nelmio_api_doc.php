@@ -11,6 +11,9 @@ return static function (ContainerConfigurator $container): void {
     }
 
     $container->extension('nelmio_api_doc', [
+        'html_config' => [
+            'assets_mode' => 'bundle',
+        ],
         'documentation' => [
             'info' => [
                 'title' => 'Discovering API',
@@ -19,9 +22,11 @@ return static function (ContainerConfigurator $container): void {
             ],
         ],
         'areas' => [
-            'default' => false,
+            'default' => [
+                'path_patterns' => ['^/api/(?:v1/)?discovery'],
+            ],
             'public_discovery' => [
-                'path_patterns' => ['^/api/discovery', '^/api/discovery'],
+                'path_patterns' => ['^/api/(?:v1/)?discovery'],
             ],
             'management_discovery' => [
                 'path_patterns' => ['^/management/discovery'],

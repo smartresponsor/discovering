@@ -1,0 +1,31 @@
+openapi: 3.1.0
+info:
+  title: Discovering API
+  version: 1.0.0
+paths:
+  /api/v1/discovery:
+    get:
+      operationId: discoveryQueryV1
+      responses:
+        '200':
+          description: Discovery result.
+  /api/discovery:
+    get:
+      operationId: discoveryQueryCompatibility
+      deprecated: true
+      responses:
+        '200':
+          description: Discovery result.
+  /api/v1/discovery/click:
+    post:
+      operationId: discoveryClickV1
+      responses:
+        '200':
+          description: Recorded discovery feedback.
+  /api/discovery/click:
+    post:
+      operationId: discoveryClickCompatibility
+      deprecated: true
+      responses:
+        '200':
+          description: Recorded discovery feedback.

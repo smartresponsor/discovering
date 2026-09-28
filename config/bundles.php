@@ -16,10 +16,7 @@ $bundles = [
     App\Objecting\ObjectBundle::class => ['all' => true],
     App\Failing\FailingBundle::class => ['all' => true],
     App\Discovering\DiscoveringBundle::class => ['all' => true],
+    Nelmio\ApiDocBundle\NelmioApiDocBundle::class => ['all' => true],
 ];
-
-if (class_exists('Nelmio\\ApiDocBundle\\NelmioApiDocBundle')) {
-    $bundles['Nelmio\\ApiDocBundle\\NelmioApiDocBundle'] = ['dev' => true, 'test' => true];
-}
 
 return $bundles;

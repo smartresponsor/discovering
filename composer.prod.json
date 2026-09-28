@@ -16,6 +16,7 @@
     "doctrine/orm": "^3.6",
     "easycorp/easyadmin-bundle": "^5.5",
     "interfacing/interface": "dev-master",
+    "nelmio/api-doc-bundle": "^5.6",
     "objecting/object": "dev-master",
     "symfony/console": "^8.1",
     "symfony/dotenv": "^8.1",
