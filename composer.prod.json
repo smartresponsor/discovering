@@ -10,6 +10,7 @@
     "php": ">=8.4",
     "collectioning/collection": "dev-collection-query-hardening as dev-master",
     "cruding/crud": "dev-master",
+    "failing/failure": "dev-master",
     "doctrine/doctrine-bundle": "^3.2",
     "doctrine/doctrine-migrations-bundle": "^3.7",
     "doctrine/orm": "^3.6",
@@ -39,6 +40,11 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/smartresponsor/failing.git",
+      "no-api": true
+    },
     {
       "type": "vcs",
       "url": "git@github.com:smartresponsor/collectioning.git",

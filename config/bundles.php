@@ -14,6 +14,7 @@ $bundles = [
     App\Interfacing\InterfacingBundle::class => ['all' => true],
     App\Viewing\ViewingBundle::class => ['all' => true],
     App\Objecting\ObjectBundle::class => ['all' => true],
+    App\Failing\FailingBundle::class => ['all' => true],
     App\Discovering\DiscoveringBundle::class => ['all' => true],
 ];
 
