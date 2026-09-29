@@ -12,7 +12,7 @@
     "cruding/crud": "dev-master",
     "failing/failure": "dev-master",
     "doctrine/doctrine-bundle": "^3.2",
-    "doctrine/doctrine-migrations-bundle": "^3.7",
+    "doctrine/doctrine-migrations-bundle": "^4.0",
     "doctrine/orm": "^3.6",
     "easycorp/easyadmin-bundle": "^5.5",
     "interfacing/interface": "dev-master",
