@@ -1,5 +1,47 @@
 # CMCP Orchestration Journal
 
+## 2026-09-29 — Component autodiscovery Canon052 closure (engine-20260930020206-discovering-c79e78)
+
+### Reconnaissance and baseline
+
+- Workspace resolved through Console MCP only: `D:\\PhpstormProjects\\www\\Discovering`; initial branch `master`, HEAD `ee428ed4e363cd6f14472914bed71532395479c3`, synchronized with `origin/master` (ahead 0 / behind 0).
+- Initial tracked dirt was only `.gating/README.md`; its diff showed the Gating owner README replacing the canonical Discovering consumer-artifact README.
+- Consumed upstream CanonScanning RED evidence for fingerprint `f3a5aa44abf07c6b92860c60c3192c4746a6ae5b4fdb01cf563ca813b4b60d70`: sole hard failure `canon.052.gating_integration`; warnings are Canon016 compatibility lifecycle, Canon040 measured PHP coverage, and Canon042 functional coverage.
+- Consumed fresh Inspecting evidence from the supplied scan: 12 medium-only PHP-structure findings, no high/critical/autofixable finding; Semgrep timed out in that upstream scan and was not redundantly re-run before remediation.
+- Re-read target AGENTS/README/Composer/journal plus Objecting, Cruding, Viewing, Interfacing contour material available in the shared workspace; re-read Gating Canon052 executable rule and Canonization normative `Canon052GatingIntegrationRule.md` plus guard matrix.
+
+### Market baseline and workstreams
+
+- Mature discovery/search systems (for example Algolia-style hosted search and Elasticsearch/OpenSearch/Meilisearch/Typesense-class engines) converge on deterministic indexing, filters/facets, relevance controls, diagnostics, safe rebuild/rollback, API/UI observability, and optional semantic/vector growth.
+- RC-critical workstream: keep Discovering focused on resource discovery while enforcing deterministic packaging/runtime/canon boundaries; specifically close the copied Gating-owner-tree drift without destructive cleanup.
+- Growth workstream: semantic/vector retrieval, reranking, richer relevance analytics, and broader discovery DX remain post-RC and do not block correctness.
+
+### Canon mapping and implementation
+
+- Canon052 applies directly: Discovering is a canonical `App\\Discovering\\` Composer consumer; development uses `gating/gate: dev-master` through sibling `../Gating` with symlink=true, production must package Gating without a filesystem path, `gate`/aggregate `quality` scripts are required, and consumer-local `.gating/` is artifact-only.
+- The accidental owner-side `.gating/` tree was preserved non-destructively under `var/gating-owner-residue-engine-20260930020206-discovering-c79e78` rather than deleted.
+- Restored tracked `.gating/README.md` to the Discovering consumer artifact-boundary content; no sibling repository was modified.
+
+### Gates to run
+
+- Re-run Gating after mutation, strict development/production Composer validation, local/runtime/quality gates as capacity permits, affected PHP lint/tests, fresh Inspecting because the repository mutated, and final Git status/HEAD/upstream inspection.
+- Reuse the existing managed Symfony runtime first; do not restart a healthy process. No browser-visible code changed, so new screenshot evidence is not intrinsically required for this patch.
+
+### Acceptance evidence
+
+- Canon052 filesystem topology after remediation: canonical `.gating/README.md` present; representative prohibited owner files `.gating/composer.json`, `.gating/bin/gating`, and `.gating/src/Rule/Canon/Canon052GatingIntegrationRule.php` are absent.
+- `composer gate`: PASS (consumer profile: 9 rules, 0 failed, 0 warnings, 2 skipped).
+- `validate:composer`: PASS; `validate:prod`: PASS.
+- `ci:local`: PASS; runtime preflight, security, docblocks, and PHP lint (259 files) are green.
+- `ci:quality`: PASS; PHPStan/analysis has 0 errors and PHP-CS-Fixer reports 0/262 files requiring fixes.
+- `test:unit`: PASS — 103 tests / 488 assertions.
+- `test:contract`: PASS — 7 tests / 96 assertions.
+- `test:behavioral`: PASS — 3 tests / 20 assertions.
+- Full `ci:runtime` was not started because Console MCP capacity policy returned `REPOSITORY_WORKER_WAITING_RUNTIME_CAPACITY` under RESOURCE_PRESSURE_WATCH / ENGINE_BACKLOG_HIGH. A direct functional-suite call later exceeded the synchronous Console-MCP call window and therefore is not claimed as a fresh pass or failure here.
+- Existing loopback runtime probe on port 8123 timed out; no restart was attempted because the current change does not touch application runtime/UI source and runtime restart is not justified solely by this RC invocation.
+- Fresh Inspecting was not duplicated: supplied Inspecting analyzes `src/`, while this remediation changed only ignored `.gating/` residue plus this journal; inspected PHP source remained unchanged. Upstream Inspecting baseline therefore remains applicable to the inspected scope.
+- No browser/mobile/UI files changed; no new screenshot is required by the visual artifact contract for this patch.
+
 ## engine-20260911152914-discovering-6af99f
 
 ### Iteration 1 — reconnaissance and baseline
